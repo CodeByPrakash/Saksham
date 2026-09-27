@@ -200,6 +200,7 @@ export function PersonalVoiceOnboarding({
   const recognitionRef = useRef<any>(null);
   const audioPlayerRef = useRef<HTMLAudioElement | null>(null);
   const latestTranscriptRef = useRef<string>("");
+  const audioRequestIdRef = useRef<number>(0);
 
   const currentStep = ONBOARDING_QUESTIONS[currentStepIndex];
 
@@ -229,10 +230,14 @@ export function PersonalVoiceOnboarding({
   }, []);
 
   const stopAudioPlayback = () => {
+    audioRequestIdRef.current++;
     if (audioPlayerRef.current) {
       try {
         audioPlayerRef.current.pause();
-        audioPlayerRef.current.currentTime = 0;
+        audioPlayerRef.current.src = "";
+        audioPlayerRef.current.onended = null;
+        audioPlayerRef.current.onerror = null;
+        audioPlayerRef.current.load();
       } catch { }
       audioPlayerRef.current = null;
     }
@@ -249,6 +254,7 @@ export function PersonalVoiceOnboarding({
    */
   const playAiVoice = async (text: string) => {
     stopAudioPlayback();
+    const myReqId = ++audioRequestIdRef.current;
     setIsAiSpeaking(true);
 
     const clean = text.replace(/[*_#`]/g, "").trim();
@@ -261,18 +267,25 @@ export function PersonalVoiceOnboarding({
         body: JSON.stringify({ text: clean, language })
       });
 
+      if (myReqId !== audioRequestIdRef.current) return;
+
       if (res.ok) {
         const data = await res.json();
+        if (myReqId !== audioRequestIdRef.current) return;
         if (data.audioUrl) {
           const audio = new Audio(data.audioUrl);
           audioPlayerRef.current = audio;
           audio.onended = () => {
-            audioPlayerRef.current = null;
-            setIsAiSpeaking(false);
+            if (myReqId === audioRequestIdRef.current) {
+              audioPlayerRef.current = null;
+              setIsAiSpeaking(false);
+            }
           };
           audio.onerror = () => {
-            audioPlayerRef.current = null;
-            playAiVoiceBrowserFallback(clean);
+            if (myReqId === audioRequestIdRef.current) {
+              audioPlayerRef.current = null;
+              playAiVoiceBrowserFallback(clean, myReqId);
+            }
           };
           await audio.play();
           return;
@@ -282,11 +295,14 @@ export function PersonalVoiceOnboarding({
       // Fall through to browser synthesis
     }
 
-    // 2. Fallback to browser synthesis
-    playAiVoiceBrowserFallback(clean);
+    if (myReqId === audioRequestIdRef.current) {
+      playAiVoiceBrowserFallback(clean, myReqId);
+    }
   };
 
-  const playAiVoiceBrowserFallback = (clean: string) => {
+  const playAiVoiceBrowserFallback = (clean: string, reqId: number) => {
+    if (reqId !== audioRequestIdRef.current) return;
+
     if (typeof window !== "undefined" && "speechSynthesis" in window) {
       try {
         window.speechSynthesis.cancel();
@@ -294,15 +310,27 @@ export function PersonalVoiceOnboarding({
         const utterance = new SpeechSynthesisUtterance(clean);
         utterance.lang = language === "hi" ? "hi-IN" : language === "or" ? "hi-IN" : "en-IN";
         utterance.rate = 0.95;
-        utterance.onend = () => setIsAiSpeaking(false);
-        utterance.onerror = () => setIsAiSpeaking(false);
+        utterance.onend = () => {
+          if (reqId === audioRequestIdRef.current) {
+            setIsAiSpeaking(false);
+          }
+        };
+        utterance.onerror = () => {
+          if (reqId === audioRequestIdRef.current) {
+            setIsAiSpeaking(false);
+          }
+        };
         window.speechSynthesis.speak(utterance);
       } catch (err) {
         console.warn("SpeechSynthesis error:", err);
-        setIsAiSpeaking(false);
+        if (reqId === audioRequestIdRef.current) {
+          setIsAiSpeaking(false);
+        }
       }
     } else {
-      setIsAiSpeaking(false);
+      if (reqId === audioRequestIdRef.current) {
+        setIsAiSpeaking(false);
+      }
     }
   };
 

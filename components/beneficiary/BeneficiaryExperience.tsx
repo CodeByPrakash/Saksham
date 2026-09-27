@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { WebDashboard } from "@/components/dashboard/WebDashboard";
 import { MobileDashboard } from "@/components/dashboard/MobileDashboard";
+import { useIsMobile } from "@/lib/useIsMobile";
 import {
   INITIAL_BENEFICIARIES,
   SAMPLE_PATHWAYS,
@@ -81,19 +82,13 @@ export function BeneficiaryExperience() {
     }, 4000);
   };
 
+  const isMobile = useIsMobile();
+
   // Primary Default Experience: Responsive Reference Dashboard
   if (viewMode === "dashboard") {
     return (
       <div className="w-full">
-        {/* Desktop Web Dashboard (Screen size >= 768px) */}
-        <div className="hidden md:block">
-          <WebDashboard />
-        </div>
-
-        {/* Mobile Dashboard (Screen size < 768px) */}
-        <div className="block md:hidden">
-          <MobileDashboard />
-        </div>
+        {isMobile ? <MobileDashboard /> : <WebDashboard />}
       </div>
     );
   }

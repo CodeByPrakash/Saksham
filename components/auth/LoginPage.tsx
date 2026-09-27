@@ -689,12 +689,14 @@ export function LoginPage({
   };
 
   const handleVerifyAndLogin = (roleToLogin?: "beneficiary" | "field_worker" | "government") => {
+    stopAllAudio();
     setIsVerifying(true);
     const targetRole = roleToLogin || selectedRole;
     setTimeout(() => {
+      stopAllAudio();
       setIsVerifying(false);
       onLoginSuccess(targetRole);
-    }, 600);
+    }, 350);
   };
 
   const playVoiceOtp = () => {

@@ -40,6 +40,8 @@ import {
 import { VoiceAssistantModal } from "./VoiceAssistantModal";
 import { SchemesModal } from "./SchemesModal";
 import { ProfileModal } from "./ProfileModal";
+import { GlobalVoiceNavigator } from "@/components/navigation/GlobalVoiceNavigator";
+import { VoiceNavIntent } from "@/lib/ai/voiceNavigation";
 
 interface MobileDashboardProps {
   initialTab?: MobileTab;
@@ -90,16 +92,12 @@ export function MobileDashboard({ initialTab = "home", initialCourseId, initialJ
     setSelectedCourse(null);
     setSelectedJob(null);
     if (actionId === "action-1") {
-      // Find Skill Training -> Switch to Training tab
       setActiveTab("training");
     } else if (actionId === "action-2") {
-      // Job Opportunities -> Switch to Jobs tab
       setActiveTab("jobs");
     } else if (actionId === "action-3") {
-      // Self-Employment Ideas
       setIsSchemesModalOpen(true);
     } else if (actionId === "action-4") {
-      // Find Centers Near You
       setSelectedCourse(RECOMMENDED_COURSES[0]);
     }
   };
@@ -119,6 +117,58 @@ export function MobileDashboard({ initialTab = "home", initialCourseId, initialJ
     setIsVoiceModalOpen(true);
   };
 
+  /**
+   * Universal Voice Navigation for Mobile
+   */
+  const handleVoiceNavigate = (intent: VoiceNavIntent) => {
+    if (intent.course) {
+      handleOpenCourse(intent.course);
+      return;
+    }
+
+    if (intent.job) {
+      handleOpenJob(intent.job);
+      return;
+    }
+
+    setSelectedCourse(null);
+    setSelectedJob(null);
+
+    switch (intent.target) {
+      case "home":
+      case "dashboard":
+        setActiveTab("home");
+        break;
+      case "training":
+        setActiveTab("training");
+        break;
+      case "jobs":
+        setActiveTab("jobs");
+        break;
+      case "recommendations":
+        setActiveTab("training");
+        break;
+      case "schemes":
+      case "self_employment":
+        setIsSchemesModalOpen(true);
+        break;
+      case "profile":
+        setIsProfileModalOpen(true);
+        break;
+      case "progress":
+        setActiveTab("profile");
+        break;
+      case "centers":
+        handleOpenCourse(RECOMMENDED_COURSES[0]);
+        break;
+      case "messages":
+        setIsVoiceModalOpen(true);
+        break;
+      default:
+        setActiveTab("home");
+    }
+  };
+
   return (
     <div className="w-full min-h-screen bg-[#FAF6EE] text-slate-800 flex flex-col justify-between pb-24 select-none font-sans max-w-md mx-auto relative">
       
@@ -128,11 +178,21 @@ export function MobileDashboard({ initialTab = "home", initialCourseId, initialJ
         onOpenProfile={() => setIsProfileModalOpen(true)}
         onLogoClick={() => {
           setSelectedCourse(null);
+          setSelectedJob(null);
           setActiveTab("home");
         }}
       />
 
-      {/* 2. MAIN DASHBOARD CONTENT */}
+      {/* 2. UNIVERSAL VOICE NAVIGATION BAR FOR MOBILE */}
+      <div className="px-4 pt-1">
+        <GlobalVoiceNavigator
+          currentLanguage="hi"
+          onNavigate={handleVoiceNavigate}
+          onOpenVoiceAssistant={() => setIsVoiceModalOpen(true)}
+        />
+      </div>
+
+      {/* 3. MAIN DASHBOARD CONTENT */}
       <main className="flex-1 px-4 py-2 space-y-4">
         <AnimatePresence mode="wait">
           {/* DEDICATED TRAINING DETAIL PAGE */}
@@ -291,17 +351,19 @@ export function MobileDashboard({ initialTab = "home", initialCourseId, initialJ
         </AnimatePresence>
       </main>
 
-      {/* 3. FLOATING BOTTOM DOCK NAVBAR WITH CENTER VOICE BUTTON */}
+      {/* 4. FLOATING BOTTOM DOCK NAVBAR WITH CENTER VOICE BUTTON */}
       <MobileBottomNav
         activeTab={activeTab}
         onSelectTab={handleBottomTabSelect}
         onVoiceClick={() => setIsVoiceModalOpen(true)}
       />
 
-      {/* 4. GLOBAL INTERACTIVE MODALS */}
+      {/* 5. GLOBAL INTERACTIVE MODALS */}
       <VoiceAssistantModal
         isOpen={isVoiceModalOpen}
         onClose={() => setIsVoiceModalOpen(false)}
+        initialPrompt={voiceAssistantInitialPrompt}
+        onNavigateTarget={handleVoiceNavigate}
       />
 
       <SchemesModal

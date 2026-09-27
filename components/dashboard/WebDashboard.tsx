@@ -28,44 +28,65 @@ import {
   Building2,
   Sparkles,
   Edit3,
-  Search
+  Search,
+  ShieldCheck,
+  Coins,
+  Wrench,
+  Store,
+  Laptop,
+  Users,
+  Compass,
+  Filter
 } from "lucide-react";
 import {
   CURRENT_BENEFICIARY,
   RECOMMENDED_COURSES,
+  RECOMMENDED_JOBS,
+  SCHEMES_LIST,
   QUICK_ACTIONS,
   UPCOMING_STEPS,
   CourseItem,
+  JobItem,
   QuickActionItem
 } from "./DashboardShared";
 import { VoiceAssistantModal } from "./VoiceAssistantModal";
 import { CourseDetailModal } from "./CourseDetailModal";
+import { JobDetailModal } from "./JobDetailModal";
 import { SchemesModal } from "./SchemesModal";
 import { ProfileModal } from "./ProfileModal";
+import { GlobalVoiceNavigator } from "@/components/navigation/GlobalVoiceNavigator";
+import { VoiceNavIntent } from "@/lib/ai/voiceNavigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 export function WebDashboard() {
   const [activeMenu, setActiveMenu] = useState<string>("dashboard");
   const [selectedCourse, setSelectedCourse] = useState<CourseItem | null>(null);
+  const [selectedJob, setSelectedJob] = useState<JobItem | null>(null);
   const [isVoiceModalOpen, setIsVoiceModalOpen] = useState<boolean>(false);
+  const [voiceAssistantInitialPrompt, setVoiceAssistantInitialPrompt] = useState<string>("");
   const [isCourseModalOpen, setIsCourseModalOpen] = useState<boolean>(false);
+  const [isJobModalOpen, setIsJobModalOpen] = useState<boolean>(false);
   const [isSchemesModalOpen, setIsSchemesModalOpen] = useState<boolean>(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState<boolean>(false);
   const [selectedLang, setSelectedLang] = useState<string>("English");
   const [isLangOpen, setIsLangOpen] = useState<boolean>(false);
-  const [isUserMenuOpen, setIsUserMenuOpen] = useState<boolean>(false);
+
+  // Filters for Training and Jobs
+  const [trainingFilter, setTrainingFilter] = useState<string>("all");
+  const [jobFilter, setJobFilter] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState<string>("");
 
   const sidebarMenuItems = [
     { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { id: "profile", label: "My Profile", icon: User },
     { id: "recommendations", label: "Recommendations", icon: Star },
     { id: "training", label: "Training Programs", icon: GraduationCap },
     { id: "jobs", label: "Job Opportunities", icon: Briefcase },
-    { id: "self_employment", label: "Self-Employment", icon: Sprout },
-    { id: "progress", label: "My Progress", icon: BarChart3 },
-    { id: "messages", label: "Messages", icon: MessageSquare },
-    { id: "help", label: "Help & Support", icon: HelpCircle },
+    { id: "self_employment", label: "Self-Employment & Grants", icon: Sprout },
+    { id: "progress", label: "My Progress (60%)", icon: BarChart3 },
+    { id: "profile", label: "My Profile & Passport", icon: User },
+    { id: "messages", label: "Voice AI Copilot", icon: MessageSquare },
+    { id: "help", label: "Help & Support", icon: HelpCircle }
   ];
 
   const handleOpenCourse = (course: CourseItem) => {
@@ -73,17 +94,91 @@ export function WebDashboard() {
     setIsCourseModalOpen(true);
   };
 
+  const handleOpenJob = (job: JobItem) => {
+    setSelectedJob(job);
+    setIsJobModalOpen(true);
+  };
+
   const handleQuickAction = (action: QuickActionItem) => {
-    if (action.category === "schemes") {
+    if (action.category === "schemes" || action.category === "self_employment" || action.category === "enterprise") {
       setIsSchemesModalOpen(true);
-    } else if (action.category === "training" || action.category === "jobs") {
+    } else if (action.category === "training") {
+      setActiveMenu("training");
+    } else if (action.category === "jobs") {
+      setActiveMenu("jobs");
+    } else if (action.category === "centers") {
       setSelectedCourse(RECOMMENDED_COURSES[0]);
       setIsCourseModalOpen(true);
-    } else if (action.category === "enterprise" || action.category === "self_employment") {
-      setIsSchemesModalOpen(true);
+    } else if (action.category === "progress") {
+      setActiveMenu("progress");
     } else {
       setIsVoiceModalOpen(true);
     }
+  };
+
+  /**
+   * Unified Voice Navigation Handler for Web Dashboard
+   */
+  const handleVoiceNavigate = (intent: VoiceNavIntent) => {
+    if (intent.course) {
+      setSelectedCourse(intent.course);
+      setIsCourseModalOpen(true);
+      return;
+    }
+
+    if (intent.job) {
+      setSelectedJob(intent.job);
+      setIsJobModalOpen(true);
+      return;
+    }
+
+    switch (intent.target) {
+      case "home":
+      case "dashboard":
+        setActiveMenu("dashboard");
+        break;
+      case "recommendations":
+        setActiveMenu("recommendations");
+        break;
+      case "training":
+        setActiveMenu("training");
+        break;
+      case "jobs":
+        setActiveMenu("jobs");
+        break;
+      case "schemes":
+      case "self_employment":
+        setIsSchemesModalOpen(true);
+        setActiveMenu("self_employment");
+        break;
+      case "profile":
+        setIsProfileModalOpen(true);
+        break;
+      case "progress":
+        setActiveMenu("progress");
+        break;
+      case "centers":
+        setSelectedCourse(RECOMMENDED_COURSES[0]);
+        setIsCourseModalOpen(true);
+        break;
+      case "messages":
+        setIsVoiceModalOpen(true);
+        break;
+      case "set_language":
+        if (intent.languageName) {
+          setSelectedLang(intent.languageName.split(" ")[0]);
+        }
+        break;
+      default:
+        setActiveMenu("dashboard");
+    }
+  };
+
+  const handleOpenVoiceWithPrompt = (prompt?: string) => {
+    if (prompt) {
+      setVoiceAssistantInitialPrompt(prompt);
+    }
+    setIsVoiceModalOpen(true);
   };
 
   return (
@@ -97,7 +192,10 @@ export function WebDashboard() {
 
           <div className="space-y-6">
             {/* Saksham-AI Logo */}
-            <div className="flex flex-col items-start px-2 cursor-pointer group">
+            <div
+              onClick={() => setActiveMenu("dashboard")}
+              className="flex flex-col items-start px-2 cursor-pointer group"
+            >
               <div className="flex items-center gap-2.5">
                 <div className="size-9 flex items-center justify-center shrink-0">
                   <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-xs group-hover:scale-105 transition-transform">
@@ -138,14 +236,14 @@ export function WebDashboard() {
                     onClick={() => {
                       setActiveMenu(item.id);
                       if (item.id === "profile") setIsProfileModalOpen(true);
-                      if (item.id === "recommendations" || item.id === "training") setSelectedCourse(RECOMMENDED_COURSES[0]), setIsCourseModalOpen(true);
-                      if (item.id === "self_employment") setIsSchemesModalOpen(true);
                       if (item.id === "messages") setIsVoiceModalOpen(true);
+                      if (item.id === "self_employment") setIsSchemesModalOpen(true);
                     }}
-                    className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-2xl text-xs xl:text-sm font-bold transition-all cursor-pointer text-left ${isActive
+                    className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-2xl text-xs xl:text-sm font-bold transition-all cursor-pointer text-left ${
+                      isActive
                         ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md shadow-purple-600/25 font-extrabold"
                         : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/70"
-                      }`}
+                    }`}
                   >
                     <Icon className={`size-4 xl:size-4.5 shrink-0 ${isActive ? "text-white" : "text-slate-500"}`} />
                     <span>{item.label}</span>
@@ -155,9 +253,8 @@ export function WebDashboard() {
             </nav>
           </div>
 
-          {/* Bottom Sidebar Illustrated Card */}
+          {/* Bottom Sidebar Illustrated Voice Card */}
           <div className="relative overflow-hidden rounded-2xl border border-amber-200/80 bg-gradient-to-b from-amber-100/60 to-orange-50/80 p-3 shadow-xs">
-            {/* Village scenery backdrop */}
             <div className="relative h-20 w-full rounded-xl overflow-hidden mb-2.5">
               <Image
                 src="/landingPage/bg_1_landing.webp"
@@ -167,7 +264,7 @@ export function WebDashboard() {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent flex items-end p-2">
                 <span className="text-[10px] font-bold text-white leading-tight">
-                  Start a voice conversation in your language
+                  Voice navigation in Odia & Hindi
                 </span>
               </div>
             </div>
@@ -184,9 +281,9 @@ export function WebDashboard() {
                 </div>
                 <div className="flex flex-col text-left">
                   <span className="text-[11px] font-extrabold text-slate-900 leading-tight">
-                    Talk to Saksham-AI
+                    Talk to Voice Copilot
                   </span>
-                  <span className="text-[9px] text-slate-500">24/7 AI Voice Copilot</span>
+                  <span className="text-[9px] text-slate-500">24/7 Voice & Navigation</span>
                 </div>
               </div>
               <ChevronRight className="size-3.5 text-purple-600" />
@@ -197,7 +294,7 @@ export function WebDashboard() {
         {/* ========================================================================= */}
         {/* MAIN DASHBOARD CONTENT AREA                                               */}
         {/* ========================================================================= */}
-        <div className="flex-1 flex flex-col gap-6 min-w-0">
+        <div className="flex-1 flex flex-col gap-5 min-w-0">
 
           {/* Top Header Bar */}
           <header className="flex items-center justify-between gap-4 py-1">
@@ -208,7 +305,7 @@ export function WebDashboard() {
                 <span className="animate-wave inline-block origin-bottom-right">👋</span>
               </h1>
               <p className="text-xs text-slate-500 font-medium">
-                Let's build a brighter future together.
+                Kalahandi, Odisha • NSQF & PM-AJAY Livelihood Intelligence
               </p>
             </div>
 
@@ -226,17 +323,25 @@ export function WebDashboard() {
                 </button>
 
                 {isLangOpen && (
-                  <div className="absolute right-0 mt-2 w-44 bg-white rounded-2xl shadow-xl border border-slate-200/90 py-1.5 z-30">
-                    {["English", "हिन्दी (Hindi)", "ଓଡ଼ିଆ (Odia)", "संताली (Santhali)"].map((l) => (
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-slate-200/90 py-1.5 z-30">
+                    {[
+                      { code: "en", label: "English" },
+                      { code: "hi", label: "हिन्दी (Hindi)" },
+                      { code: "or", label: "ଓଡ଼ିଆ (Odia)" },
+                      { code: "sat", label: "संताली (Santhali)" },
+                      { code: "bho", label: "भोजपुरी (Bhojpuri)" },
+                      { code: "bn", label: "বাংলা (Bengali)" },
+                      { code: "mr", label: "मराठी (Marathi)" }
+                    ].map((l) => (
                       <button
-                        key={l}
+                        key={l.code}
                         onClick={() => {
-                          setSelectedLang(l.split(" ")[0]);
+                          setSelectedLang(l.label.split(" ")[0]);
                           setIsLangOpen(false);
                         }}
                         className="w-full text-left px-3.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-purple-50 hover:text-purple-700 cursor-pointer"
                       >
-                        {l}
+                        {l.label}
                       </button>
                     ))}
                   </div>
@@ -249,6 +354,7 @@ export function WebDashboard() {
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setIsVoiceModalOpen(true)}
                 className="relative size-10 rounded-2xl bg-white hover:bg-slate-50 border border-slate-200/90 flex items-center justify-center text-slate-700 shadow-2xs cursor-pointer"
+                title="Notifications & Alerts"
               >
                 <Bell className="size-4.5" />
                 <span className="absolute top-2 right-2 size-2 rounded-full bg-red-500 ring-2 ring-white"></span>
@@ -278,434 +384,906 @@ export function WebDashboard() {
           </header>
 
           {/* ========================================================================= */}
-          {/* 2-COLUMN MAIN BODY: Center Left Feed (68%) & Right Sidebar Info (32%)     */}
+          {/* UNIVERSAL VOICE NAVIGATION BAR                                            */}
           {/* ========================================================================= */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <GlobalVoiceNavigator
+            currentLanguage={selectedLang === "ଓଡ଼ିଆ" ? "or" : selectedLang === "संताली" ? "sat" : "hi"}
+            onNavigate={handleVoiceNavigate}
+            onOpenVoiceAssistant={() => setIsVoiceModalOpen(true)}
+          />
 
-            {/* ----------------------------------------------------------------------- */}
-            {/* CENTER / LEFT COLUMN (lg:col-span-8)                                   */}
-            {/* ----------------------------------------------------------------------- */}
-            <div className="lg:col-span-8 flex flex-col gap-6">
+          {/* ========================================================================= */}
+          {/* DYNAMIC TAB ROUTING VIEW                                                  */}
+          {/* ========================================================================= */}
+          <AnimatePresence mode="wait">
 
-              {/* 1. HERO AI ASSISTANT BANNER */}
+            {/* TAB 1: MAIN DASHBOARD OVERVIEW */}
+            {activeMenu === "dashboard" && (
               <motion.div
-                initial={{ opacity: 0, y: 12 }}
+                key="view-dashboard"
+                initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.35 }}
-                className="relative overflow-hidden rounded-[32px] bg-gradient-to-r from-[#FFFDF9] via-[#FAF6EE] to-[#F5EFE1] border border-[#EDE7D9] shadow-sm p-6 xl:p-8 flex items-center justify-between min-h-[220px]"
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.25 }}
+                className="grid grid-cols-1 lg:grid-cols-12 gap-6"
               >
-                {/* Background village artwork blend */}
-                <div className="absolute right-0 top-0 bottom-0 w-1/2 opacity-30 pointer-events-none">
-                  <Image
-                    src="/landingPage/bg_2_landing.webp"
-                    alt="Village Background"
-                    fill
-                    className="object-cover object-right"
-                  />
-                </div>
+                {/* CENTER / LEFT COLUMN (lg:col-span-8) */}
+                <div className="lg:col-span-8 flex flex-col gap-6">
 
-                {/* Left Text Content */}
-                <div className="relative z-10 max-w-md space-y-3">
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-100 text-purple-700 font-extrabold text-[11px] tracking-wide uppercase">
-                    <Sparkles className="size-3 text-purple-600" />
-                    Your AI Livelihood Assistant
-                  </span>
-
-                  <h2 className="text-2xl xl:text-3xl font-black text-slate-900 font-heading tracking-tight leading-tight">
-                    Speak. Explore. Grow.
-                  </h2>
-
-                  <p className="text-xs xl:text-sm text-slate-600 font-medium leading-relaxed">
-                    Get personalized skill training, job opportunities and self-employment ideas in your language.
-                  </p>
-
-                  <motion.button
-                    whileHover={{ scale: 1.03 }}
-                    whileTap={{ scale: 0.97 }}
-                    onClick={() => setIsVoiceModalOpen(true)}
-                    className="flex items-center gap-2 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 text-white px-5 py-2.5 rounded-2xl text-xs xl:text-sm font-bold shadow-lg shadow-purple-600/30 cursor-pointer mt-1"
+                  {/* 1. HERO AI ASSISTANT BANNER */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.35 }}
+                    className="relative overflow-hidden rounded-[32px] bg-gradient-to-r from-[#FFFDF9] via-[#FAF6EE] to-[#F5EFE1] border border-[#EDE7D9] shadow-sm p-6 xl:p-8 flex items-center justify-between min-h-[220px]"
                   >
-                    <Mic className="size-4 animate-pulse" />
-                    <span>Start a Conversation</span>
-                    <ArrowRight className="size-4" />
-                  </motion.button>
-                </div>
+                    <div className="absolute right-0 top-0 bottom-0 w-1/2 opacity-30 pointer-events-none">
+                      <Image
+                        src="/landingPage/bg_2_landing.webp"
+                        alt="Village Background"
+                        fill
+                        className="object-cover object-right"
+                      />
+                    </div>
 
-                {/* Right 3D Character Illustration with AI Robot & Soundwaves */}
-                <div className="relative z-10 hidden sm:flex items-end justify-center w-64 xl:w-72 h-44 xl:h-48 shrink-0">
-                  {/* Savitri Devi 3D Character */}
-                  <div className="relative w-36 xl:w-40 h-full">
-                    <Image
-                      src="/landingPage/person_2_landing.webp"
-                      alt="Savitri Devi"
-                      fill
-                      className="object-contain object-bottom drop-shadow-md"
-                      priority
-                    />
-                  </div>
+                    <div className="relative z-10 max-w-md space-y-3">
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-100 text-purple-700 font-extrabold text-[11px] tracking-wide uppercase">
+                        <Sparkles className="size-3 text-purple-600" />
+                        AI Voice Navigation & Copilot
+                      </span>
 
-                  {/* AI Robot Companion with sound waves */}
-                  <div className="relative w-24 xl:w-28 h-32 mb-2 animate-float">
-                    <Image
-                      src="/landingPage/ai_2_landing.webp"
-                      alt="AI Assistant Bot"
-                      fill
-                      className="object-contain drop-shadow-lg"
-                      priority
-                    />
-                    {/* Pulsing soundwaves */}
-                    <span className="absolute -top-1 -right-1 flex h-3 w-3">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-3 w-3 bg-purple-500"></span>
-                    </span>
-                  </div>
-                </div>
-              </motion.div>
+                      <h2 className="text-2xl xl:text-3xl font-black text-slate-900 font-heading tracking-tight leading-tight">
+                        Speak. Explore. Grow.
+                      </h2>
 
-              {/* 2. "WHAT WOULD YOU LIKE TO DO TODAY?" SECTION */}
-              <div className="space-y-3.5">
-                <h3 className="text-base xl:text-lg font-extrabold text-slate-900 font-heading tracking-tight">
-                  What would you like to do today?
-                </h3>
+                      <p className="text-xs xl:text-sm text-slate-600 font-medium leading-relaxed">
+                        Access all training courses, job opportunities, PM-AJAY grants, and center maps manually or by voice.
+                      </p>
 
-                <div className="grid grid-cols-2 xl:grid-cols-4 gap-3.5">
-                  {QUICK_ACTIONS.slice(0, 4).map((action, idx) => (
-                    <motion.div
-                      key={action.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.3, delay: idx * 0.05 }}
-                      whileHover={{ y: -3, scale: 1.01 }}
-                      onClick={() => handleQuickAction(action)}
-                      className="bg-white p-4 rounded-3xl border border-[#EDE7D9] shadow-2xs hover:shadow-md hover:border-purple-200 transition-all cursor-pointer flex flex-col justify-between group h-36"
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className={`size-11 rounded-2xl ${action.bgColor} flex items-center justify-center transition-transform group-hover:scale-110`}>
-                          {action.iconName === "training" && <GraduationCap className={`size-6 ${action.iconColor}`} />}
-                          {action.iconName === "job" && <Briefcase className={`size-6 ${action.iconColor}`} />}
-                          {action.iconName === "enterprise" && <Sprout className={`size-6 ${action.iconColor}`} />}
-                          {action.iconName === "center" && <MapPin className={`size-6 ${action.iconColor}`} />}
-                        </div>
+                      <div className="flex items-center gap-2.5 pt-1">
+                        <motion.button
+                          whileHover={{ scale: 1.03 }}
+                          whileTap={{ scale: 0.97 }}
+                          onClick={() => setIsVoiceModalOpen(true)}
+                          className="flex items-center gap-2 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 text-white px-5 py-2.5 rounded-2xl text-xs xl:text-sm font-bold shadow-lg shadow-purple-600/30 cursor-pointer"
+                        >
+                          <Mic className="size-4 animate-pulse" />
+                          <span>Voice Copilot</span>
+                          <ArrowRight className="size-4" />
+                        </motion.button>
 
-                        <div className="size-7 rounded-full bg-purple-50 group-hover:bg-purple-600 group-hover:text-white text-purple-600 flex items-center justify-center transition-colors">
-                          <ChevronRight className="size-3.5" />
-                        </div>
+                        <button
+                          onClick={() => setActiveMenu("recommendations")}
+                          className="flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-800 px-4 py-2.5 rounded-2xl text-xs xl:text-sm font-bold border border-slate-200/90 shadow-2xs transition-colors cursor-pointer"
+                        >
+                          <Star className="size-3.5 text-amber-500" />
+                          <span>My Recommendations</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="relative z-10 hidden sm:flex items-end justify-center w-64 xl:w-72 h-44 xl:h-48 shrink-0">
+                      <div className="relative w-36 xl:w-40 h-full">
+                        <Image
+                          src="/landingPage/person_2_landing.webp"
+                          alt="Savitri Devi"
+                          fill
+                          className="object-contain object-bottom drop-shadow-md"
+                          priority
+                        />
                       </div>
 
+                      <div className="relative w-24 xl:w-28 h-32 mb-2 animate-float">
+                        <Image
+                          src="/landingPage/ai_2_landing.webp"
+                          alt="AI Assistant Bot"
+                          fill
+                          className="object-contain drop-shadow-lg"
+                          priority
+                        />
+                        <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-3 w-3 bg-purple-500"></span>
+                        </span>
+                      </div>
+                    </div>
+                  </motion.div>
+
+                  {/* 2. "WHAT WOULD YOU LIKE TO DO TODAY?" SECTION */}
+                  <div className="space-y-3.5">
+                    <h3 className="text-base xl:text-lg font-extrabold text-slate-900 font-heading tracking-tight">
+                      What would you like to do today?
+                    </h3>
+
+                    <div className="grid grid-cols-2 xl:grid-cols-4 gap-3.5">
+                      {QUICK_ACTIONS.slice(0, 4).map((action, idx) => (
+                        <motion.div
+                          key={action.id}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.3, delay: idx * 0.05 }}
+                          whileHover={{ y: -3, scale: 1.01 }}
+                          onClick={() => handleQuickAction(action)}
+                          className="bg-white p-4 rounded-3xl border border-[#EDE7D9] shadow-2xs hover:shadow-md hover:border-purple-200 transition-all cursor-pointer flex flex-col justify-between group h-36"
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className={`size-11 rounded-2xl ${action.bgColor} flex items-center justify-center transition-transform group-hover:scale-110`}>
+                              {action.iconName === "training" && <GraduationCap className={`size-6 ${action.iconColor}`} />}
+                              {action.iconName === "job" && <Briefcase className={`size-6 ${action.iconColor}`} />}
+                              {action.iconName === "enterprise" && <Sprout className={`size-6 ${action.iconColor}`} />}
+                              {action.iconName === "center" && <MapPin className={`size-6 ${action.iconColor}`} />}
+                            </div>
+
+                            <div className="size-7 rounded-full bg-purple-50 group-hover:bg-purple-600 group-hover:text-white text-purple-600 flex items-center justify-center transition-colors">
+                              <ChevronRight className="size-3.5" />
+                            </div>
+                          </div>
+
+                          <div>
+                            <h4 className="font-extrabold text-slate-900 text-xs xl:text-sm font-heading leading-tight">
+                              {action.title}
+                            </h4>
+                            <p className="text-[10px] xl:text-[11px] text-slate-500 font-medium line-clamp-1 mt-0.5">
+                              {action.subtitle}
+                            </p>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* 3. "RECOMMENDED FOR YOU" SECTION */}
+                  <div className="space-y-3.5">
+                    <div className="flex items-center justify-between">
                       <div>
-                        <h4 className="font-extrabold text-slate-900 text-xs xl:text-sm font-heading leading-tight">
-                          {action.title}
-                        </h4>
-                        <p className="text-[10px] xl:text-[11px] text-slate-500 font-medium line-clamp-1 mt-0.5">
-                          {action.subtitle}
+                        <h3 className="text-base xl:text-lg font-extrabold text-slate-900 font-heading tracking-tight">
+                          Recommended For You
+                        </h3>
+                        <p className="text-xs text-slate-500 font-medium">
+                          Based on your profile, interests and local Kalahandi opportunities
                         </p>
                       </div>
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
 
-              {/* 3. "RECOMMENDED FOR YOU" SECTION */}
-              <div className="space-y-3.5">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-base xl:text-lg font-extrabold text-slate-900 font-heading tracking-tight">
-                      Recommended For You
-                    </h3>
-                    <p className="text-xs text-slate-500 font-medium">
-                      Based on your profile, interests and local opportunities
-                    </p>
+                      <button
+                        onClick={() => setActiveMenu("recommendations")}
+                        className="text-xs font-bold text-purple-700 hover:text-purple-800 flex items-center gap-1 cursor-pointer hover:underline"
+                      >
+                        <span>See All Recommendations</span>
+                        <ArrowRight className="size-3" />
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      {RECOMMENDED_COURSES.slice(0, 3).map((course, idx) => (
+                        <motion.div
+                          key={course.id}
+                          initial={{ opacity: 0, y: 12 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.35, delay: 0.1 + idx * 0.07 }}
+                          whileHover={{ y: -4 }}
+                          className="bg-white rounded-3xl border border-[#EDE7D9] shadow-2xs hover:shadow-lg hover:border-purple-200 transition-all overflow-hidden flex flex-col justify-between group"
+                        >
+                          <div className="relative h-32 xl:h-36 w-full overflow-hidden bg-slate-100">
+                            <Image
+                              src={course.image}
+                              alt={course.title}
+                              fill
+                              className="object-cover group-hover:scale-105 transition-transform duration-300"
+                            />
+                            <div className="absolute top-2.5 right-2.5">
+                              <span
+                                className={`text-[9px] font-extrabold uppercase px-2.5 py-1 rounded-full shadow-xs ${
+                                  course.badgeColor === "blue"
+                                    ? "bg-blue-600 text-white"
+                                    : course.badgeColor === "amber"
+                                    ? "bg-amber-500 text-white"
+                                    : "bg-emerald-600 text-white"
+                                }`}
+                              >
+                                {course.badge}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="p-4 flex-1 flex flex-col justify-between space-y-3">
+                            <div>
+                              <h4 className="font-extrabold text-slate-900 text-xs xl:text-sm font-heading leading-snug">
+                                {course.title}
+                              </h4>
+
+                              <div className="flex items-center gap-3 text-[11px] text-slate-500 font-semibold mt-1.5">
+                                <span className="flex items-center gap-1">
+                                  <Clock className="size-3 text-slate-400" />
+                                  {course.duration}
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <MapPin className="size-3 text-slate-400" />
+                                  {course.location}
+                                </span>
+                              </div>
+                            </div>
+
+                            <motion.button
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
+                              onClick={() => handleOpenCourse(course)}
+                              className="w-full bg-purple-50 hover:bg-purple-100 text-purple-700 hover:text-purple-800 text-xs font-bold py-2 rounded-xl flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                            >
+                              <span>View Details</span>
+                              <ArrowRight className="size-3" />
+                            </motion.button>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* RIGHT COLUMN (lg:col-span-4): Profile, Progress, Upcoming Steps */}
+                <div className="lg:col-span-4 flex flex-col gap-5">
+
+                  {/* 1. PROFILE SUMMARY CARD */}
+                  <div className="bg-white rounded-3xl border border-[#EDE7D9] shadow-2xs p-5 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="relative size-12 rounded-2xl overflow-hidden border border-purple-200">
+                          <Image
+                            src={CURRENT_BENEFICIARY.avatarUrl}
+                            alt={CURRENT_BENEFICIARY.name}
+                            fill
+                            className="object-cover object-top"
+                          />
+                        </div>
+                        <div>
+                          <h4 className="font-extrabold text-slate-900 text-sm xl:text-base font-heading">
+                            {CURRENT_BENEFICIARY.name}
+                          </h4>
+                          <p className="text-[10px] font-bold text-purple-700">
+                            {CURRENT_BENEFICIARY.beneficiaryType}
+                          </p>
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={() => setIsProfileModalOpen(true)}
+                        className="flex items-center gap-1 text-[11px] font-bold text-purple-700 hover:underline cursor-pointer bg-purple-50 px-2.5 py-1 rounded-xl"
+                      >
+                        <Edit3 className="size-3" />
+                        <span>Edit Profile</span>
+                      </button>
+                    </div>
+
+                    <div className="space-y-2 text-xs text-slate-600 font-medium pt-1">
+                      <div className="flex items-center gap-2">
+                        <MapPin className="size-3.5 text-purple-600 shrink-0" />
+                        <span>{CURRENT_BENEFICIARY.district}, {CURRENT_BENEFICIARY.state}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <GraduationCap className="size-3.5 text-blue-600 shrink-0" />
+                        <span>{CURRENT_BENEFICIARY.education}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Sprout className="size-3.5 text-emerald-600 shrink-0" />
+                        <span>Family Occupation: {CURRENT_BENEFICIARY.familyOccupation}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Briefcase className="size-3.5 text-amber-600 shrink-0" />
+                        <span>Looking for: {CURRENT_BENEFICIARY.lookingFor}</span>
+                      </div>
+                    </div>
+
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => setIsProfileModalOpen(true)}
+                      className="w-full bg-purple-50 hover:bg-purple-100 text-purple-700 text-xs font-bold py-2.5 rounded-2xl flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                    >
+                      <span>View Complete Profile</span>
+                      <ArrowRight className="size-3.5" />
+                    </motion.button>
                   </div>
 
-                  <button
-                    onClick={() => {
-                      setSelectedCourse(RECOMMENDED_COURSES[0]);
-                      setIsCourseModalOpen(true);
-                    }}
-                    className="text-xs font-bold text-purple-700 hover:text-purple-800 flex items-center gap-1 cursor-pointer hover:underline"
-                  >
-                    <span>See More</span>
-                    <ArrowRight className="size-3" />
-                  </button>
-                </div>
+                  {/* 2. "YOUR PROGRESS" CARD (Donut Chart 60% + Checklist) */}
+                  <div className="bg-white rounded-3xl border border-[#EDE7D9] shadow-2xs p-5 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-extrabold text-slate-900 text-sm font-heading">
+                        Your Progress
+                      </h4>
+                      <button
+                        onClick={() => setActiveMenu("progress")}
+                        className="text-xs font-bold text-purple-700 hover:underline cursor-pointer"
+                      >
+                        View All
+                      </button>
+                    </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  {RECOMMENDED_COURSES.slice(0, 3).map((course, idx) => (
-                    <motion.div
-                      key={course.id}
-                      initial={{ opacity: 0, y: 12 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.35, delay: 0.1 + idx * 0.07 }}
-                      whileHover={{ y: -4 }}
-                      className="bg-white rounded-3xl border border-[#EDE7D9] shadow-2xs hover:shadow-lg hover:border-purple-200 transition-all overflow-hidden flex flex-col justify-between group"
-                    >
-                      {/* Course Image & Badge */}
-                      <div className="relative h-32 xl:h-36 w-full overflow-hidden bg-slate-100">
-                        <Image
-                          src={course.image}
-                          alt={course.title}
-                          fill
-                          className="object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
-                        <div className="absolute top-2.5 right-2.5">
-                          <span
-                            className={`text-[9px] font-extrabold uppercase px-2.5 py-1 rounded-full shadow-xs ${course.badgeColor === "blue"
-                                ? "bg-blue-600 text-white"
-                                : course.badgeColor === "amber"
-                                  ? "bg-amber-500 text-white"
-                                  : "bg-emerald-600 text-white"
-                              }`}
-                          >
-                            {course.badge}
+                    <div className="flex items-center gap-4">
+                      <div className="relative size-24 shrink-0 flex items-center justify-center">
+                        <svg className="size-full -rotate-90" viewBox="0 0 36 36">
+                          <path
+                            className="text-slate-100"
+                            strokeWidth="3.5"
+                            stroke="currentColor"
+                            fill="none"
+                            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                          />
+                          <path
+                            className="text-purple-600"
+                            strokeDasharray="60, 100"
+                            strokeWidth="3.5"
+                            strokeLinecap="round"
+                            stroke="currentColor"
+                            fill="none"
+                            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                          />
+                        </svg>
+                        <div className="absolute flex flex-col items-center justify-center text-center">
+                          <span className="text-base font-black text-slate-900 leading-none">60%</span>
+                          <span className="text-[8px] font-bold text-slate-400 leading-tight mt-0.5 max-w-[45px]">
+                            Profile Done
                           </span>
                         </div>
                       </div>
 
-                      {/* Content */}
-                      <div className="p-4 flex-1 flex flex-col justify-between space-y-3">
-                        <div>
-                          <h4 className="font-extrabold text-slate-900 text-xs xl:text-sm font-heading leading-snug">
-                            {course.title}
-                          </h4>
-
-                          <div className="flex items-center gap-3 text-[11px] text-slate-500 font-semibold mt-1.5">
-                            <span className="flex items-center gap-1">
-                              <Clock className="size-3 text-slate-400" />
-                              {course.duration}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <MapPin className="size-3 text-slate-400" />
-                              {course.location}
+                      <div className="space-y-1.5 flex-1">
+                        {CURRENT_BENEFICIARY.progressSteps.map((step, idx) => (
+                          <div key={idx} className="flex items-center gap-2 text-xs">
+                            {step.status === "completed" && (
+                              <div className="size-4 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
+                                <Check className="size-2.5 stroke-[3]" />
+                              </div>
+                            )}
+                            {step.status === "active" && (
+                              <div className="size-4 rounded-full bg-purple-600 text-white flex items-center justify-center shrink-0">
+                                <span className="size-1.5 rounded-full bg-white animate-ping"></span>
+                              </div>
+                            )}
+                            {step.status === "pending" && (
+                              <div className="size-4 rounded-full border border-slate-300 shrink-0"></div>
+                            )}
+                            <span
+                              className={`font-semibold text-[11px] truncate ${
+                                step.status === "active"
+                                  ? "text-purple-700 font-extrabold"
+                                  : step.status === "completed"
+                                  ? "text-slate-800"
+                                  : "text-slate-400"
+                              }`}
+                            >
+                              {step.title}
                             </span>
                           </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 3. "UPCOMING STEPS" CARD */}
+                  <div className="bg-white rounded-3xl border border-[#EDE7D9] shadow-2xs p-5 space-y-3.5">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-extrabold text-slate-900 text-sm font-heading">
+                        Upcoming Steps
+                      </h4>
+                      <button
+                        onClick={() => setIsVoiceModalOpen(true)}
+                        className="text-xs font-bold text-purple-700 hover:underline cursor-pointer"
+                      >
+                        View All
+                      </button>
+                    </div>
+
+                    <div className="space-y-2.5">
+                      {UPCOMING_STEPS.map((step) => (
+                        <motion.div
+                          key={step.id}
+                          whileHover={{ x: 2 }}
+                          onClick={() => {
+                            if (step.iconName === "mic") setIsVoiceModalOpen(true);
+                            else if (step.iconName === "book") {
+                              setActiveMenu("training");
+                            } else if (step.iconName === "file") setIsSchemesModalOpen(true);
+                            else setIsVoiceModalOpen(true);
+                          }}
+                          className="p-2.5 rounded-2xl bg-slate-50 hover:bg-purple-50/60 border border-slate-200/70 hover:border-purple-200 transition-all flex items-center justify-between cursor-pointer group"
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <div
+                              className={`size-8 rounded-xl flex items-center justify-center shrink-0 ${
+                                step.color === "purple"
+                                  ? "bg-purple-100 text-purple-700"
+                                  : step.color === "amber"
+                                  ? "bg-amber-100 text-amber-700"
+                                  : step.color === "blue"
+                                  ? "bg-blue-100 text-blue-700"
+                                  : "bg-emerald-100 text-emerald-700"
+                              }`}
+                            >
+                              {step.iconName === "mic" && <Mic className="size-4" />}
+                              {step.iconName === "book" && <GraduationCap className="size-4" />}
+                              {step.iconName === "pin" && <MapPin className="size-4" />}
+                              {step.iconName === "file" && <FileText className="size-4" />}
+                            </div>
+
+                            <div>
+                              <h5 className="font-bold text-slate-900 text-xs leading-tight group-hover:text-purple-700 transition-colors">
+                                {step.title}
+                              </h5>
+                              <p className="text-[10px] text-slate-500 font-medium">
+                                {step.subtitle}
+                              </p>
+                            </div>
+                          </div>
+
+                          <ChevronRight className="size-4 text-slate-400 group-hover:text-purple-600 transition-transform group-hover:translate-x-0.5" />
+                        </motion.div>
+                      ))}
+                    </div>
+                  </div>
+
+                </div>
+              </motion.div>
+            )}
+
+            {/* TAB 2: AI RECOMMENDATIONS HUB */}
+            {activeMenu === "recommendations" && (
+              <motion.div
+                key="view-recommendations"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.25 }}
+                className="space-y-6"
+              >
+                {/* Header Banner */}
+                <div className="bg-gradient-to-r from-purple-900 via-indigo-900 to-slate-900 text-white p-6 rounded-[32px] shadow-md flex items-center justify-between">
+                  <div className="space-y-1">
+                    <span className="px-3 py-1 rounded-full bg-purple-500/30 text-purple-200 text-xs font-extrabold uppercase">
+                      AI Personalized Matches
+                    </span>
+                    <h2 className="text-2xl font-black font-heading">
+                      Recommended for Savitri Devi
+                    </h2>
+                    <p className="text-xs text-purple-200/80">
+                      Based on your 10th qualification, tailoring interest, and high-demand trades in Kalahandi.
+                    </p>
+                  </div>
+
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => handleOpenVoiceWithPrompt("मेरे लिए कौन से कोर्स और योजनाएं सबसे अच्छी हैं?")}
+                    className="flex items-center gap-2 bg-white text-purple-900 font-extrabold text-xs px-4 py-2.5 rounded-2xl shadow-md cursor-pointer"
+                  >
+                    <Mic className="size-4 text-purple-600" />
+                    <span>Ask AI Recommendations</span>
+                  </motion.button>
+                </div>
+
+                {/* 1. Top Recommended Courses */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-base font-extrabold text-slate-900 font-heading flex items-center gap-2">
+                      <GraduationCap className="size-5 text-blue-600" />
+                      <span>Top NSQF Training Matches (with ₹3,500/mo Stipend)</span>
+                    </h3>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {RECOMMENDED_COURSES.slice(0, 3).map((course) => (
+                      <div
+                        key={course.id}
+                        className="bg-white rounded-3xl border border-[#EDE7D9] shadow-2xs p-4 flex flex-col justify-between space-y-3 hover:shadow-md transition-all group"
+                      >
+                        <div className="relative h-32 rounded-2xl overflow-hidden bg-slate-100">
+                          <Image src={course.image} alt={course.title} fill className="object-cover group-hover:scale-105 transition-transform" />
+                          <span className="absolute top-2 right-2 bg-emerald-600 text-white text-[9px] font-extrabold px-2.5 py-0.5 rounded-full">
+                            95% Match
+                          </span>
                         </div>
 
-                        <motion.button
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                          onClick={() => handleOpenCourse(course)}
-                          className="w-full bg-purple-50 hover:bg-purple-100 text-purple-700 hover:text-purple-800 text-xs font-bold py-2 rounded-xl flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-                        >
-                          <span>View Details</span>
-                          <ArrowRight className="size-3" />
-                        </motion.button>
+                        <div>
+                          <h4 className="font-extrabold text-slate-900 text-sm font-heading">{course.title}</h4>
+                          <p className="text-xs text-purple-700 font-bold mt-1">{course.stipend}</p>
+                          <p className="text-[11px] text-slate-500 mt-1 line-clamp-2">{course.description}</p>
+                        </div>
+
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleOpenCourse(course)}
+                            className="flex-1 bg-purple-50 hover:bg-purple-100 text-purple-700 text-xs font-bold py-2 rounded-xl"
+                          >
+                            View Details
+                          </button>
+                        </div>
                       </div>
-                    </motion.div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              </div>
-            </div>
 
-            {/* ----------------------------------------------------------------------- */}
-            {/* RIGHT COLUMN (lg:col-span-4): Profile, Progress, Upcoming Steps        */}
-            {/* ----------------------------------------------------------------------- */}
-            <div className="lg:col-span-4 flex flex-col gap-5">
+                {/* 2. Top Recommended Jobs */}
+                <div className="space-y-3">
+                  <h3 className="text-base font-extrabold text-slate-900 font-heading flex items-center gap-2">
+                    <Briefcase className="size-5 text-emerald-600" />
+                    <span>Top Verified Job Matches</span>
+                  </h3>
 
-              {/* 1. PROFILE SUMMARY CARD */}
-              <div className="bg-white rounded-3xl border border-[#EDE7D9] shadow-2xs p-5 space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="relative size-12 rounded-2xl overflow-hidden border border-purple-200">
-                      <Image
-                        src={CURRENT_BENEFICIARY.avatarUrl}
-                        alt={CURRENT_BENEFICIARY.name}
-                        fill
-                        className="object-cover object-top"
-                      />
-                    </div>
-                    <div>
-                      <h4 className="font-extrabold text-slate-900 text-sm xl:text-base font-heading">
-                        {CURRENT_BENEFICIARY.name}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {RECOMMENDED_JOBS.slice(0, 2).map((job) => (
+                      <div
+                        key={job.id}
+                        className="bg-white rounded-3xl border border-[#EDE7D9] shadow-2xs p-5 flex flex-col justify-between space-y-3 hover:shadow-md transition-all"
+                      >
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <span className="text-[10px] font-extrabold text-emerald-700 bg-emerald-100 px-2.5 py-0.5 rounded-full">
+                              ✓ NCS Verified
+                            </span>
+                            <h4 className="font-extrabold text-slate-900 text-base font-heading mt-1.5">{job.title}</h4>
+                            <p className="text-xs text-slate-500 font-medium">{job.company} • {job.location}</p>
+                          </div>
+                          <span className="text-sm font-extrabold text-purple-700">{job.salary}</span>
+                        </div>
+
+                        <p className="text-xs text-slate-600">{job.description}</p>
+
+                        <button
+                          onClick={() => handleOpenJob(job)}
+                          className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold text-xs py-2.5 rounded-2xl flex items-center justify-center gap-2 shadow-sm"
+                        >
+                          <span>Apply for Job</span>
+                          <ArrowRight className="size-3.5" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 3. Recommended PM-AJAY Schemes */}
+                <div className="space-y-3">
+                  <h3 className="text-base font-extrabold text-slate-900 font-heading flex items-center gap-2">
+                    <Sprout className="size-5 text-amber-600" />
+                    <span>Recommended PM-AJAY Financial Grants</span>
+                  </h3>
+
+                  <div className="bg-white rounded-3xl border border-[#EDE7D9] p-5 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div className="space-y-1">
+                      <span className="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-700">
+                        Pre-Approved Scheme
+                      </span>
+                      <h4 className="font-extrabold text-slate-900 text-base font-heading">
+                        PM-AJAY ₹35,000 Micro-Enterprise Grant & Toolkit
                       </h4>
-                      <p className="text-[10px] font-bold text-purple-700">
-                        {CURRENT_BENEFICIARY.beneficiaryType}
+                      <p className="text-xs text-slate-500">
+                        100% direct bank grant for purchasing industrial sewing machines, electrical toolkits, and raw materials.
                       </p>
                     </div>
-                  </div>
 
-                  <button
-                    onClick={() => setIsProfileModalOpen(true)}
-                    className="flex items-center gap-1 text-[11px] font-bold text-purple-700 hover:underline cursor-pointer bg-purple-50 px-2.5 py-1 rounded-xl"
-                  >
-                    <Edit3 className="size-3" />
-                    <span>Edit Profile</span>
-                  </button>
-                </div>
-
-                {/* Profile Details List */}
-                <div className="space-y-2 text-xs text-slate-600 font-medium pt-1">
-                  <div className="flex items-center gap-2">
-                    <MapPin className="size-3.5 text-purple-600 shrink-0" />
-                    <span>{CURRENT_BENEFICIARY.district}, {CURRENT_BENEFICIARY.state}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <GraduationCap className="size-3.5 text-blue-600 shrink-0" />
-                    <span>{CURRENT_BENEFICIARY.education}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Sprout className="size-3.5 text-emerald-600 shrink-0" />
-                    <span>Family Occupation: {CURRENT_BENEFICIARY.familyOccupation}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Briefcase className="size-3.5 text-amber-600 shrink-0" />
-                    <span>Looking for: {CURRENT_BENEFICIARY.lookingFor}</span>
+                    <button
+                      onClick={() => setIsSchemesModalOpen(true)}
+                      className="bg-purple-600 text-white font-bold text-xs px-5 py-2.5 rounded-2xl shadow-md shrink-0 cursor-pointer"
+                    >
+                      View Grant Details
+                    </button>
                   </div>
                 </div>
+              </motion.div>
+            )}
 
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => setIsProfileModalOpen(true)}
-                  className="w-full bg-purple-50 hover:bg-purple-100 text-purple-700 text-xs font-bold py-2.5 rounded-2xl flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-                >
-                  <span>View Complete Profile</span>
-                  <ArrowRight className="size-3.5" />
-                </motion.button>
-              </div>
+            {/* TAB 3: FULL TRAINING PROGRAMS CATALOG */}
+            {activeMenu === "training" && (
+              <motion.div
+                key="view-training"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.25 }}
+                className="space-y-5"
+              >
+                {/* Header & Filter Bar */}
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-white p-4 rounded-3xl border border-[#EDE7D9] shadow-2xs">
+                  <div>
+                    <h2 className="text-lg font-extrabold text-slate-900 font-heading">
+                      NSQF Skill Training Catalog (10 Courses)
+                    </h2>
+                    <p className="text-xs text-slate-500">
+                      All courses offer 100% free tuition, hostel accommodation, and ₹3,500/month stipend.
+                    </p>
+                  </div>
 
-              {/* 2. "YOUR PROGRESS" CARD (Donut Chart 60% + Checklist) */}
-              <div className="bg-white rounded-3xl border border-[#EDE7D9] shadow-2xs p-5 space-y-4">
-                <div className="flex items-center justify-between">
-                  <h4 className="font-extrabold text-slate-900 text-sm font-heading">
-                    Your Progress
-                  </h4>
-                  <button
-                    onClick={() => setIsProfileModalOpen(true)}
-                    className="text-xs font-bold text-purple-700 hover:underline cursor-pointer"
-                  >
-                    View All
-                  </button>
+                  {/* Filter Pills */}
+                  <div className="flex items-center gap-1.5 overflow-x-auto text-xs">
+                    {["all", "technical", "agriculture", "service", "self_employment"].map((f) => (
+                      <button
+                        key={f}
+                        onClick={() => setTrainingFilter(f)}
+                        className={`px-3 py-1.5 rounded-xl font-bold transition-all cursor-pointer ${
+                          trainingFilter === f
+                            ? "bg-purple-600 text-white shadow-xs"
+                            : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                        }`}
+                      >
+                        {f === "all" ? "All Courses" : f.charAt(0).toUpperCase() + f.slice(1).replace("_", " ")}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-4">
-                  {/* Circular SVG Donut Chart */}
-                  <div className="relative size-24 shrink-0 flex items-center justify-center">
-                    <svg className="size-full -rotate-90" viewBox="0 0 36 36">
-                      {/* Background circle */}
-                      <path
-                        className="text-slate-100"
-                        strokeWidth="3.5"
-                        stroke="currentColor"
-                        fill="none"
-                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                      />
-                      {/* Progress circle 60% */}
-                      <path
-                        className="text-purple-600"
-                        strokeDasharray="60, 100"
-                        strokeWidth="3.5"
-                        strokeLinecap="round"
-                        stroke="currentColor"
-                        fill="none"
-                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                      />
-                    </svg>
-                    <div className="absolute flex flex-col items-center justify-center text-center">
-                      <span className="text-base font-black text-slate-900 leading-none">60%</span>
-                      <span className="text-[8px] font-bold text-slate-400 leading-tight mt-0.5 max-w-[45px]">
-                        Profile Done
-                      </span>
+                {/* 10 Course Cards Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {RECOMMENDED_COURSES.map((course) => (
+                    <div
+                      key={course.id}
+                      className="bg-white rounded-3xl border border-[#EDE7D9] shadow-2xs hover:shadow-lg transition-all p-4 flex flex-col justify-between space-y-3 group"
+                    >
+                      <div className="relative h-36 rounded-2xl overflow-hidden bg-slate-100">
+                        <Image src={course.image} alt={course.title} fill className="object-cover group-hover:scale-105 transition-transform" />
+                        <span className="absolute top-2.5 right-2.5 bg-purple-600 text-white text-[9px] font-extrabold px-2.5 py-0.5 rounded-full">
+                          NSQF Level {course.nsqfLevel}
+                        </span>
+                      </div>
+
+                      <div>
+                        <h4 className="font-extrabold text-slate-900 text-sm font-heading">{course.title}</h4>
+                        <p className="text-xs text-purple-700 font-bold mt-1">{course.stipend}</p>
+                        <div className="flex items-center gap-2 text-[11px] text-slate-500 mt-1">
+                          <Clock className="size-3 text-slate-400" />
+                          <span>{course.duration}</span>
+                          <span>•</span>
+                          <MapPin className="size-3 text-slate-400" />
+                          <span>{course.location}</span>
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={() => handleOpenCourse(course)}
+                        className="w-full bg-purple-50 hover:bg-purple-100 text-purple-700 font-bold text-xs py-2 rounded-xl flex items-center justify-center gap-1.5 transition-colors"
+                      >
+                        <span>View Details & Apply</span>
+                        <ArrowRight className="size-3" />
+                      </button>
                     </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
+            {/* TAB 4: JOB OPPORTUNITIES CATALOG */}
+            {activeMenu === "jobs" && (
+              <motion.div
+                key="view-jobs"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.25 }}
+                className="space-y-5"
+              >
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-white p-4 rounded-3xl border border-[#EDE7D9] shadow-2xs">
+                  <div>
+                    <h2 className="text-lg font-extrabold text-slate-900 font-heading">
+                      Verified Job Openings (NCS Linked)
+                    </h2>
+                    <p className="text-xs text-slate-500">
+                      Direct employment opportunities with PF, ESI healthcare, and verified salaries.
+                    </p>
                   </div>
 
-                  {/* Checklist */}
-                  <div className="space-y-1.5 flex-1">
-                    {CURRENT_BENEFICIARY.progressSteps.map((step, idx) => (
-                      <div key={idx} className="flex items-center gap-2 text-xs">
-                        {step.status === "completed" && (
-                          <div className="size-4 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
-                            <Check className="size-2.5 stroke-[3]" />
-                          </div>
-                        )}
-                        {step.status === "active" && (
-                          <div className="size-4 rounded-full bg-purple-600 text-white flex items-center justify-center shrink-0">
-                            <span className="size-1.5 rounded-full bg-white animate-ping"></span>
-                          </div>
-                        )}
-                        {step.status === "pending" && (
-                          <div className="size-4 rounded-full border border-slate-300 shrink-0"></div>
-                        )}
-                        <span
-                          className={`font-semibold text-[11px] truncate ${step.status === "active"
-                              ? "text-purple-700 font-extrabold"
-                              : step.status === "completed"
-                                ? "text-slate-800"
-                                : "text-slate-400"
-                            }`}
+                  <div className="flex items-center gap-1.5 text-xs">
+                    {["all", "government", "private"].map((f) => (
+                      <button
+                        key={f}
+                        onClick={() => setJobFilter(f)}
+                        className={`px-3 py-1.5 rounded-xl font-bold transition-all cursor-pointer ${
+                          jobFilter === f
+                            ? "bg-purple-600 text-white shadow-xs"
+                            : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                        }`}
+                      >
+                        {f === "all" ? "All Jobs" : f.charAt(0).toUpperCase() + f.slice(1)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {RECOMMENDED_JOBS.map((job) => (
+                    <div
+                      key={job.id}
+                      className="bg-white rounded-3xl border border-[#EDE7D9] shadow-2xs hover:shadow-md transition-all p-5 flex flex-col justify-between space-y-3"
+                    >
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <span className="text-[10px] font-extrabold text-emerald-700 bg-emerald-100 px-2.5 py-0.5 rounded-full">
+                            ✓ NCS Verified
+                          </span>
+                          <h4 className="font-extrabold text-slate-900 text-base font-heading mt-1">{job.title}</h4>
+                          <p className="text-xs text-slate-500">{job.company} • {job.location}</p>
+                        </div>
+                        <span className="text-sm font-extrabold text-purple-700">{job.salary}</span>
+                      </div>
+
+                      <p className="text-xs text-slate-600 line-clamp-2">{job.description}</p>
+
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleOpenJob(job)}
+                          className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold text-xs py-2.5 rounded-2xl flex items-center justify-center gap-2 shadow-sm"
                         >
-                          {step.title}
+                          <span>View Job & Apply</span>
+                          <ArrowRight className="size-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
+            {/* TAB 5: SELF EMPLOYMENT & PM-AJAY GRANTS */}
+            {activeMenu === "self_employment" && (
+              <motion.div
+                key="view-self-employment"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.25 }}
+                className="space-y-5"
+              >
+                <div className="bg-gradient-to-r from-amber-500 via-orange-600 to-purple-800 text-white p-6 rounded-[32px] shadow-md flex items-center justify-between">
+                  <div className="space-y-1">
+                    <span className="px-3 py-1 rounded-full bg-white/20 text-white text-xs font-extrabold uppercase">
+                      Micro-Enterprise Grant Support
+                    </span>
+                    <h2 className="text-2xl font-black font-heading">
+                      PM-AJAY Self-Employment & Capital Grants
+                    </h2>
+                    <p className="text-xs text-white/90">
+                      Get ₹35,000 to ₹50,000 direct grant assistance to set up your own tailoring unit, electrical shop, or food venture.
+                    </p>
+                  </div>
+
+                  <button
+                    onClick={() => setIsSchemesModalOpen(true)}
+                    className="bg-white text-orange-950 font-extrabold text-xs px-5 py-2.5 rounded-2xl shadow-md cursor-pointer"
+                  >
+                    Open Schemes Modal
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {SCHEMES_LIST.map((scheme) => (
+                    <div
+                      key={scheme.id}
+                      className="bg-white rounded-3xl border border-[#EDE7D9] p-5 shadow-2xs flex flex-col justify-between space-y-3"
+                    >
+                      <div>
+                        <span className="text-[10px] font-extrabold text-purple-700 bg-purple-100 px-2.5 py-0.5 rounded-full">
+                          {scheme.status}
+                        </span>
+                        <h4 className="font-extrabold text-slate-900 text-sm font-heading mt-2">{scheme.name}</h4>
+                        <p className="text-xs font-black text-emerald-600 mt-1">{scheme.grantAmount}</p>
+                        <p className="text-xs text-slate-500 mt-1">{scheme.eligibility}</p>
+                      </div>
+
+                      <button
+                        onClick={() => setIsSchemesModalOpen(true)}
+                        className="w-full bg-purple-50 hover:bg-purple-100 text-purple-700 font-bold text-xs py-2 rounded-xl"
+                      >
+                        Apply for Grant
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
+            {/* TAB 6: PROGRESS JOURNEY */}
+            {activeMenu === "progress" && (
+              <motion.div
+                key="view-progress"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.25 }}
+                className="space-y-5"
+              >
+                <div className="bg-white rounded-3xl border border-[#EDE7D9] p-6 shadow-2xs space-y-5">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-lg font-extrabold text-slate-900 font-heading">
+                        Savitri Devi · Skills Passport & Verification
+                      </h3>
+                      <p className="text-xs text-slate-500">60% Completed · SIDH & PM-AJAY Certified Profile</p>
+                    </div>
+
+                    <span className="text-xl font-black text-purple-700">60% Complete</span>
+                  </div>
+
+                  <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
+                    <div className="bg-gradient-to-r from-purple-600 to-indigo-600 h-full w-[60%] rounded-full"></div>
+                  </div>
+
+                  <div className="space-y-3 pt-2">
+                    {CURRENT_BENEFICIARY.progressSteps.map((step, idx) => (
+                      <div
+                        key={idx}
+                        className={`p-3.5 rounded-2xl border flex items-center justify-between ${
+                          step.status === "completed"
+                            ? "bg-emerald-50/60 border-emerald-200"
+                            : step.status === "active"
+                            ? "bg-purple-50/70 border-purple-200"
+                            : "bg-slate-50 border-slate-200"
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div
+                            className={`size-6 rounded-full flex items-center justify-center font-bold text-xs ${
+                              step.status === "completed"
+                                ? "bg-emerald-600 text-white"
+                                : step.status === "active"
+                                ? "bg-purple-600 text-white animate-pulse"
+                                : "bg-slate-300 text-slate-600"
+                            }`}
+                          >
+                            {step.status === "completed" ? "✓" : idx + 1}
+                          </div>
+                          <span className="text-xs font-bold text-slate-900">{step.title}</span>
+                        </div>
+
+                        <span
+                          className={`text-[11px] font-extrabold uppercase px-2.5 py-0.5 rounded-full ${
+                            step.status === "completed"
+                              ? "bg-emerald-100 text-emerald-700"
+                              : step.status === "active"
+                              ? "bg-purple-100 text-purple-700"
+                              : "bg-slate-200 text-slate-500"
+                          }`}
+                        >
+                          {step.status}
                         </span>
                       </div>
                     ))}
                   </div>
                 </div>
-              </div>
+              </motion.div>
+            )}
 
-              {/* 3. "UPCOMING STEPS" CARD */}
-              <div className="bg-white rounded-3xl border border-[#EDE7D9] shadow-2xs p-5 space-y-3.5">
-                <div className="flex items-center justify-between">
-                  <h4 className="font-extrabold text-slate-900 text-sm font-heading">
-                    Upcoming Steps
-                  </h4>
+            {/* TAB 7: HELP & SUPPORT */}
+            {activeMenu === "help" && (
+              <motion.div
+                key="view-help"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.25 }}
+                className="bg-white rounded-3xl border border-[#EDE7D9] p-6 shadow-2xs space-y-4"
+              >
+                <h3 className="text-lg font-extrabold text-slate-900 font-heading">
+                  Help & Grievance Redressal
+                </h3>
+                <p className="text-xs text-slate-600">
+                  Toll-Free PM-AJAY Helpline: <span className="font-extrabold text-purple-700">14449</span> • Available in Odia, Hindi and Santhali.
+                </p>
+
+                <div className="p-4 bg-purple-50 rounded-2xl border border-purple-100 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Phone className="size-6 text-purple-600" />
+                    <div>
+                      <h4 className="font-bold text-xs text-slate-900">Direct Voice AI Assistant</h4>
+                      <p className="text-[11px] text-slate-500">Ask any question by speaking in your local language.</p>
+                    </div>
+                  </div>
+
                   <button
                     onClick={() => setIsVoiceModalOpen(true)}
-                    className="text-xs font-bold text-purple-700 hover:underline cursor-pointer"
+                    className="bg-purple-600 text-white text-xs font-bold px-4 py-2 rounded-xl"
                   >
-                    View All
+                    Open Copilot
                   </button>
                 </div>
+              </motion.div>
+            )}
 
-                <div className="space-y-2.5">
-                  {UPCOMING_STEPS.map((step, idx) => (
-                    <motion.div
-                      key={step.id}
-                      whileHover={{ x: 2 }}
-                      onClick={() => {
-                        if (step.iconName === "mic") setIsVoiceModalOpen(true);
-                        else if (step.iconName === "book") {
-                          setSelectedCourse(RECOMMENDED_COURSES[0]);
-                          setIsCourseModalOpen(true);
-                        } else if (step.iconName === "file") setIsSchemesModalOpen(true);
-                        else setIsVoiceModalOpen(true);
-                      }}
-                      className="p-2.5 rounded-2xl bg-slate-50 hover:bg-purple-50/60 border border-slate-200/70 hover:border-purple-200 transition-all flex items-center justify-between cursor-pointer group"
-                    >
-                      <div className="flex items-center gap-2.5">
-                        <div
-                          className={`size-8 rounded-xl flex items-center justify-center shrink-0 ${step.color === "purple"
-                              ? "bg-purple-100 text-purple-700"
-                              : step.color === "amber"
-                                ? "bg-amber-100 text-amber-700"
-                                : step.color === "blue"
-                                  ? "bg-blue-100 text-blue-700"
-                                  : "bg-emerald-100 text-emerald-700"
-                            }`}
-                        >
-                          {step.iconName === "mic" && <Mic className="size-4" />}
-                          {step.iconName === "book" && <GraduationCap className="size-4" />}
-                          {step.iconName === "pin" && <MapPin className="size-4" />}
-                          {step.iconName === "file" && <FileText className="size-4" />}
-                        </div>
-
-                        <div>
-                          <h5 className="font-bold text-slate-900 text-xs leading-tight group-hover:text-purple-700 transition-colors">
-                            {step.title}
-                          </h5>
-                          <p className="text-[10px] text-slate-500 font-medium">
-                            {step.subtitle}
-                          </p>
-                        </div>
-                      </div>
-
-                      <ChevronRight className="size-4 text-slate-400 group-hover:text-purple-600 transition-transform group-hover:translate-x-0.5" />
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
-
-            </div>
-
-          </div>
+          </AnimatePresence>
 
         </div>
 
@@ -715,12 +1293,21 @@ export function WebDashboard() {
       <VoiceAssistantModal
         isOpen={isVoiceModalOpen}
         onClose={() => setIsVoiceModalOpen(false)}
+        initialPrompt={voiceAssistantInitialPrompt}
+        onNavigateTarget={handleVoiceNavigate}
       />
 
       <CourseDetailModal
         course={selectedCourse}
         isOpen={isCourseModalOpen}
         onClose={() => setIsCourseModalOpen(false)}
+      />
+
+      <JobDetailModal
+        job={selectedJob}
+        isOpen={isJobModalOpen}
+        onClose={() => setIsJobModalOpen(false)}
+        onOpenVoiceAssistant={handleOpenVoiceWithPrompt}
       />
 
       <SchemesModal

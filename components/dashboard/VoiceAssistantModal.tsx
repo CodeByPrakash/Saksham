@@ -19,12 +19,14 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { VoicePoweredOrb } from "@/components/ui/voice-powered-orb";
+import { VoiceNavIntent, parseVoiceNavigationIntent } from "@/lib/ai/voiceNavigation";
 import confetti from "canvas-confetti";
 
 interface VoiceAssistantModalProps {
   isOpen: boolean;
   onClose: () => void;
   initialPrompt?: string;
+  onNavigateTarget?: (intent: VoiceNavIntent) => void;
 }
 
 interface ChatMessage {
@@ -36,13 +38,15 @@ interface ChatMessage {
   actionButton?: {
     label: string;
     action: string;
+    intent?: VoiceNavIntent | null;
   };
 }
 
 export function VoiceAssistantModal({
   isOpen,
   onClose,
-  initialPrompt
+  initialPrompt,
+  onNavigateTarget
 }: VoiceAssistantModalProps) {
   const [selectedLanguage, setSelectedLanguage] = useState<string>("hindi");
   const [isRecording, setIsRecording] = useState<boolean>(false);
@@ -220,14 +224,20 @@ export function VoiceAssistantModal({
       const replyText = data.replyText || "सावित्री देवी जी, आपके लिए कालाहांडी में नि:शुल्क सिलाई और इलेक्ट्रीशियन कोर्स उपलब्ध हैं।";
       const audioUrl = data.audioUrl || null;
 
+      const detectedIntent = parseVoiceNavigationIntent(queryText, selectedLanguage);
+      const actionLabel = detectedIntent
+        ? `👉 ${detectedIntent.displayText}`
+        : "कोर्स में आवेदन करें (Apply Now)";
+
       const aiMsg: ChatMessage = {
         id: `ai-${Date.now()}`,
         sender: "ai",
         text: replyText,
         audioUrl: audioUrl,
         actionButton: {
-          label: "कोर्स में आवेदन करें (Apply Now)",
-          action: "apply"
+          label: actionLabel,
+          action: detectedIntent ? "navigate" : "apply",
+          intent: detectedIntent
         }
       };
 
@@ -238,10 +248,16 @@ export function VoiceAssistantModal({
       console.error("Voice assistant query error:", err);
       setIsProcessing(false);
       const fallbackText = "सावित्री देवी जी, कालाहांडी के PMKK सेंटर में सिलाई एवं इलेक्ट्रीशियन के नए बैच 15 अक्टूबर से शुरू हो रहे हैं।";
+      const detectedIntent = parseVoiceNavigationIntent(queryText, selectedLanguage);
       const aiMsg: ChatMessage = {
         id: `ai-${Date.now()}`,
         sender: "ai",
-        text: fallbackText
+        text: fallbackText,
+        actionButton: {
+          label: detectedIntent ? `👉 ${detectedIntent.displayText}` : "ट्रेनिंग सेंटर देखें (View Center)",
+          action: detectedIntent ? "navigate" : "apply",
+          intent: detectedIntent
+        }
       };
       setMessages((prev) => [...prev, aiMsg]);
       playSynthesizedAudio(null, fallbackText);
@@ -509,6 +525,9 @@ export function VoiceAssistantModal({
                       <Button
                         onClick={() => {
                           onClose();
+                          if (msg.actionButton?.intent && onNavigateTarget) {
+                            onNavigateTarget(msg.actionButton.intent);
+                          }
                           confetti({ particleCount: 60, spread: 60, origin: { y: 0.6 } });
                         }}
                         size="sm"
