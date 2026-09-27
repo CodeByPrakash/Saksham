@@ -174,13 +174,13 @@ export function OnboardingFlow({ onFinish, isMobile = false }: OnboardingFlowPro
 
       {/* Hidden Asset Prefetcher: Forces browser to warm cache for Slide 1, 2, 3 seamlessly */}
       <div className="hidden pointer-events-none opacity-0 select-none -z-50" aria-hidden="true">
-        <Image src="/landingPage/bg_1_landing.png" alt="" width={1} height={1} priority quality={95} />
-        <Image src="/landingPage/person_1_landing.png" alt="" width={1} height={1} priority quality={95} />
-        <Image src="/landingPage/bg_2_landing.png" alt="" width={1} height={1} priority quality={95} />
-        <Image src="/landingPage/person_2_landing.png" alt="" width={1} height={1} priority quality={95} />
-        <Image src="/landingPage/ai_2_landing.png" alt="" width={1} height={1} priority quality={95} />
-        <Image src="/landingPage/bg_3_landing.png" alt="" width={1} height={1} priority quality={95} />
-        <Image src="/landingPage/person_3_landing.png" alt="" width={1} height={1} priority quality={95} />
+        <Image src="/landingPage/bg_1_landing_mob.webp" alt="" width={1} height={1} priority quality={90} />
+        <Image src="/landingPage/person_1_landing_mob.webp" alt="" width={1} height={1} priority quality={90} />
+        <Image src="/landingPage/bg_2_landing_mob.webp" alt="" width={1} height={1} priority quality={90} />
+        <Image src="/landingPage/person_2_landing_mob.webp" alt="" width={1} height={1} priority quality={90} />
+        <Image src="/landingPage/ai_2_landing_mob.webp" alt="" width={1} height={1} priority quality={90} />
+        <Image src="/landingPage/bg_3_landing_mob.webp" alt="" width={1} height={1} priority quality={90} />
+        <Image src="/landingPage/person_3_landing_mob.webp" alt="" width={1} height={1} priority quality={90} />
       </div>
 
       {/* ========================================================================= */}
@@ -193,7 +193,7 @@ export function OnboardingFlow({ onFinish, isMobile = false }: OnboardingFlowPro
             {/* Background Widescreen Village Illustration */}
             <div className="absolute inset-0 z-0">
               <Image
-                src="/landingPage/bg_component.png"
+                src="/landingPage/bg_component.webp"
                 alt="Rural village sunrise landscape with sun and cottages"
                 fill
                 className="object-cover object-bottom"
@@ -297,15 +297,15 @@ export function OnboardingFlow({ onFinish, isMobile = false }: OnboardingFlowPro
                     </Badge>
                   </div>
 
-                  {/* Center Character (person_1_landing.png) */}
+                  {/* Center Character (person_1_landing.webp) */}
                   <div className="relative flex-1 w-full flex items-center justify-center my-2">
                     <div className="relative w-[280px] h-[320px] animate-float">
                       <Image
-                        src="/landingPage/person_1_landing.png"
+                        src="/landingPage/person_1_landing.webp"
                         alt="Young beneficiary using JeevikaSetu voice app"
                         fill
                         sizes="320px"
-                        quality={95}
+                        quality={90}
                         className="object-contain drop-shadow-2xl"
                         priority
                       />
@@ -502,7 +502,7 @@ export function OnboardingFlow({ onFinish, isMobile = false }: OnboardingFlowPro
 
                   <div className="relative w-full h-[360px] rounded-3xl overflow-hidden shadow-lg border border-slate-200">
                     <Image
-                      src="/landingPage/bg_1_landing.png"
+                      src="/landingPage/bg_1_landing.webp"
                       alt="Village backdrop"
                       fill
                       className="object-cover"
@@ -572,7 +572,7 @@ export function OnboardingFlow({ onFinish, isMobile = false }: OnboardingFlowPro
                     {/* Background scenic village canvas with foggy mist */}
                     <div className="absolute inset-0 z-0">
                       <Image
-                        src="/landingPage/bg_2_landing.png"
+                        src="/landingPage/bg_2_landing.webp"
                         alt="Village landscape"
                         fill
                         className="object-cover object-center opacity-70"
@@ -586,7 +586,7 @@ export function OnboardingFlow({ onFinish, isMobile = false }: OnboardingFlowPro
                       <div className="absolute left-0 bottom-0 w-[55%] h-[90%] z-10">
                         <div className="relative w-full h-full [mask-image:linear-gradient(to_bottom,black_0%,black_65%,transparent_98%)] [-webkit-mask-image:linear-gradient(to_bottom,black_0%,black_65%,transparent_98%)]">
                           <Image
-                            src="/landingPage/person_2_landing.png"
+                            src="/landingPage/person_2_landing.webp"
                             alt="Beneficiary speaking with AI Bot"
                             fill
                             className="object-contain object-bottom drop-shadow-xl"
@@ -596,7 +596,7 @@ export function OnboardingFlow({ onFinish, isMobile = false }: OnboardingFlowPro
                       {/* Right: AI Bot */}
                       <div className="absolute right-2 top-8 w-[48%] h-[68%] z-20 animate-float">
                         <Image
-                          src="/landingPage/ai_2_landing.png"
+                          src="/landingPage/ai_2_landing.webp"
                           alt="AI Robot Assistant"
                           fill
                           className="object-contain drop-shadow-2xl"

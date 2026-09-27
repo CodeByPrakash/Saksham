@@ -97,13 +97,16 @@ export function SlideOne({ onNext, onSkip, isNativeMobile = false }: SlideOnePro
         {/* Village Backdrop Image with Soft Mist Blend */}
         <div className="absolute inset-0 top-1 overflow-hidden rounded-3xl opacity-95">
           <Image
-            src="/landingPage/bg_1_landing.png"
+            src={isNativeMobile ? "/landingPage/bg_1_landing_mob.webp" : "/landingPage/bg_1_landing.webp"}
             alt="Village backdrop"
             fill
             sizes="(max-width: 768px) 100vw, 420px"
-            quality={95}
+            quality={90}
             className="object-cover object-bottom"
             priority
+            loading="eager"
+            placeholder="blur"
+            blurDataURL="data:image/webp;base64,UklGRm4BAABXRUJQVlA4WAoAAAAQAAAADAAAEwAAQUxQSKYAAAAFgFvbtmpl7fvdUiLLqYAWSBlUQSWUQT2Enrm7O9wVPOghIiagBJG/K5RWm19FFvqDt/L9M7h7en79XJsaXD9cHfc3rm5PP6eT3u/P+8ctvfpZEiutj9Lplp+2gV8pSZVIFEJM0AggAUQikaaGfyUVggKINKtEGgZpRht8pZVg1RLWVvgqpg3Vurq8NG/vcu/q+vD867TOLU697a7fCKT90568fgQCVlA4IKIAAADwBACdASoNABQAPu1iqU2ppaOiMAgBMB2JbACdMoMYPYAQV4xB5VD5aMYSc0PAc0AA/OU9tZ19ps3FIH/eptTVyyTE6fh7MXJHznXu3lc9/2C0lskkwXr5p5hm2f3a9OEXzQmVnTE+EUaEM33ZSESw3pU7yAru3Ge0LFU2YKpy6GGlKOgBSboLnqfv3AkNXUQOV3vDNlrjmyf09IS7U2ZNAAA="
           />
           {/* Top Foggy Mist Cloud Blend */}
           <div className="absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-[#FAF6EE] via-[#FAF6EE]/70 to-transparent" />
@@ -114,13 +117,16 @@ export function SlideOne({ onNext, onSkip, isNativeMobile = false }: SlideOnePro
         <div className="relative z-10 w-[240px] sm:w-[270px] h-[95%] max-h-[290px] mb-[-6px]">
           <div className="relative w-full h-full [mask-image:linear-gradient(to_bottom,black_0%,black_90%,transparent_100%)] [-webkit-mask-image:linear-gradient(to_bottom,black_0%,black_90%,transparent_100%)]">
             <Image
-              src="/landingPage/person_1_landing.png"
+              src={isNativeMobile ? "/landingPage/person_1_landing_mob.webp" : "/landingPage/person_1_landing.webp"}
               alt="Beneficiary speaking with voice assistant"
               fill
               sizes="(max-width: 768px) 270px, 300px"
-              quality={95}
+              quality={90}
               className="object-contain object-bottom drop-shadow-xl"
               priority
+              loading="eager"
+              placeholder="blur"
+              blurDataURL="data:image/webp;base64,UklGRkYCAABXRUJQVlA4WAoAAAAQAAAAEwAAEwAAQUxQSP8AAAABkGvb2rFX+0NsO7mGpE1ldi7t5Bilb+BURmfbtlWe0kb7ve+zv6f4/jfXEBETgJQBOk69PNhdCh9uHyuoqvppEn4KDwG6VIy1VnUAQQJZAa7FEUlG8Yd0z4PvrekDHqlJ0GoLAqB556Ym3HFE8XaEwOy6qUZ8V5tK9yGE1zx14W3uZTWOjV4IDxV/dXRSI4okRpAGhDjEZ6fVUEia+G4mPB+1/2NVOo1eyw4CtKsV6xLRenhe/nu1XI691IAQSxpRHKTRM16Q+S62LiGtPRpihxo6RUjRlehXI8sRke/jtb8YGXGQtPoxrUOTJIUUUmh1uuj1z8O3nqkVESElcQcAVlA4ICABAACwBgCdASoUABQAPu1ur1KppiQiqAgBMB2JbACdMoR1AP0qvsADpd0aBs7xcIc8C1qEAWh2+tcu/JF/5ZqTgAD9Kau3vkY5fnTXr/+4zF9/DXa8NuuL8ZGju3MdNfA6UDbVJZGnM5RZOxN5UFGnYRq66ezyBLjPH1WYI9vQJRiFgxUtqQZB+FKzuD/l8k5yWvBS4GrK4B2S15pKp8hbVVWlgOHbYcwY00FXndGsk6DNKTlrCjJAf0fgS65DJLSv8vkGPE7Pw6dcQzGlRs/oOH4yKslv4nZkjVgx16CJnFQvbZ352I34BSW5TpiOUb74a6AV/D1kT8x8+XhnfZ+zB/y41ON1L6kJuw3u907JpeFYpCO557T+FIL3JtzLSHxcgAA="
             />
           </div>
 

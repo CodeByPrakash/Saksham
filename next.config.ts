@@ -13,6 +13,21 @@ const nextConfig: NextConfig = {
     qualities: [80, 85, 90, 95, 100],
   },
 
+  // Cache headers for static assets over Wi-Fi hosting
+  async headers() {
+    return [
+      {
+        source: "/landingPage/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+    ];
+  },
+
   // Allow access from local network IPs for mobile testing
   allowedDevOrigins: [
     "localhost:3000",
@@ -25,3 +40,4 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
+

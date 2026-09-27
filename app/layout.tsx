@@ -32,14 +32,14 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full">
       <head>
-        {/* Preload critical onboarding slide artwork to ensure 0ms instantaneous slide transitions */}
-        <link rel="preload" as="image" href="/landingPage/bg_1_landing.png" />
-        <link rel="preload" as="image" href="/landingPage/person_1_landing.png" />
-        <link rel="preload" as="image" href="/landingPage/bg_2_landing.png" />
-        <link rel="preload" as="image" href="/landingPage/person_2_landing.png" />
-        <link rel="preload" as="image" href="/landingPage/ai_2_landing.png" />
-        <link rel="preload" as="image" href="/landingPage/bg_3_landing.png" />
-        <link rel="preload" as="image" href="/landingPage/person_3_landing.png" />
+        {/* Preload critical onboarding slide artwork in ultra-fast WebP format for 0ms instantaneous Wi-Fi hosting load */}
+        <link rel="preload" as="image" href="/landingPage/bg_1_landing_mob.webp" type="image/webp" fetchPriority="high" />
+        <link rel="preload" as="image" href="/landingPage/person_1_landing_mob.webp" type="image/webp" fetchPriority="high" />
+        <link rel="preload" as="image" href="/landingPage/bg_2_landing_mob.webp" type="image/webp" />
+        <link rel="preload" as="image" href="/landingPage/person_2_landing_mob.webp" type="image/webp" />
+        <link rel="preload" as="image" href="/landingPage/ai_2_landing_mob.webp" type="image/webp" />
+        <link rel="preload" as="image" href="/landingPage/bg_3_landing_mob.webp" type="image/webp" />
+        <link rel="preload" as="image" href="/landingPage/person_3_landing_mob.webp" type="image/webp" />
       </head>
       <body
         className={`${plusJakarta.variable} ${outfit.variable} font-sans antialiased bg-slate-50 text-slate-900 min-h-full flex flex-col selection:bg-purple-500 selection:text-white`}
