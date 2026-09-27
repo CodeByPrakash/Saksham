@@ -61,9 +61,8 @@ export function LoginPage({ onLoginSuccess, onBackToOnboarding, isMobile = false
 
   return (
     <div
-      className={`relative w-full flex flex-col items-center bg-gradient-to-b from-[#FFFDF9] via-[#FAF6EE] to-[#F5EFE1] text-slate-900 select-none ${
-        isMobile ? "min-h-[100dvh] px-4.5 pt-3 pb-8 overflow-y-auto" : "min-h-[calc(100vh-65px)] py-8 px-4 sm:px-8"
-      }`}
+      className={`relative w-full flex flex-col items-center bg-gradient-to-b from-[#FFFDF9] via-[#FAF6EE] to-[#F5EFE1] text-slate-900 select-none ${isMobile ? "min-h-[100dvh] px-4.5 pt-3 pb-8 overflow-y-auto" : "min-h-[calc(100vh-65px)] py-8 px-4 sm:px-8"
+        }`}
     >
       {/* Background Ambient Cloud Puffs */}
       <div className="absolute inset-0 pointer-events-none z-0">
@@ -114,7 +113,7 @@ export function LoginPage({ onLoginSuccess, onBackToOnboarding, isMobile = false
           </div>
 
           <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 font-heading tracking-tight">
-            Welcome to Jeevika<span className="text-purple-600">Setu</span>
+            Welcome to Sak<span className="text-purple-600">sham</span>
           </h2>
           <p className="text-xs sm:text-sm text-slate-600 font-medium max-w-xs">
             Sign in with your mobile number to access your livelihood passport and opportunities.

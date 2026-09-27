@@ -19,7 +19,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             "bg-slate-100 text-slate-900 hover:bg-slate-200": variant === "secondary",
             "hover:bg-slate-100 text-slate-700 hover:text-slate-900": variant === "ghost",
             "text-purple-600 underline-offset-4 hover:underline": variant === "link",
-            "btn-jeevika-gradient font-bold tracking-wide": variant === "gradient",
+            "btn-sakham-gradient font-bold tracking-wide": variant === "gradient",
             "bg-white/80 backdrop-blur-md border border-white/60 text-slate-800 shadow-md hover:bg-white": variant === "glass",
           },
           {

@@ -16,11 +16,10 @@ interface SlideOneProps {
 export function SlideOne({ onNext, onSkip, isNativeMobile = false }: SlideOneProps) {
   return (
     <div
-      className={`relative flex flex-col justify-between w-full mx-auto bg-gradient-to-b from-[#FFFDF9] via-[#FAF6EE] to-[#F5EFE1] overflow-hidden text-slate-900 select-none ${
-        isNativeMobile
-          ? "h-full max-h-[100dvh] px-5 pt-4 pb-0"
-          : "h-full max-w-md rounded-[44px] shadow-2xl border-[8px] border-slate-900/10 px-5 pt-3 pb-0"
-      }`}
+      className={`relative flex flex-col justify-between w-full mx-auto bg-gradient-to-b from-[#FFFDF9] via-[#FAF6EE] to-[#F5EFE1] overflow-hidden text-slate-900 select-none ${isNativeMobile
+        ? "h-full max-h-[100dvh] px-5 pt-4 pb-0"
+        : "h-full max-w-md rounded-[44px] shadow-2xl border-[8px] border-slate-900/10 px-5 pt-3 pb-0"
+        }`}
     >
       {/* Background Ambient Cloud Puffs */}
       <div className="absolute inset-0 pointer-events-none z-0">
@@ -57,7 +56,7 @@ export function SlideOne({ onNext, onSkip, isNativeMobile = false }: SlideOnePro
 
       {/* Brand Logo & Title Area */}
       <div className="flex flex-col items-center text-center pt-1 z-10 shrink-0">
-        {/* Custom JeevikaSetu Logo Emblem */}
+        {/* Custom Saksham Logo Emblem */}
         <div className="flex flex-col items-center mb-1">
           <div className="relative size-11 sm:size-12 mb-0.5 flex items-center justify-center">
             <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-sm">
@@ -75,7 +74,7 @@ export function SlideOne({ onNext, onSkip, isNativeMobile = false }: SlideOnePro
           </div>
           <div className="flex items-center gap-1">
             <span className="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900 font-heading">
-              Jeevika<span className="text-purple-600">Setu</span>
+              Sak<span className="text-purple-600">sham</span>
             </span>
           </div>
           <span className="text-[10px] font-bold text-slate-500 tracking-wider uppercase mt-0.5">
