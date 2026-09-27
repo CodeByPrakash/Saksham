@@ -375,3 +375,155 @@ export const SCHEMES_LIST = [
     status: "Active"
   }
 ];
+
+export interface JobItem {
+  id: string;
+  title: string;
+  company: string;
+  companyLogoType: "shree" | "sakhi" | "ahaar" | "odisha" | "default";
+  type: string;
+  location: string;
+  salary: string;
+  badge: string;
+  badgeColor: "emerald" | "purple" | "blue" | "amber";
+  badgeIcon: "star" | "thumbs_up" | "chart" | "building";
+  image: string;
+  skills: string[];
+  category: "all" | "government" | "private" | "apprenticeship" | "self_employment";
+  description: string;
+  openings: number;
+  experience: string;
+  benefits: string[];
+  contactPhone: string;
+  verifiedNCS: boolean;
+}
+
+export const RECOMMENDED_JOBS: JobItem[] = [
+  {
+    id: "job-1",
+    title: "Electrician Technician",
+    company: "Shree Power Solutions Pvt. Ltd.",
+    companyLogoType: "shree",
+    type: "Full Time",
+    location: "Kalahandi",
+    salary: "₹ 15,000 - 22,000/month",
+    badge: "High Match",
+    badgeColor: "emerald",
+    badgeIcon: "star",
+    image: "/dashboard/electrician.jpg",
+    skills: ["Electrical", "Installation", "Maintenance"],
+    category: "private",
+    description: "Install, test, and maintain residential electrical systems, circuit panels, solar inverters, and domestic distribution boards across Kalahandi district.",
+    openings: 18,
+    experience: "0-2 Years (Freshers with NSQF Certificate Welcome)",
+    benefits: ["PF & ESI Healthcare", "Free Travel Allowance", "Overtime 1.5x Pay", "Safety Kit Provided"],
+    contactPhone: "+91 6670 223401",
+    verifiedNCS: true
+  },
+  {
+    id: "job-2",
+    title: "Tailor / Sewing Machine Operator",
+    company: "Sakhi Garments Unit",
+    companyLogoType: "sakhi",
+    type: "Full Time",
+    location: "Nearby Center",
+    salary: "₹ 12,000 - 18,000/month",
+    badge: "Suitable for You",
+    badgeColor: "purple",
+    badgeIcon: "thumbs_up",
+    image: "/dashboard/tailoring.jpg",
+    skills: ["Stitching", "Garment Making", "Quality Check"],
+    category: "private",
+    description: "Operate modern high-speed industrial stitching machines, assist in pattern cutting, garment assembly, and bulk school uniform production under SHG cluster.",
+    openings: 24,
+    experience: "0-1 Year (Basic Stitching Knowledge)",
+    benefits: ["Piece-rate Production Bonus", "Safe Women Workplace", "Subsidized Canteen", "Hostel Available"],
+    contactPhone: "+91 6670 231190",
+    verifiedNCS: true
+  },
+  {
+    id: "job-3",
+    title: "Food Processing Assistant",
+    company: "Ahaar Food Products Ltd.",
+    companyLogoType: "ahaar",
+    type: "Full Time",
+    location: "District Level",
+    salary: "₹ 14,000 - 20,000/month",
+    badge: "Good Opportunity",
+    badgeColor: "blue",
+    badgeIcon: "chart",
+    image: "/dashboard/food_processing.jpg",
+    skills: ["Food Processing", "Packaging", "Quality"],
+    category: "private",
+    description: "Operate agro-processing packaging units, clean and grade organic grains and pulses, manage batch labeling, and adhere to FSSAI hygienic standards.",
+    openings: 15,
+    experience: "Fresher / 10th Pass",
+    benefits: ["Health Insurance Cover", "FSSAI Training Certificate", "Annual Performance Bonus", "Day Shifts Only"],
+    contactPhone: "+91 6670 245012",
+    verifiedNCS: true
+  },
+  {
+    id: "job-4",
+    title: "Data Entry Operator",
+    company: "Block Development Office",
+    companyLogoType: "odisha",
+    type: "Contract",
+    location: "Kalahandi",
+    salary: "₹ 12,000 - 18,000/month",
+    badge: "Government",
+    badgeColor: "purple",
+    badgeIcon: "building",
+    image: "/dashboard/electrician.jpg",
+    skills: ["Computer Basics", "Data Entry", "Documentation"],
+    category: "government",
+    description: "Assist Block Development Office in updating beneficiary records on PM-AJAY, SIDH, e-Shram, and Odisha Mo Seva digital portal with high accuracy.",
+    openings: 8,
+    experience: "10th / 12th Pass with Computer Knowledge",
+    benefits: ["Government Experience Certificate", "Fixed Working Hours (10 AM - 5 PM)", "Weekly Sunday Off", "Direct Bank Credit"],
+    contactPhone: "+91 6670 220055",
+    verifiedNCS: true
+  },
+  {
+    id: "job-5",
+    title: "Solar Rooftop Technician",
+    company: "GreenGrid Energy Odisha",
+    companyLogoType: "shree",
+    type: "Full Time",
+    location: "Bhawanipatna Hub",
+    salary: "₹ 16,000 - 24,000/month",
+    badge: "High Match",
+    badgeColor: "emerald",
+    badgeIcon: "star",
+    image: "/dashboard/electrician.jpg",
+    skills: ["Solar PV", "Grid Safety", "Wiring"],
+    category: "private",
+    description: "Assemble and install PM Surya Ghar Muft Bijli Yojana rooftop solar panels and inverters across rural houses and commercial buildings.",
+    openings: 20,
+    experience: "Suryamitra or NSQF Level 4",
+    benefits: ["Company Bike Allowance", "Tool Kit Provided", "Incentives per kW installed", "PF + ESI"],
+    contactPhone: "+91 6670 255100",
+    verifiedNCS: true
+  },
+  {
+    id: "job-6",
+    title: "Community Mobilizer & Field Assistant",
+    company: "Mission Shakti SHG Federation",
+    companyLogoType: "odisha",
+    type: "Full Time",
+    location: "Gram Panchayat Level",
+    salary: "₹ 13,000 - 17,500/month",
+    badge: "Government",
+    badgeColor: "purple",
+    badgeIcon: "building",
+    image: "/dashboard/tailoring.jpg",
+    skills: ["Field Survey", "Community Mobilization", "Odia"],
+    category: "government",
+    description: "Coordinate with village women SHGs, facilitate financial literacy camps, and verify scheme applications under PM-AJAY and Mission Shakti.",
+    openings: 12,
+    experience: "Local Village Resident preferred",
+    benefits: ["Monthly Travel Reimbursement", "Smartphone Allowance", "Maternity Benefit", "Govt ID Card"],
+    contactPhone: "+91 6670 220114",
+    verifiedNCS: true
+  }
+];
+
