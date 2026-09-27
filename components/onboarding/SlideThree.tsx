@@ -44,13 +44,15 @@ export function SlideThree({
       {/* Background Village Canvas (bg_3_landing.png) with Foggy Clouds Blend */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
         <Image
-          src="/landingPage/bg_3_landing.png"
+          src={isNativeMobile ? "/landingPage/bg_3_landing_mob.webp" : "/landingPage/bg_3_landing.webp"}
           alt="Village scenic background"
           fill
           sizes="(max-width: 768px) 100vw, 420px"
-          quality={95}
+          quality={90}
           className="object-cover object-center opacity-70"
           priority
+          placeholder="blur"
+          blurDataURL="data:image/webp;base64,UklGRpwAAABXRUJQVlA4IJAAAACQBACdASoLABQAPu1iqU2ppaOiMAgBMB2JbACdMoGvVARQx9UCwTMjHq+fbgAA/pUEITCCuAocKbT2yHaXI0LbllVNJA4fuPY5TDjAg+Z30/YquenNOzrxo8raeDH6Ceebnm9ab9dn5ar67YomPM2BVezgqqo+IMrO9/kcg3vIBU+zbO57PDhsl3XdeIAAAAA="
         />
 
         {/* Top Foggy Mist Cloud Gradient */}
@@ -103,13 +105,15 @@ export function SlideThree({
           <div className="absolute left-[-16px] sm:left-[-10px] bottom-[-6px] sm:bottom-[-2px] w-[52%] sm:w-[48%] h-[98%] sm:h-full z-10 pointer-events-none">
             <div className="relative w-full h-full [mask-image:linear-gradient(to_bottom,black_0%,black_88%,transparent_100%)] [-webkit-mask-image:linear-gradient(to_bottom,black_0%,black_88%,transparent_100%)]">
               <Image
-                src="/landingPage/person_3_landing.png"
+                src={isNativeMobile ? "/landingPage/person_3_landing_mob.webp" : "/landingPage/person_3_landing.webp"}
                 alt="Beneficiary looking at livelihood opportunities"
                 fill
                 sizes="(max-width: 768px) 55vw, 260px"
-                quality={95}
+                quality={90}
                 className="object-contain object-bottom drop-shadow-2xl"
                 priority
+                placeholder="blur"
+                blurDataURL="data:image/webp;base64,UklGRrABAABXRUJQVlA4WAoAAAAQAAAADAAAEwAAQUxQSNAAAAABkGJr27JV9yu4Q7LOPGAODs1J7tFhBJo8uTd3d2iaaM753vf9nu8J3xlEREwAAIn0vIlSSAAQqHljfkoTAlDIYbb/uAIaUGKRPLJBLhSE0A++IxtMQwIarWzJ8iUEIGTMrO/sT6PQABSiH33uhBaAQOQ6O+c1QkDKrHV2RMRjUVJijf8Rke9xMZDtWwobfxToZu8/lnchbpk45PN7YnFAH1+B7xM5Kpvx//48ChkeLGZmS2HHA6q2o+w3FPzwAoB2NkSOD3c3RGTkAdvQafMFVlA4ILoAAACwBACdASoNABQAPu1iqU2ppaOiMAgBMB2JbACdMoMYPYAQVYkMdvXVH1KR9vJwAP7NrjZgbZQAYIfJDC8w6EHc/irGljPhwmYchfGinIpEcwdm4dXzmKAm997hTy3vFN8zuke1WjgiaWHULUM7HZYrBWn7jyTuEShOnlQs7VGhFAat4umKpp8pCkx3G3t7nQBhtE7ZI6RjvG18cFzuu54BtIyNYVcSPzbISp/jLZr0wiWGEhAGvJUAAAA="
               />
             </div>
           </div>

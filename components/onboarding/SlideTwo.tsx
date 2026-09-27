@@ -26,13 +26,15 @@ export function SlideTwo({ onNext, onPrev, onSkip, isNativeMobile = false }: Sli
       {/* Background Village Canvas (bg_2_landing.png) with Foggy Clouds Blend */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
         <Image
-          src="/landingPage/bg_2_landing.png"
+          src={isNativeMobile ? "/landingPage/bg_2_landing_mob.webp" : "/landingPage/bg_2_landing.webp"}
           alt="Village landscape backdrop"
           fill
           sizes="(max-width: 768px) 100vw, 420px"
-          quality={95}
+          quality={90}
           className="object-cover object-center opacity-70"
           priority
+          placeholder="blur"
+          blurDataURL="data:image/webp;base64,UklGRpwAAABXRUJQVlA4IJAAAABwBACdASoNABQAPu1iqU2ppaOiMAgBMB2JbACdMoR4PoM4ABOBVsGgqsh8gAD+AT7ABDA7zf/79ViluKjKReuzWetWk0pG+rtn4XwJ6mpZkcoo3aoBaBbWSMbrkBQ3lE5KKpo8F8mrOfzXtO93GkBckPyUm2dhUjP9c/dyBMlkqOB4dtGr/Hw7XhXNQJGAAAA="
         />
 
         {/* Top Foggy Mist Cloud Gradient */}
@@ -86,13 +88,15 @@ export function SlideTwo({ onNext, onPrev, onSkip, isNativeMobile = false }: Sli
           <div className="absolute left-[-14px] sm:left-[-6px] bottom-[-6px] sm:bottom-[-2px] w-[62%] sm:w-[58%] h-[96%] sm:h-[98%] z-10">
             <div className="relative w-full h-full [mask-image:linear-gradient(to_bottom,black_0%,black_88%,transparent_100%)] [-webkit-mask-image:linear-gradient(to_bottom,black_0%,black_88%,transparent_100%)]">
               <Image
-                src="/landingPage/person_2_landing.png"
+                src={isNativeMobile ? "/landingPage/person_2_landing_mob.webp" : "/landingPage/person_2_landing.webp"}
                 alt="Person holding smartphone"
                 fill
                 sizes="(max-width: 768px) 65vw, 320px"
-                quality={95}
+                quality={90}
                 className="object-contain object-bottom drop-shadow-2xl"
                 priority
+                placeholder="blur"
+                blurDataURL="data:image/webp;base64,UklGRrgBAABXRUJQVlA4WAoAAAAQAAAADAAAEwAAQUxQSM0AAAABgGttmyHpqxqma9sbezMjtfcWbO/m1gVYqcPZ2KEZ2arqrv7X1xAREwCA4b8M9ozavhj+g8Npj4ioGGaAmxdIfIiLCMbB4PKsdI2OAIDBeqY0pYl8bmMwsV6SSqNiAOAM64ZUyiepNZgBrRvCGPZja5TNLXNEunadYXuWWaijd03pdNspqJJtKKmUkrS7+BztdUe6+vniWEcW6ep3unSLvib9F01SDiqk9guR0WRGHwmlNGP6hGLNvOuHoB7fZJgx9kOSA2AmjP82zS0AAFZQOCDEAAAAcAQAnQEqDQAUAD7tYqlNqaWjojAIATAdiWwAnSBMYKYRy2ittP6kfR+81DAA/uRdd2xN4hBsOXMe1+tbBb1pfGjv4AwNxxvbBaCNalCAJRmpBEioqXmr4nolBxSIcRTMURr8rZ5+a4Ledge3WpfwOQp3l4VKm25UFvIyE/V02m7j31vZed23z+Iofn3hiRqgG9h4yXLxfLwfpiX/oJGRpP7Q0O67P/P/5fyCjT1uefWN9/U34LuRA7qcgVwD9LxWhmAAAA=="
               />
             </div>
           </div>
@@ -100,11 +104,11 @@ export function SlideTwo({ onNext, onPrev, onSkip, isNativeMobile = false }: Sli
           {/* 2. Center-Right: Cute AI Robot */}
           <div className="absolute right-[2%] top-[6%] w-[50%] h-[68%] z-20 animate-float">
             <Image
-              src="/landingPage/ai_2_landing.png"
+              src={isNativeMobile ? "/landingPage/ai_2_landing_mob.webp" : "/landingPage/ai_2_landing.webp"}
               alt="AI Voice Assistant Bot"
               fill
               sizes="(max-width: 768px) 50vw, 240px"
-              quality={95}
+              quality={90}
               className="object-contain drop-shadow-2xl"
               priority
             />
