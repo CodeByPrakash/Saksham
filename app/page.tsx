@@ -88,16 +88,18 @@ export default function Home() {
               transition={{ duration: 0.3, ease: "easeOut" }}
               className="w-full min-h-[100dvh] flex flex-col"
             >
-              <AppHeader
-                currentMode={currentMode}
-                onModeChange={setCurrentMode}
-                language={language}
-                onLanguageChange={setLanguage}
-                onLogout={handleLogout}
-                isLoggedIn={true}
-              />
+              {currentMode !== "beneficiary" && (
+                <AppHeader
+                  currentMode={currentMode}
+                  onModeChange={setCurrentMode}
+                  language={language}
+                  onLanguageChange={setLanguage}
+                  onLogout={handleLogout}
+                  isLoggedIn={true}
+                />
+              )}
 
-              <main className="flex-1 pb-16">
+              <main className={`flex-1 ${currentMode !== "beneficiary" ? "pb-16" : ""}`}>
                 {currentMode === "beneficiary" && <BeneficiaryExperience />}
                 {currentMode === "field_worker" && <FieldWorkerCopilot />}
                 {currentMode === "government" && <GovernmentDashboard />}
@@ -111,25 +113,27 @@ export default function Home() {
       {/* 2. DESKTOP / TABLET LAYOUT (>= 768px with full web suite)                */}
       {/* ========================================================================= */}
       <div className="hidden md:flex w-full flex-col min-h-screen">
-        {/* Desktop Header */}
-        <AppHeader
-          currentMode={flowStage === "login" ? "onboarding" : (flowStage === "onboarding" ? "onboarding" : currentMode)}
-          onModeChange={(mode) => {
-            if (mode === "onboarding") {
-              setFlowStage("onboarding");
-            } else {
-              setCurrentMode(mode);
-              setFlowStage("dashboard");
-            }
-          }}
-          language={language}
-          onLanguageChange={setLanguage}
-          onLogout={handleLogout}
-          isLoggedIn={flowStage === "dashboard"}
-        />
+        {/* Desktop Header - shown except on beneficiary dashboard where integrated sidebar/header is used */}
+        {!(flowStage === "dashboard" && currentMode === "beneficiary") && (
+          <AppHeader
+            currentMode={flowStage === "login" ? "onboarding" : (flowStage === "onboarding" ? "onboarding" : currentMode)}
+            onModeChange={(mode) => {
+              if (mode === "onboarding") {
+                setFlowStage("onboarding");
+              } else {
+                setCurrentMode(mode);
+                setFlowStage("dashboard");
+              }
+            }}
+            language={language}
+            onLanguageChange={setLanguage}
+            onLogout={handleLogout}
+            isLoggedIn={flowStage === "dashboard"}
+          />
+        )}
 
         {/* Main Content Area */}
-        <main className={`flex-1 ${flowStage === "dashboard" ? "pb-16" : ""}`}>
+        <main className={`flex-1 ${flowStage === "dashboard" && currentMode !== "beneficiary" ? "pb-16" : ""}`}>
           <AnimatePresence mode="wait" initial={false}>
             {flowStage === "onboarding" && (
               <motion.div
@@ -175,8 +179,8 @@ export default function Home() {
           </AnimatePresence>
         </main>
 
-        {/* Desktop Footer (Only on Onboarding showcase & Dashboard, never on login screen) */}
-        {flowStage !== "login" && (
+        {/* Desktop Footer (Only on Onboarding showcase & other modes, never on login or beneficiary dashboard) */}
+        {flowStage !== "login" && !(flowStage === "dashboard" && currentMode === "beneficiary") && (
           <footer className="w-full bg-white border-t border-slate-200/80 py-8 px-4 text-xs text-slate-500">
             <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
               <div className="flex flex-col gap-1 text-center md:text-left">

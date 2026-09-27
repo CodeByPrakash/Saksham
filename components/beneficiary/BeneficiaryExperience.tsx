@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
+import { WebDashboard } from "@/components/dashboard/WebDashboard";
+import { MobileDashboard } from "@/components/dashboard/MobileDashboard";
 import {
   INITIAL_BENEFICIARIES,
   SAMPLE_PATHWAYS,
@@ -30,15 +32,17 @@ import {
   Sliders,
   Play,
   RotateCcw,
-  Check
+  Check,
+  LayoutDashboard,
+  Layers
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import confetti from "canvas-confetti";
 
 export function BeneficiaryExperience() {
+  const [viewMode, setViewMode] = useState<"dashboard" | "advanced_tools">("dashboard");
   const [selectedBeneficiaryId, setSelectedBeneficiaryId] = useState<string>("BEN-2026-901");
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [selectedPathway, setSelectedPathway] = useState<PathwayOption | null>(
@@ -77,8 +81,41 @@ export function BeneficiaryExperience() {
     }, 4000);
   };
 
+  // Primary Default Experience: Responsive Reference Dashboard
+  if (viewMode === "dashboard") {
+    return (
+      <div className="w-full">
+        {/* Desktop Web Dashboard (Screen size >= 768px) */}
+        <div className="hidden md:block">
+          <WebDashboard />
+        </div>
+
+        {/* Mobile Dashboard (Screen size < 768px) */}
+        <div className="block md:hidden">
+          <MobileDashboard />
+        </div>
+      </div>
+    );
+  }
+
+  // Advanced Tools Experience (3 Pathways, Voice Profiler, Enterprise Builder, Passport)
   return (
     <div className="w-full max-w-7xl mx-auto px-4 py-6 space-y-6">
+      {/* Return to Dashboard Button */}
+      <div className="flex items-center justify-between">
+        <button
+          onClick={() => setViewMode("dashboard")}
+          className="flex items-center gap-1.5 text-xs font-extrabold text-purple-700 bg-white hover:bg-purple-50 px-4 py-2 rounded-2xl border border-purple-200 shadow-2xs transition-all cursor-pointer"
+        >
+          <LayoutDashboard className="size-4" />
+          <span>← Return to Main Dashboard</span>
+        </button>
+
+        <Badge variant="purple" className="text-xs">
+          Advanced Engine Explorer
+        </Badge>
+      </div>
+
       {/* Top Banner & Beneficiary Switcher */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-gradient-to-r from-purple-900 via-indigo-900 to-slate-900 text-white p-6 rounded-3xl shadow-xl border border-purple-800/40">
         <div className="space-y-1.5">
@@ -397,7 +434,7 @@ export function BeneficiaryExperience() {
             )}
           </div>
 
-          {/* Right Column: Beneficiary Persona Snapshot & Digital Twin Widget */}
+          {/* Right Column: Beneficiary Persona Snapshot */}
           <div className="space-y-5">
             <Card className="border-slate-200 bg-white shadow-sm">
               <CardHeader className="pb-3">
@@ -429,7 +466,7 @@ export function BeneficiaryExperience() {
                   </p>
                 </div>
 
-                {/* Extracted Informal Skills */}
+                {/* Discovered Skills */}
                 <div className="space-y-2">
                   <span className="text-xs font-bold text-slate-800">
                     Discovered Skills & Confidence:
@@ -452,22 +489,6 @@ export function BeneficiaryExperience() {
                         </div>
                       </div>
                     ))}
-                  </div>
-                </div>
-
-                {/* Constraint Summary */}
-                <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1.5 text-[11px] text-slate-600">
-                  <div className="flex justify-between">
-                    <span>Mobility Limit:</span>
-                    <span className="font-bold text-slate-900">Within {currentBeneficiary.mobilityConstraintKm} km</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Income Urgency:</span>
-                    <span className="font-bold text-slate-900 capitalize">{currentBeneficiary.timeToIncomeUrgency}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Household Land:</span>
-                    <span className="font-bold text-slate-900">{currentBeneficiary.householdContext.agriculturalLand}</span>
                   </div>
                 </div>
 
@@ -506,7 +527,6 @@ export function BeneficiaryExperience() {
           </CardHeader>
 
           <CardContent className="space-y-6">
-            {/* Interactive Voice Mic Simulation */}
             <div className="flex flex-col items-center justify-center p-8 bg-gradient-to-b from-purple-50/50 to-white rounded-3xl border border-purple-100 text-center space-y-4">
               <div className="relative">
                 {isRecording && (
@@ -532,57 +552,12 @@ export function BeneficiaryExperience() {
                   Try speaking: "मैं धान की खेती करता हूँ और गांव में लोगों के मोटर पंप और इन्वर्टर ठीक करता हूँ"
                 </p>
               </div>
-
-              <div className="flex items-center gap-2">
-                <Badge variant="glass" className="text-xs font-semibold">
-                  🌐 Dialect: Sambalpuri / Sadri Odia
-                </Badge>
-                <Badge variant="glass" className="text-xs font-semibold">
-                  ⚡ Latency: 240ms
-                </Badge>
-              </div>
-            </div>
-
-            {/* Step-by-Step AI Extraction Pipeline Visualizer */}
-            <div className="space-y-3">
-              <h3 className="text-sm font-bold text-slate-900">
-                AI Speech-to-Occupation Pipeline (The Core Moat)
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-3 text-xs">
-                <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 space-y-1">
-                  <span className="font-bold text-purple-700">1. Vernacular Audio</span>
-                  <p className="text-slate-600">
-                    Captures colloquial spoken phrases without requiring formal job titles.
-                  </p>
-                </div>
-
-                <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 space-y-1">
-                  <span className="font-bold text-indigo-700">2. Concept Extraction</span>
-                  <p className="text-slate-600">
-                    Derives latent experience: motor wiring, submersible pump handling, safety norms.
-                  </p>
-                </div>
-
-                <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 space-y-1">
-                  <span className="font-bold text-blue-700">3. NSQF / NOS Code</span>
-                  <p className="text-slate-600">
-                    Maps directly to QP: SGJ/Q0101 (Suryamitra) and ELE/Q5901.
-                  </p>
-                </div>
-
-                <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 space-y-1">
-                  <span className="font-bold text-emerald-700">4. Local Demand Fit</span>
-                  <p className="text-slate-600">
-                    Ranks opportunities within 35 km with PM-AJAY funding eligibility.
-                  </p>
-                </div>
-              </div>
             </div>
           </CardContent>
         </Card>
       )}
 
-      {/* Tab 3: Enterprise Builder (Self-Employment) */}
+      {/* Tab 3: Enterprise Builder */}
       {activeTab === "enterprise" && (
         <Card className="border-emerald-200 bg-white shadow-md">
           <CardHeader>
@@ -621,29 +596,6 @@ export function BeneficiaryExperience() {
                 <span className="font-bold text-blue-900 text-xs">Estimated Break-even:</span>
                 <p className="text-lg font-extrabold text-blue-700">3 Months</p>
                 <span className="text-[11px] text-slate-600">Avg net profit ₹22,000 – ₹35,000/mo</span>
-              </div>
-            </div>
-
-            {/* Target Village Catchment Analysis */}
-            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
-              <h4 className="font-bold text-slate-900 text-sm">
-                Local Market Catchment & Linkage (Sundargarh Block)
-              </h4>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-slate-700">
-                <div className="bg-white p-3 rounded-xl border border-slate-200">
-                  <span className="text-[10px] text-slate-500 font-bold block">450+ Active Agri Pumps</span>
-                  <span className="font-bold text-slate-900">High Recurring Demand</span>
-                </div>
-
-                <div className="bg-white p-3 rounded-xl border border-slate-200">
-                  <span className="text-[10px] text-slate-500 font-bold block">Nearest Rival Workshop</span>
-                  <span className="font-bold text-slate-900">28 km away (Gap Identified)</span>
-                </div>
-
-                <div className="bg-white p-3 rounded-xl border border-slate-200">
-                  <span className="text-[10px] text-slate-500 font-bold block">Market Linkage Tie-up</span>
-                  <span className="font-bold text-slate-900">12 Local FPOs</span>
-                </div>
               </div>
             </div>
           </CardContent>
@@ -687,30 +639,6 @@ export function BeneficiaryExperience() {
                 <Badge variant="purple" className="bg-purple-500/30 text-purple-200 border-purple-400/40 text-xs">
                   Active Digital Twin
                 </Badge>
-              </div>
-
-              {/* Journey Status Steps */}
-              <div className="space-y-2">
-                <span className="text-[11px] font-bold text-purple-200 uppercase tracking-wider">
-                  Livelihood Journey Progress:
-                </span>
-                <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-center text-xs">
-                  <div className="bg-white/10 p-2.5 rounded-xl border border-emerald-400/40 text-emerald-300 font-bold">
-                    ✓ Profiling Done
-                  </div>
-                  <div className="bg-white/10 p-2.5 rounded-xl border border-emerald-400/40 text-emerald-300 font-bold">
-                    ✓ Gap Analyzed
-                  </div>
-                  <div className="bg-purple-600/60 p-2.5 rounded-xl border border-purple-400 text-white font-bold animate-pulse">
-                    ● Training Enrolled
-                  </div>
-                  <div className="bg-white/5 p-2.5 rounded-xl text-slate-400">
-                    ○ Certification
-                  </div>
-                  <div className="bg-white/5 p-2.5 rounded-xl text-slate-400">
-                    ○ Sustainable Income
-                  </div>
-                </div>
               </div>
             </div>
           </CardContent>
