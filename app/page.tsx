@@ -36,11 +36,10 @@ export default function Home() {
   };
 
   return (
-    <div className={`flex flex-col text-slate-900 selection:bg-purple-500 selection:text-white ${
-      flowStage === "onboarding" || flowStage === "login"
-        ? "bg-[#FAF6EE]"
-        : "bg-slate-50 min-h-screen"
-    } ${flowStage === "onboarding" ? "h-screen md:min-h-screen overflow-hidden md:overflow-visible" : "min-h-screen"}`}>
+    <div className={`flex flex-col text-slate-900 selection:bg-purple-500 selection:text-white ${flowStage === "onboarding" || flowStage === "login"
+      ? "bg-[#FAF6EE]"
+      : "bg-slate-50 min-h-screen"
+      } ${flowStage === "onboarding" ? "h-screen md:min-h-screen overflow-hidden md:overflow-visible" : "min-h-screen"}`}>
       {/* ========================================================================= */}
       {/* 1. MOBILE RESPONSIVE LAYOUT (Strict sequence without header/footer clutter)*/}
       {/* ========================================================================= */}
@@ -185,7 +184,7 @@ export default function Home() {
             <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
               <div className="flex flex-col gap-1 text-center md:text-left">
                 <div className="flex items-center justify-center md:justify-start gap-2 font-bold text-slate-800 font-heading">
-                  <span>JeevikaSetu — AI Livelihood Intelligence Platform</span>
+                  <span>Saksham — AI Livelihood Intelligence Platform</span>
                   <Badge variant="purple" className="text-[10px]">
                     PM-AJAY Standard
                   </Badge>

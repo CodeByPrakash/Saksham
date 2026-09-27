@@ -211,7 +211,7 @@ export function AppHeader({
           <div className="flex flex-col">
             <div className="flex items-center gap-1.5">
               <span className="text-base sm:text-lg font-extrabold tracking-tight text-slate-900 font-heading">
-                Jeevika<span className="text-purple-600">Setu</span>
+                Sak<span className="text-purple-600">sham</span>
               </span>
               <span className="hidden sm:inline-flex text-[10px] font-extrabold uppercase px-1.5 py-0.5 rounded-md bg-purple-100 text-purple-700">
                 PM-AJAY
@@ -229,11 +229,10 @@ export function AppHeader({
               <button
                 key={item.id}
                 onClick={() => onModeChange(item.id)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
-                  isActive
-                    ? "bg-white text-purple-700 shadow-xs font-extrabold"
-                    : "text-slate-600 hover:text-slate-900"
-                }`}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${isActive
+                  ? "bg-white text-purple-700 shadow-xs font-extrabold"
+                  : "text-slate-600 hover:text-slate-900"
+                  }`}
               >
                 <Icon className="size-3.5" />
                 <span>{item.label}</span>
@@ -255,9 +254,8 @@ export function AppHeader({
               <Globe className="size-3.5 text-purple-600 shrink-0" />
               <span className="font-extrabold text-slate-900">{currentLangObj.native}</span>
               <ChevronDown
-                className={`size-3.5 text-slate-400 transition-transform duration-200 ${
-                  isLangDropdownOpen ? "rotate-180 text-purple-600" : ""
-                }`}
+                className={`size-3.5 text-slate-400 transition-transform duration-200 ${isLangDropdownOpen ? "rotate-180 text-purple-600" : ""
+                  }`}
               />
             </button>
 
@@ -309,11 +307,10 @@ export function AppHeader({
                         <button
                           key={lang.code}
                           onClick={() => handleSelectLanguage(lang)}
-                          className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer text-left ${
-                            isSelected
-                              ? "bg-purple-50/90 text-purple-700 font-extrabold"
-                              : "text-slate-700 hover:bg-slate-50 hover:text-slate-900"
-                          }`}
+                          className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer text-left ${isSelected
+                            ? "bg-purple-50/90 text-purple-700 font-extrabold"
+                            : "text-slate-700 hover:bg-slate-50 hover:text-slate-900"
+                            }`}
                         >
                           <div className="flex flex-col min-w-0 pr-2">
                             <span className="text-xs font-extrabold text-slate-900 leading-tight">
@@ -399,11 +396,10 @@ export function AppHeader({
                     onModeChange(item.id);
                     setIsMobileMenuOpen(false);
                   }}
-                  className={`flex items-center gap-2 p-2.5 rounded-xl text-xs font-bold transition-all text-left cursor-pointer ${
-                    isActive
-                      ? "bg-purple-600 text-white shadow-sm font-extrabold"
-                      : "bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200"
-                  }`}
+                  className={`flex items-center gap-2 p-2.5 rounded-xl text-xs font-bold transition-all text-left cursor-pointer ${isActive
+                    ? "bg-purple-600 text-white shadow-sm font-extrabold"
+                    : "bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200"
+                    }`}
                 >
                   <Icon className="size-4 shrink-0" />
                   <span>{item.label}</span>

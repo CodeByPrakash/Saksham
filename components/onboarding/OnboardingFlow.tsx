@@ -302,7 +302,7 @@ export function OnboardingFlow({ onFinish, isMobile = false }: OnboardingFlowPro
                     <div className="relative w-[280px] h-[320px] animate-float">
                       <Image
                         src="/landingPage/person_1_landing.webp"
-                        alt="Young beneficiary using JeevikaSetu voice app"
+                        alt="Young beneficiary using Saksham voice app"
                         fill
                         sizes="320px"
                         quality={90}
@@ -363,7 +363,7 @@ export function OnboardingFlow({ onFinish, isMobile = false }: OnboardingFlowPro
           <section className="w-full max-w-7xl px-4 space-y-8">
             <div className="text-center space-y-2 max-w-2xl mx-auto">
               <Badge variant="purple" className="text-xs">
-                How JeevikaSetu Works
+                How Saksham Works
               </Badge>
               <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight font-heading">
                 From Spoken Voice to Sustainable Income
@@ -377,11 +377,10 @@ export function OnboardingFlow({ onFinish, isMobile = false }: OnboardingFlowPro
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div
                 onClick={() => setActiveWebStep(0)}
-                className={`p-5 rounded-3xl border-2 transition-all cursor-pointer flex flex-col justify-between ${
-                  activeWebStep === 0
-                    ? "bg-purple-50/70 border-purple-600 shadow-md scale-[1.02]"
-                    : "bg-white border-slate-200 hover:border-slate-300"
-                }`}
+                className={`p-5 rounded-3xl border-2 transition-all cursor-pointer flex flex-col justify-between ${activeWebStep === 0
+                  ? "bg-purple-50/70 border-purple-600 shadow-md scale-[1.02]"
+                  : "bg-white border-slate-200 hover:border-slate-300"
+                  }`}
               >
                 <div className="space-y-2">
                   <div className="size-10 rounded-2xl bg-purple-100 text-purple-700 flex items-center justify-center font-bold text-sm">
@@ -402,11 +401,10 @@ export function OnboardingFlow({ onFinish, isMobile = false }: OnboardingFlowPro
 
               <div
                 onClick={() => setActiveWebStep(1)}
-                className={`p-5 rounded-3xl border-2 transition-all cursor-pointer flex flex-col justify-between ${
-                  activeWebStep === 1
-                    ? "bg-purple-50/70 border-purple-600 shadow-md scale-[1.02]"
-                    : "bg-white border-slate-200 hover:border-slate-300"
-                }`}
+                className={`p-5 rounded-3xl border-2 transition-all cursor-pointer flex flex-col justify-between ${activeWebStep === 1
+                  ? "bg-purple-50/70 border-purple-600 shadow-md scale-[1.02]"
+                  : "bg-white border-slate-200 hover:border-slate-300"
+                  }`}
               >
                 <div className="space-y-2">
                   <div className="size-10 rounded-2xl bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-sm">
@@ -427,11 +425,10 @@ export function OnboardingFlow({ onFinish, isMobile = false }: OnboardingFlowPro
 
               <div
                 onClick={() => setActiveWebStep(2)}
-                className={`p-5 rounded-3xl border-2 transition-all cursor-pointer flex flex-col justify-between ${
-                  activeWebStep === 2
-                    ? "bg-purple-50/70 border-purple-600 shadow-md scale-[1.02]"
-                    : "bg-white border-slate-200 hover:border-slate-300"
-                }`}
+                className={`p-5 rounded-3xl border-2 transition-all cursor-pointer flex flex-col justify-between ${activeWebStep === 2
+                  ? "bg-purple-50/70 border-purple-600 shadow-md scale-[1.02]"
+                  : "bg-white border-slate-200 hover:border-slate-300"
+                  }`}
               >
                 <div className="space-y-2">
                   <div className="size-10 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-sm">
@@ -466,7 +463,7 @@ export function OnboardingFlow({ onFinish, isMobile = false }: OnboardingFlowPro
                       </span>
                     </h3>
                     <p className="text-sm text-slate-600 leading-relaxed">
-                      Instead of presenting a daunting 20-page form, JeevikaSetu engages the candidate in a friendly spoken dialogue. The AI detects occupation, latent experience, mobility constraints, and income urgency.
+                      Instead of presenting a daunting 20-page form, Saksham engages the candidate in a friendly spoken dialogue. The AI detects occupation, latent experience, mobility constraints, and income urgency.
                     </p>
 
                     <div className="space-y-2 bg-slate-50 p-4 rounded-2xl border border-slate-200 text-xs">
@@ -621,7 +618,7 @@ export function OnboardingFlow({ onFinish, isMobile = false }: OnboardingFlowPro
                       Personalized Livelihood Decision Matrix
                     </h3>
                     <p className="text-sm text-slate-600 leading-relaxed">
-                      Rather than pushing a generic course, JeevikaSetu presents three viable, constraint-verified pathways side-by-side:
+                      Rather than pushing a generic course, Saksham presents three viable, constraint-verified pathways side-by-side:
                     </p>
 
                     <div className="space-y-2.5 text-xs">
@@ -704,11 +701,10 @@ export function OnboardingFlow({ onFinish, isMobile = false }: OnboardingFlowPro
                     )}
                     <button
                       onClick={() => handleSimulateVoice(samplePhrases[0])}
-                      className={`size-16 rounded-full flex items-center justify-center text-white shadow-xl transition-all cursor-pointer ${
-                        isSimulatingVoice
-                          ? "bg-red-500 scale-110"
-                          : "bg-purple-600 hover:bg-purple-500"
-                      }`}
+                      className={`size-16 rounded-full flex items-center justify-center text-white shadow-xl transition-all cursor-pointer ${isSimulatingVoice
+                        ? "bg-red-500 scale-110"
+                        : "bg-purple-600 hover:bg-purple-500"
+                        }`}
                     >
                       <Mic className="size-7" />
                     </button>

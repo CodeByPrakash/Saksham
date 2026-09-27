@@ -336,13 +336,13 @@ The defensible advantage is **not** the LLM call — anyone can call an LLM API.
 
 ## 11. Product Naming
 
-Recommended: **JeevikaSetu — AI Livelihood Intelligence Platform**
+Recommended: **Saksham — AI Livelihood Intelligence Platform**
 
-Other candidate names considered: Jeevika Saathi, Kaushal Saathi AI, KaushalSetu, Rozgar Saathi, JeevikaMitra, KaushalPath, Jeevika Navigator.
+Other candidate names considered: Saksham Saathi, Kaushal Saathi AI, KaushalSetu, Rozgar Saathi, SakshamMitra, KaushalPath, Saksham Navigator.
 
-**Proposed product architecture under the JeevikaSetu brand:**
+**Proposed product architecture under the Saksham brand:**
 ```
-JEEVIKA SETU
+SAKSHAM
 ├── 01. AI Voice Assistant (IVR / WhatsApp Voice / App / Assisted Mode)
 ├── 02. Beneficiary Intelligence (Profile, Skill Extraction, Assessment, Constraints, Twin)
 ├── 03. Skill Intelligence (Ontology, NSQF, QP/NOS, NCO, Gap Engine)

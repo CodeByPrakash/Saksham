@@ -270,7 +270,7 @@ This lets the demo show: install one Expo/EAS build → beneficiary voice interv
 ## 18. Suggested Repo Structure
 
 ```
-jeevikasetu-app/                  # Expo project (React Native + TypeScript)
+saksham-app/                  # Expo project (React Native + TypeScript)
 ├── app/                          # Expo Router file-based routes
 │   ├── (auth)/                   # OTP login
 │   ├── (beneficiary)/            # Voice interview, twin, journey, pathways
