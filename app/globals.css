@@ -1,0 +1,215 @@
+@import "tailwindcss";
+
+:root {
+  --background: 240 20% 98%;
+  --foreground: 224 71.4% 4.1%;
+  --card: 0 0% 100%;
+  --card-foreground: 224 71.4% 4.1%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 224 71.4% 4.1%;
+  --primary: 262 83% 58%;
+  --primary-foreground: 210 20% 98%;
+  --secondary: 220 14.3% 95.9%;
+  --secondary-foreground: 220.9 39.3% 11%;
+  --muted: 220 14.3% 95.9%;
+  --muted-foreground: 220 8.9% 46.1%;
+  --accent: 262 83% 96%;
+  --accent-foreground: 262 83% 58%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 210 20% 98%;
+  --border: 220 13% 91%;
+  --input: 220 13% 91%;
+  --ring: 262 83% 58%;
+  --radius: 1rem;
+
+  /* Custom Brand Tokens */
+  --brand-purple: #6B34EB;
+  --brand-purple-dark: #5824C8;
+  --brand-purple-light: #7E45FC;
+  --brand-blue: #3B82F6;
+  --brand-sun: #F59E0B;
+  --brand-teal: #10B981;
+}
+
+.dark {
+  --background: 224 71.4% 4.1%;
+  --foreground: 210 20% 98%;
+  --card: 224 71.4% 6.9%;
+  --card-foreground: 210 20% 98%;
+  --popover: 224 71.4% 6.9%;
+  --popover-foreground: 210 20% 98%;
+  --primary: 263.4 70% 60.4%;
+  --primary-foreground: 210 20% 98%;
+  --secondary: 215 27.9% 16.9%;
+  --secondary-foreground: 210 20% 98%;
+  --muted: 215 27.9% 16.9%;
+  --muted-foreground: 217.9 10.6% 64.9%;
+  --accent: 215 27.9% 16.9%;
+  --accent-foreground: 210 20% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 210 20% 98%;
+  --border: 215 27.9% 16.9%;
+  --input: 215 27.9% 16.9%;
+  --ring: 263.4 70% 60.4%;
+}
+
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+  }
+  html, body {
+    overscroll-behavior-y: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+/* Custom Utilities & Keyframe Animations */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes wave {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.2); opacity: 0.6; }
+  100% { transform: scale(1.4); opacity: 0; }
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+.animate-float-delayed {
+  animation: float 4s ease-in-out 2s infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 3s ease-in-out infinite;
+}
+
+.animate-wave {
+  animation: wave 2s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(140, 140, 160, 0.3);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(140, 140, 160, 0.5);
+}
+
+/* Glassmorphic Cards */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.06), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
+}
+
+.glass-panel-dark {
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.4);
+}
+
+/* Purple Gradient CTA */
+.btn-jeevika-gradient {
+  background: linear-gradient(135deg, #6B34EB 0%, #5824C8 100%);
+  color: #ffffff;
+  box-shadow: 0 8px 20px -4px rgba(107, 52, 235, 0.45);
+  transition: all 0.2s ease-in-out;
+}
+
+.btn-jeevika-gradient:hover {
+  background: linear-gradient(135deg, #7840F4 0%, #632BD4 100%);
+  box-shadow: 0 12px 24px -4px rgba(107, 52, 235, 0.6);
+  transform: translateY(-1px);
+}
+
+.btn-jeevika-gradient:active {
+  transform: translateY(1px);
+  box-shadow: 0 4px 12px -2px rgba(107, 52, 235, 0.4);
+}
+
+/* ========================================================================= */
+/* Google Translate Widget Override - Seamlessly native without top banners  */
+/* ========================================================================= */
+.goog-te-banner-frame.skiptranslate,
+.goog-te-banner-frame,
+iframe.goog-te-banner-frame {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+}
+
+body {
+  top: 0px !important;
+  position: static !important;
+}
+
+.skiptranslate {
+  display: none !important;
+}
+
+#google_translate_element {
+  display: none !important;
+}
+
+#goog-gt-tt,
+.goog-te-balloon-frame {
+  display: none !important;
+}
+
+.goog-text-highlight {
+  background: none !important;
+  box-shadow: none !important;
+}
+
+/* Custom sleek scrollbar for Language Dropdown */
+.lang-scrollbar::-webkit-scrollbar {
+  width: 5px;
+}
+.lang-scrollbar::-webkit-scrollbar-track {
+  background: rgba(240, 240, 245, 0.6);
+  border-radius: 9999px;
+}
+.lang-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(107, 52, 235, 0.35);
+  border-radius: 9999px;
+}
+.lang-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(107, 52, 235, 0.6);
+}
+
