@@ -15,7 +15,7 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "Saksham — AI Livelihood Intelligence Platform",
+  title: "Saksham-AI — AI Livelihood Intelligence Platform",
   description: "AI-powered livelihood decision and execution platform under PM-AJAY. From what a beneficiary can say, to what they can learn, to where they can earn.",
   icons: {
     icon: "/favicon.ico",
@@ -30,7 +30,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full">
+    <html lang="en" className="h-full notranslate" translate="no">
       <head>
         {/* Preload critical onboarding slide artwork in ultra-fast WebP format for 0ms instantaneous Wi-Fi hosting load */}
         <link rel="preload" as="image" href="/landingPage/bg_1_landing_mob.webp" type="image/webp" fetchPriority="high" />
@@ -42,7 +42,8 @@ export default function RootLayout({
         <link rel="preload" as="image" href="/landingPage/person_3_landing_mob.webp" type="image/webp" />
       </head>
       <body
-        className={`${plusJakarta.variable} ${outfit.variable} font-sans antialiased bg-slate-50 text-slate-900 min-h-full flex flex-col selection:bg-purple-500 selection:text-white`}
+        className={`${plusJakarta.variable} ${outfit.variable} notranslate font-sans antialiased bg-slate-50 text-slate-900 min-h-full flex flex-col selection:bg-purple-500 selection:text-white`}
+        translate="no"
       >
         <GoogleTranslateScript />
         {children}

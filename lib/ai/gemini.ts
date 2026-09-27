@@ -1,8 +1,4 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
-
 const apiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY || "";
-
-export const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null;
 
 export interface LivelihoodAdviceRequest {
   userQuery: string;
@@ -14,46 +10,60 @@ export interface LivelihoodAdviceRequest {
 
 // Ordered by current availability and lowest latency on Google API
 const CANDIDATE_MODELS = [
-  "gemini-3.1-flash-lite",
-  "gemini-3.6-flash",
+  "gemini-2.5-flash",
+  "gemini-1.5-flash",
+  "gemini-2.0-flash",
   "gemini-flash-lite-latest",
-  "gemini-3.5-flash",
-  "gemini-3.7-flash",
-  "gemini-3.8-flash"
+  "gemini-1.5-flash-8b"
 ];
 
 /**
- * Transcribe spoken vernacular audio using Google Gemini Multimodal Audio
+ * Transcribe spoken vernacular audio using Google Gemini Multimodal Audio REST API
  */
 export async function transcribeSpokenAudioWithGemini(
   audioBase64: string,
   mimeType: string = "audio/webm"
 ): Promise<string | null> {
-  if (!genAI || !audioBase64) return null;
+  if (!apiKey || !audioBase64) return null;
 
   for (const modelName of CANDIDATE_MODELS) {
     try {
-      const model = genAI.getGenerativeModel({ model: modelName });
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
       const prompt = `You are an Indic speech-to-text transcriber for rural India (PM-AJAY beneficiaries).
 Listen to the audio and transcribe exactly what the speaker says in their original language (Hindi, Odia, Santhali, Bengali, Telugu, Tamil, or English).
 Output ONLY the clean transcribed sentence, nothing else.`;
 
-      const result = await model.generateContent([
-        prompt,
-        {
-          inlineData: {
-            mimeType: mimeType.split(";")[0] || "audio/webm",
-            data: audioBase64
-          }
-        }
-      ]);
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [
+                { text: prompt },
+                {
+                  inlineData: {
+                    mimeType: mimeType.split(";")[0] || "audio/webm",
+                    data: audioBase64
+                  }
+                }
+              ]
+            }
+          ]
+        })
+      });
 
-      const text = result.response.text();
+      if (!response.ok) {
+        continue;
+      }
+
+      const data = await response.json();
+      const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
       if (text && text.trim().length > 0) {
         return text.trim();
       }
     } catch (err: any) {
-      console.warn(`Gemini audio transcription with ${modelName} failed (${err?.message || err}), trying next model...`);
+      console.warn(`Gemini audio transcription with ${modelName} failed, trying next model...`);
     }
   }
 
@@ -61,7 +71,7 @@ Output ONLY the clean transcribed sentence, nothing else.`;
 }
 
 /**
- * Generate personalized NSQF livelihood and training advice using Google Gemini AI
+ * Generate personalized NSQF livelihood and training advice using Google Gemini AI REST API
  */
 export async function generateGeminiLivelihoodAdvice({
   userQuery,
@@ -70,12 +80,12 @@ export async function generateGeminiLivelihoodAdvice({
   education = "10th Pass",
   language = "hi"
 }: LivelihoodAdviceRequest): Promise<string> {
-  if (!genAI) {
+  if (!apiKey) {
     return `नमस्ते ${beneficiaryName} जी! ${district} में आपके कौशल और ${education} योग्यता के अनुसार 'सिलाई एवं परिधान' और 'इलेक्ट्रीशियन NSQF Level 4' कोर्स सबसे उपयुक्त हैं। इनमें PM-AJAY के तहत ₹3,500 प्रति माह स्टाइपेंड भी मिलेगा।`;
   }
 
   const prompt = `
-You are the AI Livelihood Copilot for "Saksham (JeevikaSetu)", a Government of India PM-AJAY and NSQF-aligned livelihood intelligence platform.
+You are the AI Livelihood Copilot for "Saksham-AI (Saksham-AI)", a Government of India PM-AJAY and NSQF-aligned livelihood intelligence platform.
 Beneficiary Profile:
 - Name: ${beneficiaryName}
 - Location: ${district}
@@ -87,110 +97,259 @@ User Question: "${userQuery}"
 Provide a warm, empathetic, simple, low-literacy friendly response in 2 short sentences. Mention relevant NSQF courses (Electrician, Tailoring, Food Processing, Solar), PM-AJAY ₹3,500/month stipend, and nearest training center assistance in the chosen language without markdown or asterisks.
 `;
 
-  // Try candidate model names in order with automatic fallback on 503/429/404
+  // Try candidate model names in order with automatic fallback
   for (const modelName of CANDIDATE_MODELS) {
     try {
-      const model = genAI.getGenerativeModel({ model: modelName });
-      const result = await model.generateContent(prompt);
-      const response = await result.response;
-      const text = response.text();
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [{ text: prompt }]
+            }
+          ]
+        })
+      });
+
+      if (!response.ok) {
+        continue;
+      }
+
+      const data = await response.json();
+      const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
       if (text && text.trim().length > 0) {
         return text.trim();
       }
     } catch (err: any) {
-      console.warn(`Gemini model ${modelName} attempt failed (${err?.message || err}), trying next candidate...`);
+      console.warn(`Gemini generation with ${modelName} failed, trying next candidate...`);
     }
   }
 
-  // Graceful fallback response if API is temporarily unreachable
-  return `नमस्ते ${beneficiaryName} जी! ${district} में आपके लिए सिलाई और इलेक्ट्रीशियन के नि:शुल्क ट्रेनिंग कोर्स और पीएम-अजय स्टाइपेंड उपलब्ध हैं।`;
+  // Graceful rule-based fallback
+  const fallbacks: Record<string, string> = {
+    hi: `नमस्ते ${beneficiaryName} जी! आपके लिए PM-AJAY के अंतर्गत NSQF Level 4 सोलर एवं मोटर रिपेयर कोर्स उपलब्ध है। इसमें ₹3,500 मासिक स्टाइपेंड और ₹35,000 की टूलकिट सहायता मिलेगी।`,
+    or: `ନମସ୍କାର ${beneficiaryName} ଜ୍ଞା! ଆପଣଙ୍କ ପାଇଁ PM-AJAY ଅନ୍ତର୍ଗତ NSQF ଲେଭଲ ୪ ସିଲେଇ ଓ ମୋଟର ରିପେୟାର କୋର୍ସ ଉପଲବ୍ଧ। ଏଥିରେ ମାସିକ ₹୩,୫୦୦ ଷ୍ଟାଇପେଣ୍ଡ ମିଳିବ।`,
+    sat: `ᱡᱚᱦᱟᱨ ${beneficiaryName}! ᱟᱢ ᱞᱟᱹᱜᱤᱫ PM-AJAY ᱨᱮ NSQF Level 4 ᱴᱨᱮᱱᱤᱝ ᱢᱮᱱᱟᱜ-ᱟ ᱟᱨ ₹3,500 ᱥᱴᱟᱭᱯᱮᱱᱰ ᱧᱟᱢᱚᱜ-ᱟ।`,
+    en: `Hello ${beneficiaryName}! Under PM-AJAY, NSQF Level 4 Solar and Motor Repair courses are available for you with a ₹3,500 monthly stipend and tool kit support.`
+  };
+
+  return fallbacks[language] || fallbacks.hi;
 }
 
 /**
- * Extract formal NSQF skill capabilities from informal vernacular speech
+ * Detect Indian vernacular language from user utterance using Gemini AI
  */
-export async function extractSkillsWithGemini(spokenStatement: string) {
-  if (!genAI) {
-    return [
-      { name: "Domestic Wiring & Repair", nsqfLevel: 4, qpCode: "ELE/Q5901", confidence: 92 },
-      { name: "Garment Construction", nsqfLevel: 3, qpCode: "AMH/Q0102", confidence: 88 }
-    ];
-  }
+export async function detectSpokenLanguageWithGemini(
+  userUtterance: string
+): Promise<{ languageCode: string; languageName: string } | null> {
+  if (!apiKey || !userUtterance.trim()) return null;
+
+  const prompt = `
+You are an expert Indic language & accent classifier for rural India (PM-AJAY beneficiaries).
+The user spoke: "${userUtterance}"
+
+TASK:
+Determine the exact Indian language the user is speaking in or intends to use.
+
+CRITICAL ACCENT & REGIONAL RULES:
+1. Odia (code "or"):
+   - Words & phonetic variants (English / Devanagari / Odia script):
+     "mote", "mu", "mun", "aame", "ame", "tame", "apana", "apananku", "nahanti", "asuchi", "heuchi", "dorkar", "darkar", "sikhiba", "sikhibaku", "sikhibara", "silai", "kam", "kaam", "katha", "jani", "bapa", "ghare", "bhalo", "namaskar", "odia", "oriya", "odisha", "pani", "kahuchi", "deba", "neba", "silai sikhba", "kam darkar", "mote kam", "मोते काम दरकार", "सिलाइ सिखिब", "आमे ओडिया", "कहूचि", "दरकार", "सिखिबा", "ओड़िआ", "ସିଲେଇ", "ଦରକାର", "ଶିଖିବା", "ଆମେ", "ମୋତେ"
+   - Odia script Unicode: \\u0B00-\\u0B7F
+   - MUST be classified as "or" (Odia)!
+
+2. Santhali (code "sat"):
+   - Words: "johar", "kami", "nyam", "santhal", "abon", "ing", "am", "ol chiki", "chando", "ᱥᱟᱱᱛᱟᱲᱤ", "ᱡᱚᱦᱟᱨ"
+   - Ol Chiki script Unicode: \\u1C50-\\u1C7F
+   - MUST be classified as "sat" (Santhali)!
+
+3. Bhojpuri (code "bho"):
+   - Words: "ba", "baate", "dikat ba", "kare ke", "hamra", "tohar", "kaisan", "bujhat", "raua", "हमार", "तोहार", "बाटे"
+   - MUST be classified as "bho" (Bhojpuri)!
+
+4. Marathi (code "mr"):
+   - Words: "shikaycha", "karaycha", "aahe", "havay", "aamhi", "tumhi", "kasa", "ahes", "शिकायचं", "करायचं", "आहे"
+   - MUST be classified as "mr" (Marathi)!
+
+5. Bengali (code "bn"):
+   - Words: "ami", "kaj", "korte chai", "shikhte", "amake", "bhalo", "আমি", "কাজ"
+   - MUST be classified as "bn" (Bengali)!
+
+6. English (code "en"):
+   - Words: "i want", "i need", "job", "training", "computer", "skills", "learn", "course", "english"
+   - MUST be classified as "en" (English)!
+
+7. Hindi (code "hi"):
+   - Words: "मुझे", "सीखना है", "काम चाहिए", "बताइए", "रोजगार", "योजना", "हिन्दी"
+   - CRITICAL: Do NOT classify as Hindi if the utterance contains Odia, Santhali, Bhojpuri, or Marathi words!
+
+Allowed language codes:
+"hi", "or", "sat", "en", "bho", "bn", "te", "mr", "ta", "gu", "kn", "pa", "ur", "as"
+
+Output STRICT JSON only:
+{"languageCode": "hi"|"or"|"sat"|"en"|"bho"|"bn"|"te"|"mr"|"ta"|"gu"|"kn"|"pa"|"ur"|"as", "languageName": "string"}
+`;
 
   for (const modelName of CANDIDATE_MODELS) {
     try {
-      const model = genAI.getGenerativeModel({
-        model: modelName,
-        generationConfig: { responseMimeType: "application/json" }
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { responseMimeType: "application/json" }
+        })
       });
 
-      const prompt = `
-Analyze this beneficiary's informal spoken statement and extract verified NSQF skill items with Qualification Pack (QP) code, NSQF Level (1-5), and confidence score (0-100).
-Spoken statement: "${spokenStatement}"
-
-Return JSON array of objects with keys: name, nsqfLevel, qpCode, confidence.
-`;
-
-      const result = await model.generateContent(prompt);
-      const responseText = result.response.text();
-      return JSON.parse(responseText);
-    } catch (err) {
-      console.warn(`Gemini skill extraction with ${modelName} failed, trying next...`);
-    }
+      if (!response.ok) continue;
+      const data = await response.json();
+      const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed?.languageCode) {
+          return parsed;
+        }
+      }
+    } catch { }
   }
 
-  return [
-    { name: "Basic Electrical Wiring", nsqfLevel: 4, qpCode: "ELE/Q5901", confidence: 90 }
-  ];
+  return null;
 }
 
 /**
- * Generate natural Indic spoken audio (MP3 Base64) for speech playback
+ * Detect language directly from raw human audio voice & accent using Google Gemini Multimodal Audio
+ */
+export async function detectLanguageFromSpokenAudioWithGemini(
+  audioBase64: string,
+  mimeType: string = "audio/webm"
+): Promise<{ languageCode: string; languageName: string; transcript: string } | null> {
+  if (!apiKey || !audioBase64) return null;
+
+  const prompt = `You are an expert Indic language & accent classifier for rural India (PM-AJAY beneficiaries in Kalahandi/Mayurbhanj Odisha, Bihar, Jharkhand, etc.).
+Listen to the human voice audio recording.
+Determine the exact language the user is speaking in, recognizing their accent, pronunciation, and vocabulary.
+
+RULES:
+- If the user speaks in Odia (ଓଡ଼ିଆ) or with an Odia accent/words ("ମୋତେ", "କାମ", "ଦରକାର", "ଶିଖିବା", "ଆମେ", "କୁହନ୍ତୁ", "ନାହାନ୍ତି", "ଆସୁଛି", "ନମସ୍କାର", "ସିଲେଇ", "mote", "darkar", "kam", "sikhiba"), classify as "or" (Odia).
+- If the user speaks Santhali (ᱥᱟᱱᱛᱟᱲᱤ) or uses Santhali words ("ᱡᱚᱦᱟᱨ", "କାᱹᱢᱤ", "ᱥᱟᱱᱛᱟᱲᱤ", "johar"), classify as "sat" (Santhali).
+- If the user speaks Bhojpuri ("बा", "बाटे", "हमार", "तोहार", "करे के", "रउआ"), classify as "bho" (Bhojpuri).
+- If the user speaks Marathi ("शिकायचं", "करायचं", "आहे", "हवंय", "आम्ही"), classify as "mr" (Marathi).
+- If the user speaks Bengali ("আমি", "কাজ", "করতে চাই", "শিখতে"), classify as "bn" (Bengali).
+- If the user speaks English ("I want", "need training", "skills", "job"), classify as "en" (English).
+- If the user speaks Hindi ("मुझे", "काम चाहिए", "सीखना है"), classify as "hi" (Hindi).
+- Also support "te" (Telugu), "ta" (Tamil), "gu" (Gujarati), "kn" (Kannada), "pa" (Punjabi), "ur" (Urdu), "as" (Assamese).
+
+Output STRICT JSON only:
+{"languageCode": "hi"|"or"|"sat"|"en"|"bho"|"bn"|"te"|"mr"|"ta"|"gu"|"kn"|"pa"|"ur"|"as", "languageName": "string", "transcript": "string"}
+`;
+
+  for (const modelName of CANDIDATE_MODELS) {
+    try {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [
+                { text: prompt },
+                {
+                  inlineData: {
+                    mimeType: mimeType.split(";")[0] || "audio/webm",
+                    data: audioBase64
+                  }
+                }
+              ]
+            }
+          ],
+          generationConfig: { responseMimeType: "application/json" }
+        })
+      });
+
+      if (!response.ok) continue;
+      const data = await response.json();
+      const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed?.languageCode) {
+          return parsed;
+        }
+      }
+    } catch (e) { }
+  }
+
+  return null;
+}
+
+/**
+ * Generate high-quality audio Base64 for spoken vernacular responses using Google/Gemini TTS
  */
 export async function generateGoogleSpeechBase64(
   text: string,
-  language: "hi" | "or" | "sat" | "en" = "hi"
+  lang: string = "hi"
 ): Promise<string | null> {
   try {
     const langMap: Record<string, string> = {
       hi: "hi",
-      or: "hi",
-      sat: "hi",
-      en: "en"
+      "hi-in": "hi",
+      or: "hi", // Odia phonetic synthesis
+      "or-in": "hi",
+      sat: "hi", // Santhali phonetic synthesis
+      "sat-in": "hi",
+      bho: "hi", // Bhojpuri
+      "bho-in": "hi",
+      en: "en",
+      "en-in": "en",
+      "en-us": "en",
+      bn: "bn", // Bengali
+      "bn-in": "bn",
+      te: "te", // Telugu
+      "te-in": "te",
+      mr: "mr", // Marathi
+      "mr-in": "mr",
+      ta: "ta", // Tamil
+      "ta-in": "ta",
+      gu: "gu", // Gujarati
+      "gu-in": "gu",
+      kn: "kn", // Kannada
+      "kn-in": "kn",
+      pa: "pa", // Punjabi
+      "pa-in": "pa",
+      ur: "ur", // Urdu
+      "ur-in": "ur",
+      as: "bn",  // Assamese via Bengali engine
+      "as-in": "bn"
     };
-    const target = langMap[language] || "hi";
 
-    // Clean text of markdown, asterisks, brackets, or emojis
-    const clean = text
-      .replace(/[#*`_~[\]()<>]/g, "")
-      .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}]/gu, "")
+    // Clean markdown, symbols, asterisks, emojis
+    const cleanText = text
+      .replace(/[*_#`~[\]]/g, "")
+      .replace(/[\u{1F600}-\u{1F6FF}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, "")
       .trim();
 
-    const sentences = clean.match(/[^.!?।\n]+[.!?।\n]?/g) || [clean];
-    const buffers: Buffer[] = [];
+    const normalizedLang = (lang || "hi").toLowerCase().trim();
+    const primaryCode = normalizedLang.split("-")[0].split("_")[0];
+    const targetLang = langMap[normalizedLang] || langMap[primaryCode] || "hi";
 
-    for (const chunk of sentences.slice(0, 3)) {
-      const trimmed = chunk.trim();
-      if (!trimmed) continue;
-      const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${target}&client=tw-ob&q=${encodeURIComponent(
-        trimmed.slice(0, 180)
-      )}`;
+    const clean = encodeURIComponent(cleanText.slice(0, 200));
+    const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${targetLang}&client=tw-ob&q=${clean}`;
 
-      const res = await fetch(url, {
-        headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)" }
-      });
-
-      if (res.ok) {
-        const ab = await res.arrayBuffer();
-        buffers.push(Buffer.from(ab));
+    const res = await fetch(ttsUrl, {
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
       }
-    }
+    });
 
-    if (buffers.length === 0) return null;
-    return Buffer.concat(buffers).toString("base64");
+    if (!res.ok) return null;
+    const arrayBuffer = await res.arrayBuffer();
+    return Buffer.from(arrayBuffer).toString("base64");
   } catch (err) {
-    console.error("Google Speech synthesis error:", err);
+    console.warn("Google TTS generation error:", err);
     return null;
   }
 }
-

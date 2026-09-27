@@ -68,7 +68,7 @@ export function MobileJobDetailPage({
 
   return (
     <div className="space-y-4 pb-12 select-none animate-in fade-in duration-300">
-      
+
       {/* 1. TOP STICKY APP BAR WITH BACK NAVIGATION */}
       <div className="flex items-center justify-between bg-white/95 backdrop-blur-md px-1 py-1 rounded-2xl border border-[#EDE7D9] shadow-2xs">
         <button
@@ -82,9 +82,8 @@ export function MobileJobDetailPage({
         <div className="flex items-center gap-1">
           <button
             onClick={() => setIsSaved(!isSaved)}
-            className={`p-2 rounded-xl transition-colors cursor-pointer ${
-              isSaved ? "bg-purple-100 text-purple-700" : "text-slate-500 hover:bg-slate-100"
-            }`}
+            className={`p-2 rounded-xl transition-colors cursor-pointer ${isSaved ? "bg-purple-100 text-purple-700" : "text-slate-500 hover:bg-slate-100"
+              }`}
             aria-label="Save Job"
           >
             <Bookmark className={`size-4 ${isSaved ? "fill-purple-600 text-purple-600" : ""}`} />
@@ -95,9 +94,9 @@ export function MobileJobDetailPage({
               if (navigator.share) {
                 navigator.share({
                   title: job.title,
-                  text: `Apply for ${job.title} at ${job.company} via Saksham JeevikaSetu!`,
+                  text: `Apply for ${job.title} at ${job.company} via Saksham-AI Saksham-AI!`,
                   url: window.location.href
-                }).catch(() => {});
+                }).catch(() => { });
               }
             }}
             className="p-2 rounded-xl text-slate-500 hover:bg-slate-100 transition-colors cursor-pointer"
@@ -125,13 +124,12 @@ export function MobileJobDetailPage({
           {/* Badges Top Left & Right */}
           <div className="absolute top-3.5 left-3.5 flex items-center gap-2">
             <span
-              className={`px-3 py-1 text-white text-[11px] font-extrabold rounded-full shadow-md ${
-                job.badgeColor === "emerald"
-                  ? "bg-emerald-600"
-                  : job.badgeColor === "purple"
+              className={`px-3 py-1 text-white text-[11px] font-extrabold rounded-full shadow-md ${job.badgeColor === "emerald"
+                ? "bg-emerald-600"
+                : job.badgeColor === "purple"
                   ? "bg-purple-600"
                   : "bg-blue-600"
-              }`}
+                }`}
             >
               {job.badge}
             </span>
@@ -159,9 +157,8 @@ export function MobileJobDetailPage({
           <div className="flex items-center gap-2.5">
             <button
               onClick={toggleAudio}
-              className={`size-8 rounded-full flex items-center justify-center transition-transform cursor-pointer ${
-                isPlayingAudio ? "bg-purple-600 text-white animate-pulse" : "bg-purple-200 text-purple-800"
-              }`}
+              className={`size-8 rounded-full flex items-center justify-center transition-transform cursor-pointer ${isPlayingAudio ? "bg-purple-600 text-white animate-pulse" : "bg-purple-200 text-purple-800"
+                }`}
             >
               {isPlayingAudio ? <VolumeX className="size-4" /> : <Volume2 className="size-4" />}
             </button>
@@ -230,11 +227,10 @@ export function MobileJobDetailPage({
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id as any)}
-            className={`px-3.5 py-2 rounded-2xl text-xs font-bold transition-all shrink-0 cursor-pointer ${
-              activeTab === tab.id
-                ? "bg-purple-600 text-white shadow-xs font-extrabold"
-                : "bg-white text-slate-600 border border-[#EDE7D9] hover:bg-slate-50"
-            }`}
+            className={`px-3.5 py-2 rounded-2xl text-xs font-bold transition-all shrink-0 cursor-pointer ${activeTab === tab.id
+              ? "bg-purple-600 text-white shadow-xs font-extrabold"
+              : "bg-white text-slate-600 border border-[#EDE7D9] hover:bg-slate-50"
+              }`}
           >
             {tab.label}
           </button>
@@ -289,7 +285,7 @@ export function MobileJobDetailPage({
               Direct Benefit Transfer & Post-Placement Support
             </h4>
             <p className="text-[11px] text-purple-200 leading-relaxed font-medium">
-              Beneficiaries placed through Saksham receive ₹1,500/month post-placement allowance for the first 3 months directly under the PM-AJAY scheme.
+              Beneficiaries placed through Saksham-AI receive ₹1,500/month post-placement allowance for the first 3 months directly under the PM-AJAY scheme.
             </p>
           </div>
         </div>

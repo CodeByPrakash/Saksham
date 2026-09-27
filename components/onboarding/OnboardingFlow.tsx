@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { SlideOne } from "./SlideOne";
 import { SlideTwo } from "./SlideTwo";
 import { SlideThree } from "./SlideThree";
+import { LanguageSelectScreen } from "./LanguageSelectScreen";
 import {
   Mic,
   Sparkles,
@@ -23,6 +24,8 @@ import { Badge } from "@/components/ui/badge";
 interface OnboardingFlowProps {
   onFinish: (targetMode?: "beneficiary" | "field_worker" | "government") => void;
   isMobile?: boolean;
+  initialLanguage?: string;
+  onLanguageChange?: (langCode: string) => void;
 }
 
 const slideVariants = {
@@ -40,11 +43,31 @@ const slideVariants = {
   }),
 };
 
-export function OnboardingFlow({ onFinish, isMobile = false }: OnboardingFlowProps) {
+export function OnboardingFlow({
+  onFinish,
+  isMobile = false,
+  initialLanguage = "hi",
+  onLanguageChange
+}: OnboardingFlowProps) {
   const [activeWebStep, setActiveWebStep] = useState<number>(0);
-  const [mobileSlide, setMobileSlide] = useState<number>(0);
+  const [mobileSlide, setMobileSlide] = useState<number>(-1);
   const [direction, setDirection] = useState<number>(1);
   const [isSimulatingVoice, setIsSimulatingVoice] = useState<boolean>(false);
+  const [currentLanguage, setCurrentLanguage] = useState<string>(
+    (initialLanguage || "hi").toLowerCase()
+  );
+
+  useEffect(() => {
+    if (initialLanguage) {
+      setCurrentLanguage(initialLanguage.toLowerCase());
+    }
+  }, [initialLanguage]);
+
+  const handleLanguageUpdate = (code: string) => {
+    const norm = code.toLowerCase();
+    setCurrentLanguage(norm);
+    onLanguageChange?.(norm);
+  };
 
   const goToSlide = (nextSlide: number) => {
     setDirection(nextSlide > mobileSlide ? 1 : -1);
@@ -91,6 +114,30 @@ export function OnboardingFlow({ onFinish, isMobile = false }: OnboardingFlowPro
   const renderInteractiveSlides = (isNative: boolean) => (
     <div className={`w-full ${isNative ? "h-full max-h-[100dvh]" : "h-[620px] max-w-[380px]"} relative flex flex-col overflow-hidden`}>
       <AnimatePresence custom={direction} mode="wait" initial={false}>
+        {mobileSlide === -1 && (
+          <motion.div
+            key="slide-lang"
+            custom={direction}
+            variants={slideVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{
+              x: { type: "spring", stiffness: 350, damping: 32 },
+              opacity: { duration: 0.2 },
+            }}
+            className="w-full h-full"
+          >
+            <LanguageSelectScreen
+              onLanguageSelected={(code) => {
+                handleLanguageUpdate(code);
+                goToSlide(0);
+              }}
+              initialLanguage={currentLanguage}
+              isMobile={isNative}
+            />
+          </motion.div>
+        )}
         {mobileSlide === 0 && (
           <motion.div
             key="slide-0"
@@ -109,6 +156,8 @@ export function OnboardingFlow({ onFinish, isMobile = false }: OnboardingFlowPro
               onNext={() => goToSlide(1)}
               onSkip={() => onFinish("beneficiary")}
               isNativeMobile={isNative}
+              language={currentLanguage}
+              onLanguageChange={handleLanguageUpdate}
             />
           </motion.div>
         )}
@@ -131,6 +180,8 @@ export function OnboardingFlow({ onFinish, isMobile = false }: OnboardingFlowPro
               onPrev={() => goToSlide(0)}
               onSkip={() => onFinish("beneficiary")}
               isNativeMobile={isNative}
+              language={currentLanguage}
+              onLanguageChange={handleLanguageUpdate}
             />
           </motion.div>
         )}
@@ -154,6 +205,8 @@ export function OnboardingFlow({ onFinish, isMobile = false }: OnboardingFlowPro
               onSkip={() => onFinish("beneficiary")}
               onSelectPathway={() => onFinish("beneficiary")}
               isNativeMobile={isNative}
+              language={currentLanguage}
+              onLanguageChange={handleLanguageUpdate}
             />
           </motion.div>
         )}
@@ -302,7 +355,7 @@ export function OnboardingFlow({ onFinish, isMobile = false }: OnboardingFlowPro
                     <div className="relative w-[280px] h-[320px] animate-float">
                       <Image
                         src="/landingPage/person_1_landing.webp"
-                        alt="Young beneficiary using Saksham voice app"
+                        alt="Young beneficiary using Saksham-AI voice app"
                         fill
                         sizes="320px"
                         quality={90}
@@ -363,7 +416,7 @@ export function OnboardingFlow({ onFinish, isMobile = false }: OnboardingFlowPro
           <section className="w-full max-w-7xl px-4 space-y-8">
             <div className="text-center space-y-2 max-w-2xl mx-auto">
               <Badge variant="purple" className="text-xs">
-                How Saksham Works
+                How Saksham-AI Works
               </Badge>
               <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight font-heading">
                 From Spoken Voice to Sustainable Income
@@ -463,7 +516,7 @@ export function OnboardingFlow({ onFinish, isMobile = false }: OnboardingFlowPro
                       </span>
                     </h3>
                     <p className="text-sm text-slate-600 leading-relaxed">
-                      Instead of presenting a daunting 20-page form, Saksham engages the candidate in a friendly spoken dialogue. The AI detects occupation, latent experience, mobility constraints, and income urgency.
+                      Instead of presenting a daunting 20-page form, Saksham-AI engages the candidate in a friendly spoken dialogue. The AI detects occupation, latent experience, mobility constraints, and income urgency.
                     </p>
 
                     <div className="space-y-2 bg-slate-50 p-4 rounded-2xl border border-slate-200 text-xs">
@@ -618,7 +671,7 @@ export function OnboardingFlow({ onFinish, isMobile = false }: OnboardingFlowPro
                       Personalized Livelihood Decision Matrix
                     </h3>
                     <p className="text-sm text-slate-600 leading-relaxed">
-                      Rather than pushing a generic course, Saksham presents three viable, constraint-verified pathways side-by-side:
+                      Rather than pushing a generic course, Saksham-AI presents three viable, constraint-verified pathways side-by-side:
                     </p>
 
                     <div className="space-y-2.5 text-xs">

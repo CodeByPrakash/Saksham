@@ -1,8 +1,8 @@
 "use client";
 
-import React from "react";
+import React, { useRef } from "react";
 import Image from "next/image";
-import { ArrowRight, Mic } from "lucide-react";
+import { ArrowRight, Mic, Volume2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { OnboardingProgressDots } from "./OnboardingProgressDots";
 import { LanguageSelector } from "@/components/navigation/LanguageSelector";
@@ -11,14 +11,230 @@ interface SlideOneProps {
   onNext: () => void;
   onSkip: () => void;
   isNativeMobile?: boolean;
+  language?: string;
+  onLanguageChange?: (lang: string) => void;
 }
 
-export function SlideOne({ onNext, onSkip, isNativeMobile = false }: SlideOneProps) {
+const SLIDE1_TRANSLATIONS: Record<
+  string,
+  {
+    badge: string;
+    subLogo: string;
+    title: string;
+    titleHighlight: string;
+    subtitle: string;
+    floatingChip: string;
+    ctaButton: string;
+  }
+> = {
+  hi: {
+    badge: "पीएम-अजय योजना",
+    subLogo: "हुनर आज • बेहतर कल",
+    title: "आपकी आवाज़ से",
+    titleHighlight: "उज्ज्वल भविष्य",
+    subtitle: "पीएम-अजय के तहत आजीविका और कौशल मार्गदर्शन के लिए एआई वॉयस साथी।",
+    floatingChip: "अपनी मातृभाषा में बोलें",
+    ctaButton: "आगे बढ़ें (Get Started)"
+  },
+  or: {
+    badge: "ପିଏମ-ଅଜୟ ଯୋଜନା",
+    subLogo: "ଆଜିର ଦକ୍ଷତା • ଉଜ୍ଜ୍ୱଳ ଭବିଷ୍ୟତ",
+    title: "ଆପଣଙ୍କ ସ୍ୱରରେ",
+    titleHighlight: "ଉଜ୍ଜ୍ୱଳ ଭବିଷ୍ୟତ",
+    subtitle: "ପିଏମ-ଅଜୟ ଅଧୀନରେ ଜୀବିକା ଏବଂ ଦକ୍ଷତା ମାର୍ଗଦର୍ଶନ ପାଇଁ ଏଆଇ ସହାୟକ।",
+    floatingChip: "ନିଜ ମାତୃଭାଷାରେ ସହଜରେ କୁହନ୍ତୁ",
+    ctaButton: "ଆରମ୍ଭ କରନ୍ତୁ (Get Started)"
+  },
+  sat: {
+    badge: "PM-AJAY Scheme",
+    subLogo: "Teheñak hunar • Gapaak bhalo",
+    title: "Aamaga rod te",
+    titleHighlight: "Marsal Din",
+    subtitle: "PM-AJAY bhetor te rozgar r hunar laha lagid AI copilot.",
+    floatingChip: "Apanag ror te rod me",
+    ctaButton: "Lahaag me (Get Started)"
+  },
+  en: {
+    badge: "PM-AJAY Initiative",
+    subLogo: "Skills Today • Better Tomorrow",
+    title: "Your Voice to a",
+    titleHighlight: "Brighter Future",
+    subtitle: "An AI-powered voice assistant for livelihood mapping and skill recommendations under PM-AJAY.",
+    floatingChip: "Speak in your native language",
+    ctaButton: "Get Started"
+  },
+  bho: {
+    badge: "पीएम-अजय योजना",
+    subLogo: "हुनर आज • बेहतर कल",
+    title: "रउआ के आवाज से",
+    titleHighlight: "उज्ज्वल भविष्य",
+    subtitle: "पीएम-अजय योजना के तहत रोजगार आ हुनर खातिर एआई वॉयस साथी।",
+    floatingChip: "आपन भोजपुरी में बोलीं",
+    ctaButton: "आगे बढ़ीं (Get Started)"
+  },
+  bn: {
+    badge: "পিএম-অজয় যোজনা",
+    subLogo: "আজকের দক্ষতা • উজ্জ্বল ভবিষ্যৎ",
+    title: "আপনার কণ্ঠে",
+    titleHighlight: "উজ্জ্বল ভবিষ্যৎ",
+    subtitle: "পিএম-অজয় প্রকল্পের অধীনে জীবিকা ও দক্ষতা নির্দেশিকার জন্য এআই সহকারী।",
+    floatingChip: "আপনার মাতৃভাষায় কথা বলুন",
+    ctaButton: "শুরু করুন (Get Started)"
+  },
+  te: {
+    badge: "పీఎం-అజయ్ పథకం",
+    subLogo: "నేటి నైపుణ్యం • రేపటి భవిష్యత్తు",
+    title: "మీ స్వరంతో",
+    titleHighlight: "ఉజ్వల భవిష్యత్తు",
+    subtitle: "పీఎం-అజయ్ కింద జీవనోపాధి మరియు నైపుణ్య మార్గదర్శకత్వం కోసం ఏఐ సహచరుడు.",
+    floatingChip: "మీ మాతృభాషలో మాట్లాడండి",
+    ctaButton: "ప్రారంభించండి (Get Started)"
+  },
+  mr: {
+    badge: "पीएम-अजय योजना",
+    subLogo: "आजचे कौशल्य • उद्याचे भविष्य",
+    title: "तुमच्या आवाजाने",
+    titleHighlight: "उज्ज्वल भविष्य",
+    subtitle: "पीएम-अजय अंतर्गत उपजीविका व कौशल्य मार्गदर्शनासाठी एआय व्हॉईस साथी.",
+    floatingChip: "तुमच्या भाषेत सहज बोला",
+    ctaButton: "पुढे चला (Get Started)"
+  },
+  ta: {
+    badge: "பிஎம்-அஜய் திட்டம்",
+    subLogo: "இன்றைய திறன் • நாளைய ஒளி",
+    title: "உங்கள் குரலால்",
+    titleHighlight: "ஒளிரும் எதிர்காலம்",
+    subtitle: "பிஎம்-அஜய் கீழ் வாழ்வாதாரம் மற்றும் திறன் வழிகாட்டலுக்கான ஏஐ குரல் துணை.",
+    floatingChip: "உங்கள் தாய்மொழியில் பேசுங்கள்",
+    ctaButton: "தொடங்குங்கள் (Get Started)"
+  },
+  gu: {
+    badge: "પીએમ-અજય યોજના",
+    subLogo: "આજનું હુનર • કાલનું ભવિષ્ય",
+    title: "તમારા અવાજથી",
+    titleHighlight: "ઉજ્જવળ ભવિષ્ય",
+    subtitle: "પીએમ-અજય હેઠળ આજીવિકા અને કૌશલ્ય માર્ગદર્શન માટે એઆઈ વોઈસ સાથી.",
+    floatingChip: "તમારી માતૃભાષામાં બોલો",
+    ctaButton: "શરૂ કરો (Get Started)"
+  },
+  pa: {
+    badge: "ਪੀਐਮ-ਅਜੈ ਯੋਜਨਾ",
+    subLogo: "ਅੱਜ ਦਾ ਹੁਨਰ • ਕੱਲ੍ਹ ਦਾ ਭਵਿੱਖ",
+    title: "ਤੁਹਾਡੀ ਆਵਾਜ਼ ਨਾਲ",
+    titleHighlight: "ਸੁਨਹਿਰੀ ਭਵਿੱਖ",
+    subtitle: "ਪੀਐਮ-ਅਜੈ ਤਹਿਤ ਰੋਜ਼ਗਾਰ ਅਤੇ ਹੁਨਰ ਸਿਖਲਾਈ ਲਈ ਏਆਈ ਵੌਇਸ ਸਹਾਇਕ।",
+    floatingChip: "ਆਪਣੀ ਮਾਂ-ਬੋਲੀ ਵਿੱਚ ਬੋਲੋ",
+    ctaButton: "ਸ਼ੁਰੂ ਕਰੋ (Get Started)"
+  },
+  kn: {
+    badge: "ಪಿಎಂ-ಅಜಯ್ ಯೋಜನೆ",
+    subLogo: "ಇಂದಿನ ಕೌಶಲ್ಯ • ನಾಳೆಯ ಭವಿಷ್ಯ",
+    title: "ನಿಮ್ಮ ಧ್ವನಿಯಿಂದ",
+    titleHighlight: "ಉಜ್ವಲ ಭವಿಷ್ಯ",
+    subtitle: "ಪಿಎಂ-ಅಜಯ್ ಅಡಿಯಲ್ಲಿ ಜೀವನೋಪಾಯ ಮತ್ತು ಕೌಶಲ್ಯ ಮಾರ್ಗದರ್ಶನಕ್ಕಾಗಿ AI ಸಹಾಯಕ.",
+    floatingChip: "ನಿಮ್ಮ ಭಾಷೆಯಲ್ಲಿ ಮಾತನಾಡಿ",
+    ctaButton: "ಪ್ರಾರಂಭಿಸಿ (Get Started)"
+  },
+  as: {
+    badge: "পিএম-অজয় যোজনা",
+    subLogo: "আজিৰ দক্ষতা • উজ্জ্বল ভৱিষ্যত",
+    title: "আপোনাৰ কণ্ঠেৰে",
+    titleHighlight: "উজ্জ্বল ভৱিষ্যত",
+    subtitle: "পিএম-অজয়ৰ অধীনত জীৱিকা আৰু দক্ষতা নিৰ্দেশনাৰ বাবে এআই সহায়ক।",
+    floatingChip: "আপোনাৰ ভাষাত কওক",
+    ctaButton: "আৰম্ভ কৰক (Get Started)"
+  },
+  ur: {
+    badge: "پی ایم اجے یوجنا",
+    subLogo: "آج کا ہنر • روشن کل",
+    title: "آپ کی آواز سے",
+    titleHighlight: "روشن مستقبل",
+    subtitle: "پی ایم اجے کے تحت روزگار اور ہنر رہنمائی کے لیے اے آئی وائس ساتھی۔",
+    floatingChip: "اپنی مادری زبان میں بولیں",
+    ctaButton: "شروع کریں (Get Started)"
+  }
+};
+
+export function SlideOne({
+  onNext,
+  onSkip,
+  isNativeMobile = false,
+  language = "hi",
+  onLanguageChange
+}: SlideOneProps) {
+  const normLang = (language || "hi").toLowerCase();
+  const t = SLIDE1_TRANSLATIONS[normLang] || SLIDE1_TRANSLATIONS.hi;
+  const audioPlayerRef = useRef<HTMLAudioElement | null>(null);
+  const audioRequestIdRef = useRef<number>(0);
+
+  const stopAudio = () => {
+    audioRequestIdRef.current++;
+    if (audioPlayerRef.current) {
+      try {
+        audioPlayerRef.current.pause();
+        audioPlayerRef.current.src = "";
+        audioPlayerRef.current.onended = null;
+        audioPlayerRef.current.onerror = null;
+      } catch { }
+      audioPlayerRef.current = null;
+    }
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+      try {
+        window.speechSynthesis.cancel();
+      } catch { }
+    }
+  };
+
+  const playVoicePrompt = async () => {
+    stopAudio();
+    const myReqId = ++audioRequestIdRef.current;
+    const textToSpeak = `${t.title} ${t.titleHighlight}। ${t.subtitle}`;
+
+    try {
+      const cleanLang = (normLang || "hi").toLowerCase().split("-")[0].split("_")[0];
+      const res = await fetch("/api/ai/tts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: textToSpeak, language: cleanLang })
+      });
+
+      if (myReqId !== audioRequestIdRef.current) return;
+
+      if (res.ok) {
+        const data = await res.json();
+        if (myReqId !== audioRequestIdRef.current) return;
+
+        if (data.audioUrl) {
+          const audio = new Audio(data.audioUrl);
+          audioPlayerRef.current = audio;
+          audio.onended = () => {
+            audioPlayerRef.current = null;
+          };
+          audio.onerror = () => {
+            audioPlayerRef.current = null;
+          };
+          await audio.play();
+          return;
+        }
+      }
+    } catch { }
+
+    if (myReqId === audioRequestIdRef.current && typeof window !== "undefined" && "speechSynthesis" in window) {
+      try {
+        window.speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(textToSpeak);
+        u.lang = normLang === "en" ? "en-IN" : "hi-IN";
+        window.speechSynthesis.speak(u);
+      } catch { }
+    }
+  };
+
   return (
     <div
-      className={`relative flex flex-col justify-between w-full mx-auto bg-gradient-to-b from-[#FFFDF9] via-[#FAF6EE] to-[#F5EFE1] overflow-hidden text-slate-900 select-none ${isNativeMobile
-        ? "h-full max-h-[100dvh] px-5 pt-4 pb-0"
-        : "h-full max-w-md rounded-[44px] shadow-2xl border-[8px] border-slate-900/10 px-5 pt-3 pb-0"
+      translate="no"
+      className={`notranslate relative flex flex-col justify-between w-full mx-auto bg-gradient-to-b from-[#FFFDF9] via-[#FAF6EE] to-[#F5EFE1] overflow-hidden text-slate-900 select-none ${isNativeMobile
+          ? "h-full max-h-[100dvh] px-5 pt-4 pb-0"
+          : "h-full max-w-md rounded-[44px] shadow-2xl border-[8px] border-slate-900/10 px-5 pt-3 pb-0"
         }`}
     >
       {/* Background Ambient Cloud Puffs */}
@@ -28,7 +244,7 @@ export function SlideOne({ onNext, onSkip, isNativeMobile = false }: SlideOnePro
       </div>
 
       {/* Top Header with Step Badge, Language Selector & Skip */}
-      <div className="w-full flex items-center justify-between pt-1 pb-1 z-20 shrink-0">
+      <div className="w-full flex items-center justify-between pt-1 pb-1 relative z-50 shrink-0">
         {!isNativeMobile ? (
           <div className="flex items-center gap-1 text-xs font-semibold text-slate-700 bg-white/60 px-2.5 py-0.5 rounded-full">
             <span>9:41</span>
@@ -36,12 +252,12 @@ export function SlideOne({ onNext, onSkip, isNativeMobile = false }: SlideOnePro
         ) : (
           <div className="flex items-center gap-1.5 bg-white/85 backdrop-blur-md px-2.5 py-1 rounded-full text-[11px] font-bold text-purple-800 border border-amber-100/80 shadow-2xs">
             <span className="size-1.5 rounded-full bg-purple-600 animate-pulse"></span>
-            <span>PM-AJAY</span>
+            <span>{t.badge}</span>
           </div>
         )}
 
-        <div className="flex items-center gap-2">
-          <LanguageSelector variant="icon" />
+        <div className="flex items-center gap-2 relative z-50">
+          <LanguageSelector variant="icon" currentLanguage={normLang} onLanguageChange={onLanguageChange} />
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -56,7 +272,7 @@ export function SlideOne({ onNext, onSkip, isNativeMobile = false }: SlideOnePro
 
       {/* Brand Logo & Title Area */}
       <div className="flex flex-col items-center text-center pt-1 z-10 shrink-0">
-        {/* Custom Saksham Logo Emblem */}
+        {/* Custom Saksham-AI Logo Emblem */}
         <div className="flex flex-col items-center mb-1">
           <div className="relative size-11 sm:size-12 mb-0.5 flex items-center justify-center">
             <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-sm">
@@ -73,21 +289,22 @@ export function SlideOne({ onNext, onSkip, isNativeMobile = false }: SlideOnePro
             </svg>
           </div>
           <div className="flex items-center gap-1">
-            <span className="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900 font-heading">
-              Sak<span className="text-purple-600">sham</span>
+            <span className="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900 font-heading notranslate" translate="no">
+              Saksham-AI
             </span>
           </div>
-          <span className="text-[10px] font-bold text-slate-500 tracking-wider uppercase mt-0.5">
-            Skills Today • Better Tomorrow
+          <span className="text-[10px] font-bold text-slate-500 tracking-wider uppercase mt-0.5 notranslate" translate="no">
+            {t.subLogo}
           </span>
         </div>
 
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight leading-[1.15] mt-0.5 font-heading drop-shadow-2xs">
-          Your Voice to a<br />Brighter Future
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight leading-[1.15] mt-0.5 font-heading drop-shadow-2xs notranslate" translate="no">
+          {t.title}<br />
+          <span className="text-purple-700 notranslate" translate="no">{t.titleHighlight}</span>
         </h1>
 
-        <p className="text-xs sm:text-sm text-slate-600 font-medium leading-relaxed max-w-[290px] mt-1.5">
-          An AI-powered voice assistant for livelihood mapping and skill recommendations under PM-AJAY.
+        <p className="text-xs sm:text-sm text-slate-600 font-medium leading-relaxed max-w-[290px] mt-1.5 notranslate" translate="no">
+          {t.subtitle}
         </p>
       </div>
 
@@ -121,57 +338,41 @@ export function SlideOne({ onNext, onSkip, isNativeMobile = false }: SlideOnePro
               fill
               sizes="(max-width: 768px) 270px, 300px"
               quality={90}
-              className="object-contain object-bottom drop-shadow-xl"
+              className="object-contain object-bottom"
               priority
               loading="eager"
-              placeholder="blur"
-              blurDataURL="data:image/webp;base64,UklGRkYCAABXRUJQVlA4WAoAAAAQAAAAEwAAEwAAQUxQSP8AAAABkGvb2rFX+0NsO7mGpE1ldi7t5Bilb+BURmfbtlWe0kb7ve+zv6f4/jfXEBETgJQBOk69PNhdCh9uHyuoqvppEn4KDwG6VIy1VnUAQQJZAa7FEUlG8Yd0z4PvrekDHqlJ0GoLAqB556Ym3HFE8XaEwOy6qUZ8V5tK9yGE1zx14W3uZTWOjV4IDxV/dXRSI4okRpAGhDjEZ6fVUEia+G4mPB+1/2NVOo1eyw4CtKsV6xLRenhe/nu1XI691IAQSxpRHKTRM16Q+S62LiGtPRpihxo6RUjRlehXI8sRke/jtb8YGXGQtPoxrUOTJIUUUmh1uuj1z8O3nqkVESElcQcAVlA4ICABAACwBgCdASoUABQAPu1ur1KppiQiqAgBMB2JbACdMoR1AP0qvsADpd0aBs7xcIc8C1qEAWh2+tcu/JF/5ZqTgAD9Kau3vkY5fnTXr/+4zF9/DXa8NuuL8ZGju3MdNfA6UDbVJZGnM5RZOxN5UFGnYRq66ezyBLjPH1WYI9vQJRiFgxUtqQZB+FKzuD/l8k5yWvBS4GrK4B2S15pKp8hbVVWlgOHbYcwY00FXndGsk6DNKTlrCjJAf0fgS65DJLSv8vkGPE7Pw6dcQzGlRs/oOH4yKslv4nZkjVgx16CJnFQvbZ352I34BSW5TpiOUb74a6AV/D1kT8x8+XhnfZ+zB/y41ON1L6kJuw3u907JpeFYpCO557T+FIL3JtzLSHxcgAA="
             />
           </div>
+        </div>
 
-          {/* Speech Bubble / Floating Pill: Speak in your language */}
-          <div className="absolute -left-2 sm:-left-3 bottom-10 z-20 flex items-center gap-1.5 bg-white/95 backdrop-blur-md px-3.5 py-1.5 rounded-2xl rounded-bl-sm shadow-xl border border-amber-100/90 animate-pulse-glow">
-            <div className="flex items-center justify-center size-6 rounded-full bg-purple-100 text-purple-700">
-              <Mic className="size-3.5 animate-pulse" />
-            </div>
-            <span className="text-xs font-bold text-slate-800 whitespace-nowrap">
-              Speak in your language
-            </span>
-          </div>
+        {/* Floating Voice Capability Pill */}
+        <div className="absolute top-4 -right-1 z-20 bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-full shadow-lg border border-purple-100/90 animate-bounce-subtle flex items-center gap-1.5">
+          <Mic className="size-3.5 text-purple-600 animate-pulse" />
+          <span className="text-[11px] font-bold text-slate-800">
+            {t.floatingChip}
+          </span>
         </div>
       </div>
 
-      {/* Bottom Rounded White Card Container matching reference image */}
-      <div className="w-[calc(100%+40px)] -mx-5 bg-white rounded-t-[36px] sm:rounded-t-[40px] shadow-[0_-10px_35px_rgba(0,0,0,0.06)] border-t border-slate-100/90 pt-3.5 pb-4 px-6 sm:px-7 flex flex-col items-center gap-3 z-20 shrink-0">
-        {/* 1. Centered Top Progress Dots with Framer Motion Layout Animation */}
-        <div className="pt-0.5">
-          <OnboardingProgressDots currentStep={0} />
-        </div>
+      {/* Bottom Controls Area */}
+      <div className="w-full flex flex-col items-center gap-3 pt-1 pb-4 z-20 shrink-0">
+        {/* Progress Dots */}
+        <OnboardingProgressDots currentStep={0} />
 
-        {/* 2. Main Full-Width Get Started Pill Button */}
+
+        {/* Primary CTA Button with Spring Physics */}
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.97 }}
-          transition={{ type: "spring", stiffness: 420, damping: 25 }}
+          transition={{ type: "spring", stiffness: 400, damping: 25 }}
           onClick={onNext}
-          className="w-full h-13 rounded-full bg-gradient-to-r from-[#6B34EB] via-[#7539F4] to-[#8042F6] hover:from-[#5E2DD8] hover:to-[#7335EC] text-white text-[15px] sm:text-base font-bold shadow-lg shadow-purple-600/30 transition-all flex items-center justify-center gap-2 cursor-pointer border border-purple-400/20"
+          type="button"
+          className="w-full h-13 text-base font-bold rounded-2xl bg-gradient-to-r from-[#6B34EB] via-[#7539F4] to-[#8042F6] hover:from-[#5E2DD8] hover:to-[#7335EC] text-white shadow-lg shadow-purple-600/30 flex items-center justify-center gap-2 cursor-pointer border border-purple-400/20 active:scale-95"
         >
-          <span>Get Started</span>
-          <motion.span
-            animate={{ x: [0, 3, 0] }}
-            transition={{ repeat: Infinity, duration: 1.6, ease: "easeInOut" }}
-          >
-            <ArrowRight className="size-5 stroke-[2.2]" />
-          </motion.span>
+          <span>{t.ctaButton}</span>
+          <ArrowRight className="size-5" />
         </motion.button>
-
-        {/* 3. Footer Tagline */}
-        <p className="text-xs font-semibold text-[#60567B]/80 text-center tracking-normal">
-          Inclusive • Accessible • Empowering
-        </p>
       </div>
     </div>
   );
 }
-
-

@@ -1,14 +1,14 @@
-# SAKSHAM — Gamified Design System & Auth UI Specification
+# Saksham-AI — Gamified Design System & Auth UI Specification
 
 ## 1. Visual Identity & Mood
 
-The visual language of **SAKSHAM** merges an **ambient dark cosmic aesthetic** (inspired by deep obsidian, midnight sapphire, and glowing cyan auroras) with an **empowering gamified livelihood progression theme**. 
+The visual language of **Saksham-AI** merges an **ambient dark cosmic aesthetic** (inspired by deep obsidian, midnight sapphire, and glowing cyan auroras) with an **empowering gamified livelihood progression theme**. 
 
 Every interaction is designed to feel like an empowering, rewarding quest—turning government livelihood discovery, skill assessment, and vocational training into an exciting, accessible journey.
 
 ```
                       ┌──────────────────────────────────────┐
-                      │        SAKSHAM VISUAL MATRIX         │
+                      │        Saksham-AI VISUAL MATRIX         │
                       ├──────────────────┬───────────────────┤
                       │ Aesthetic        │ Midnight Aurora   │
                       │ Texture          │ Frosted Glass     │
@@ -55,7 +55,7 @@ Every interaction is designed to feel like an empowering, rewarding quest—turn
 - Primary CTA: "Continue to Login ➔".
 
 ### 3.3 Google OAuth Login Screen (`src/app/(auth)/login.tsx`)
-1. **Brand Bar**: SAKSHAM glowing emblem + Level 1 Explorer XP badge.
+1. **Brand Bar**: Saksham-AI glowing emblem + Level 1 Explorer XP badge.
 2. **Hero Typography**: "Hi There!" + personalized livelihood quest subtitle.
 3. **Core Feature Cards**:
    - ⚡ Instant Skill Discovery (AI voice assessment in regional dialects)

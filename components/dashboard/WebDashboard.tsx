@@ -89,14 +89,14 @@ export function WebDashboard() {
   return (
     <div className="min-h-screen bg-[#FAF6EE] text-slate-800 flex justify-center p-3 sm:p-5 lg:p-6 select-none font-sans">
       <div className="w-full max-w-[1440px] flex gap-5 xl:gap-6">
-        
+
         {/* ========================================================================= */}
         {/* LEFT SIDEBAR (Cream/White Card with Curved Corners)                      */}
         {/* ========================================================================= */}
         <aside className="w-60 xl:w-64 shrink-0 bg-white/95 backdrop-blur-md rounded-[32px] border border-[#EDE7D9] shadow-sm flex flex-col justify-between p-5 self-start sticky top-5 h-[calc(100vh-40px)]">
-          
+
           <div className="space-y-6">
-            {/* JeevikaSetu Logo */}
+            {/* Saksham-AI Logo */}
             <div className="flex flex-col items-start px-2 cursor-pointer group">
               <div className="flex items-center gap-2.5">
                 <div className="size-9 flex items-center justify-center shrink-0">
@@ -116,7 +116,7 @@ export function WebDashboard() {
 
                 <div className="flex flex-col">
                   <span className="text-xl font-extrabold tracking-tight text-slate-900 font-heading">
-                    Jeevika<span className="text-purple-600">Setu</span>
+                    Saksham <span className="text-purple-600">AI</span>
                   </span>
                 </div>
               </div>
@@ -142,11 +142,10 @@ export function WebDashboard() {
                       if (item.id === "self_employment") setIsSchemesModalOpen(true);
                       if (item.id === "messages") setIsVoiceModalOpen(true);
                     }}
-                    className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-2xl text-xs xl:text-sm font-bold transition-all cursor-pointer text-left ${
-                      isActive
+                    className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-2xl text-xs xl:text-sm font-bold transition-all cursor-pointer text-left ${isActive
                         ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md shadow-purple-600/25 font-extrabold"
                         : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/70"
-                    }`}
+                      }`}
                   >
                     <Icon className={`size-4 xl:size-4.5 shrink-0 ${isActive ? "text-white" : "text-slate-500"}`} />
                     <span>{item.label}</span>
@@ -185,7 +184,7 @@ export function WebDashboard() {
                 </div>
                 <div className="flex flex-col text-left">
                   <span className="text-[11px] font-extrabold text-slate-900 leading-tight">
-                    Talk to JeevikaSetu
+                    Talk to Saksham-AI
                   </span>
                   <span className="text-[9px] text-slate-500">24/7 AI Voice Copilot</span>
                 </div>
@@ -199,7 +198,7 @@ export function WebDashboard() {
         {/* MAIN DASHBOARD CONTENT AREA                                               */}
         {/* ========================================================================= */}
         <div className="flex-1 flex flex-col gap-6 min-w-0">
-          
+
           {/* Top Header Bar */}
           <header className="flex items-center justify-between gap-4 py-1">
             <div>
@@ -282,12 +281,12 @@ export function WebDashboard() {
           {/* 2-COLUMN MAIN BODY: Center Left Feed (68%) & Right Sidebar Info (32%)     */}
           {/* ========================================================================= */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            
+
             {/* ----------------------------------------------------------------------- */}
             {/* CENTER / LEFT COLUMN (lg:col-span-8)                                   */}
             {/* ----------------------------------------------------------------------- */}
             <div className="lg:col-span-8 flex flex-col gap-6">
-              
+
               {/* 1. HERO AI ASSISTANT BANNER */}
               <motion.div
                 initial={{ opacity: 0, y: 12 }}
@@ -450,13 +449,12 @@ export function WebDashboard() {
                         />
                         <div className="absolute top-2.5 right-2.5">
                           <span
-                            className={`text-[9px] font-extrabold uppercase px-2.5 py-1 rounded-full shadow-xs ${
-                              course.badgeColor === "blue"
+                            className={`text-[9px] font-extrabold uppercase px-2.5 py-1 rounded-full shadow-xs ${course.badgeColor === "blue"
                                 ? "bg-blue-600 text-white"
                                 : course.badgeColor === "amber"
-                                ? "bg-amber-500 text-white"
-                                : "bg-emerald-600 text-white"
-                            }`}
+                                  ? "bg-amber-500 text-white"
+                                  : "bg-emerald-600 text-white"
+                              }`}
                           >
                             {course.badge}
                           </span>
@@ -502,7 +500,7 @@ export function WebDashboard() {
             {/* RIGHT COLUMN (lg:col-span-4): Profile, Progress, Upcoming Steps        */}
             {/* ----------------------------------------------------------------------- */}
             <div className="lg:col-span-4 flex flex-col gap-5">
-              
+
               {/* 1. PROFILE SUMMARY CARD */}
               <div className="bg-white rounded-3xl border border-[#EDE7D9] shadow-2xs p-5 space-y-4">
                 <div className="flex items-center justify-between">
@@ -628,13 +626,12 @@ export function WebDashboard() {
                           <div className="size-4 rounded-full border border-slate-300 shrink-0"></div>
                         )}
                         <span
-                          className={`font-semibold text-[11px] truncate ${
-                            step.status === "active"
+                          className={`font-semibold text-[11px] truncate ${step.status === "active"
                               ? "text-purple-700 font-extrabold"
                               : step.status === "completed"
-                              ? "text-slate-800"
-                              : "text-slate-400"
-                          }`}
+                                ? "text-slate-800"
+                                : "text-slate-400"
+                            }`}
                         >
                           {step.title}
                         </span>
@@ -675,15 +672,14 @@ export function WebDashboard() {
                     >
                       <div className="flex items-center gap-2.5">
                         <div
-                          className={`size-8 rounded-xl flex items-center justify-center shrink-0 ${
-                            step.color === "purple"
+                          className={`size-8 rounded-xl flex items-center justify-center shrink-0 ${step.color === "purple"
                               ? "bg-purple-100 text-purple-700"
                               : step.color === "amber"
-                              ? "bg-amber-100 text-amber-700"
-                              : step.color === "blue"
-                              ? "bg-blue-100 text-blue-700"
-                              : "bg-emerald-100 text-emerald-700"
-                          }`}
+                                ? "bg-amber-100 text-amber-700"
+                                : step.color === "blue"
+                                  ? "bg-blue-100 text-blue-700"
+                                  : "bg-emerald-100 text-emerald-700"
+                            }`}
                         >
                           {step.iconName === "mic" && <Mic className="size-4" />}
                           {step.iconName === "book" && <GraduationCap className="size-4" />}

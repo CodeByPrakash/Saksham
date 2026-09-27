@@ -2,7 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   generateGeminiLivelihoodAdvice,
   transcribeSpokenAudioWithGemini,
-  generateGoogleSpeechBase64
+  generateGoogleSpeechBase64,
+  detectSpokenLanguageWithGemini,
+  detectLanguageFromSpokenAudioWithGemini
 } from "@/lib/ai/gemini";
 
 export const maxDuration = 30; // Allow up to 30s for serverless execution
@@ -14,6 +16,9 @@ export async function POST(req: NextRequest) {
     let language = "hindi";
     let beneficiaryName = "Savitri Devi";
     let district = "Kalahandi, Odisha";
+    let action = "";
+    let base64Audio = "";
+    let mimeType = "audio/webm";
 
     // 1. Check if input is Audio (FormData) or JSON (Direct Text / Quick Prompt)
     if (contentType.includes("multipart/form-data")) {
@@ -22,19 +27,23 @@ export async function POST(req: NextRequest) {
       language = (formData.get("language") as string) || "hindi";
       beneficiaryName = (formData.get("name") as string) || "Savitri Devi";
       district = (formData.get("district") as string) || "Kalahandi, Odisha";
+      action = (formData.get("action") as string) || "";
       const directText = formData.get("text") as string | null;
 
       if (directText) {
         userQuery = directText;
-      } else if (audioFile) {
+      }
+      if (audioFile) {
         // Convert audio Blob to Base64 for Gemini Multimodal Audio understanding
         const arrayBuffer = await audioFile.arrayBuffer();
-        const base64Audio = Buffer.from(arrayBuffer).toString("base64");
-        const mimeType = audioFile.type || "audio/webm";
+        base64Audio = Buffer.from(arrayBuffer).toString("base64");
+        mimeType = audioFile.type || "audio/webm";
 
-        // Step 1: Google Gemini AI Multimodal Speech-to-Text
-        const transcribed = await transcribeSpokenAudioWithGemini(base64Audio, mimeType);
-        userQuery = transcribed || "मुझे पीएम-अजय और कौशल प्रशिक्षण के बारे में बताएं";
+        if (!userQuery && action !== "detect_language" && action !== "detect") {
+          // Step 1: Google Gemini AI Multimodal Speech-to-Text
+          const transcribed = await transcribeSpokenAudioWithGemini(base64Audio, mimeType);
+          userQuery = transcribed || "मुझे पीएम-अजय और कौशल प्रशिक्षण के बारे में बताएं";
+        }
       }
     } else {
       let body: any = {};
@@ -48,6 +57,40 @@ export async function POST(req: NextRequest) {
       language = body.language || "hindi";
       beneficiaryName = body.beneficiaryName || "Savitri Devi";
       district = body.district || "Kalahandi, Odisha";
+      action = body.action || "";
+      if (body.audioBase64) {
+        base64Audio = body.audioBase64;
+        mimeType = body.mimeType || "audio/webm";
+      }
+    }
+
+    // Special Action: Language Detection from Spoken Vernacular Voice Audio or Text
+    if (action === "detect_language" || action === "detect") {
+      // If raw audio voice is available, use Gemini Multimodal Audio for superior accent recognition!
+      if (base64Audio) {
+        const audioDetected = await detectLanguageFromSpokenAudioWithGemini(base64Audio, mimeType);
+        if (audioDetected) {
+          return NextResponse.json({
+            success: true,
+            transcript: audioDetected.transcript || userQuery,
+            languageCode: audioDetected.languageCode,
+            languageName: audioDetected.languageName
+          });
+        }
+      }
+
+      // If text query is available or fallback from audio
+      if (userQuery) {
+        const detected = await detectSpokenLanguageWithGemini(userQuery);
+        if (detected) {
+          return NextResponse.json({
+            success: true,
+            transcript: userQuery,
+            languageCode: detected.languageCode,
+            languageName: detected.languageName
+          });
+        }
+      }
     }
 
     if (!userQuery) {
@@ -105,4 +148,3 @@ export async function POST(req: NextRequest) {
     });
   }
 }
-

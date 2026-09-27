@@ -112,7 +112,7 @@ export function MobileTrainingDetailPage({
 
   return (
     <div className="space-y-4 pb-12 select-none animate-in fade-in duration-300">
-      
+
       {/* 1. TOP STICKY APP BAR WITH BACK NAVIGATION */}
       <div className="flex items-center justify-between bg-white/95 backdrop-blur-md px-1 py-1 rounded-2xl border border-[#EDE7D9] shadow-2xs">
         <button
@@ -126,9 +126,8 @@ export function MobileTrainingDetailPage({
         <div className="flex items-center gap-1">
           <button
             onClick={() => setIsSaved(!isSaved)}
-            className={`p-2 rounded-xl transition-colors cursor-pointer ${
-              isSaved ? "bg-purple-100 text-purple-700" : "text-slate-500 hover:bg-slate-100"
-            }`}
+            className={`p-2 rounded-xl transition-colors cursor-pointer ${isSaved ? "bg-purple-100 text-purple-700" : "text-slate-500 hover:bg-slate-100"
+              }`}
             aria-label="Save Course"
           >
             <Bookmark className={`size-4 ${isSaved ? "fill-purple-600 text-purple-600" : ""}`} />
@@ -139,9 +138,9 @@ export function MobileTrainingDetailPage({
               if (navigator.share) {
                 navigator.share({
                   title: course.title,
-                  text: `Check out ${course.title} training under PM-AJAY on JeevikaSetu!`,
+                  text: `Check out ${course.title} training under PM-AJAY on Saksham-AI!`,
                   url: window.location.href
-                }).catch(() => {});
+                }).catch(() => { });
               }
             }}
             className="p-2 rounded-xl text-slate-500 hover:bg-slate-100 transition-colors cursor-pointer"
@@ -172,15 +171,14 @@ export function MobileTrainingDetailPage({
               NSQF Level {course.nsqfLevel}
             </span>
             <span
-              className={`px-3 py-1 text-white text-[11px] font-extrabold rounded-full shadow-md ${
-                course.badgeColor === "blue"
+              className={`px-3 py-1 text-white text-[11px] font-extrabold rounded-full shadow-md ${course.badgeColor === "blue"
                   ? "bg-blue-600"
                   : course.badgeColor === "amber"
-                  ? "bg-amber-500"
-                  : course.badgeColor === "purple"
-                  ? "bg-purple-600"
-                  : "bg-emerald-600"
-              }`}
+                    ? "bg-amber-500"
+                    : course.badgeColor === "purple"
+                      ? "bg-purple-600"
+                      : "bg-emerald-600"
+                }`}
             >
               {course.badge}
             </span>
@@ -211,9 +209,8 @@ export function MobileTrainingDetailPage({
           <div className="flex items-center gap-2.5">
             <button
               onClick={toggleAudio}
-              className={`size-8 rounded-full flex items-center justify-center transition-transform cursor-pointer ${
-                isPlayingAudio ? "bg-purple-600 text-white animate-pulse" : "bg-purple-200 text-purple-800"
-              }`}
+              className={`size-8 rounded-full flex items-center justify-center transition-transform cursor-pointer ${isPlayingAudio ? "bg-purple-600 text-white animate-pulse" : "bg-purple-200 text-purple-800"
+                }`}
             >
               {isPlayingAudio ? <VolumeX className="size-4" /> : <Volume2 className="size-4" />}
             </button>
@@ -282,11 +279,10 @@ export function MobileTrainingDetailPage({
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id as any)}
-            className={`px-3.5 py-2 rounded-2xl text-xs font-bold transition-all shrink-0 cursor-pointer ${
-              activeTab === tab.id
+            className={`px-3.5 py-2 rounded-2xl text-xs font-bold transition-all shrink-0 cursor-pointer ${activeTab === tab.id
                 ? "bg-purple-600 text-white shadow-xs font-extrabold"
                 : "bg-white text-slate-600 border border-[#EDE7D9] hover:bg-slate-50"
-            }`}
+              }`}
           >
             {tab.label}
           </button>

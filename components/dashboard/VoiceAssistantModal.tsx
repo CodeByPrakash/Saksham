@@ -63,7 +63,7 @@ export function VoiceAssistantModal({
       sender: "ai",
       text: "नमस्ते सावित्री देवी जी! मैं सक्षम जीविका सेतु एआई सहायक हूँ। आप बोलकर अपने कौशल, ट्रेनिंग कोर्स या पीएम-अजय अनुदान के बारे में पूछ सकती हैं।",
       translatedText:
-        "Namaste Savitri Devi ji! I am Saksham Voice AI. You can speak to explore NSQF skill courses and PM-AJAY grants in your language."
+        "Namaste Savitri Devi ji! I am Saksham-AI Voice AI. You can speak to explore NSQF skill courses and PM-AJAY grants in your language."
     }
   ]);
 
@@ -380,7 +380,7 @@ export function VoiceAssistantModal({
               <div>
                 <div className="flex items-center gap-2">
                   <h3 className="font-extrabold text-base sm:text-lg tracking-tight font-heading">
-                    Saksham Realtime Voice AI
+                    Saksham-AI Realtime Voice AI
                   </h3>
                   <span className="size-2 rounded-full bg-emerald-400 animate-pulse"></span>
                 </div>
@@ -421,11 +421,10 @@ export function VoiceAssistantModal({
               <button
                 key={lang.id}
                 onClick={() => setSelectedLanguage(lang.id)}
-                className={`px-3 py-1 rounded-xl font-bold transition-all shrink-0 cursor-pointer ${
-                  selectedLanguage === lang.id
+                className={`px-3 py-1 rounded-xl font-bold transition-all shrink-0 cursor-pointer ${selectedLanguage === lang.id
                     ? "bg-purple-600 text-white shadow-xs"
                     : "bg-white text-slate-700 hover:bg-purple-100/60 border border-purple-200/50"
-                }`}
+                  }`}
               >
                 {lang.label}
               </button>
@@ -490,9 +489,8 @@ export function VoiceAssistantModal({
               {messages.map((msg) => (
                 <div
                   key={msg.id}
-                  className={`flex gap-2.5 ${
-                    msg.sender === "user" ? "justify-end" : "justify-start"
-                  }`}
+                  className={`flex gap-2.5 ${msg.sender === "user" ? "justify-end" : "justify-start"
+                    }`}
                 >
                   {msg.sender === "ai" && (
                     <div className="size-7 rounded-full bg-purple-600 text-white flex items-center justify-center shrink-0 mt-1">
@@ -501,11 +499,10 @@ export function VoiceAssistantModal({
                   )}
 
                   <div
-                    className={`max-w-[84%] p-3 rounded-2xl text-xs sm:text-sm leading-relaxed ${
-                      msg.sender === "user"
+                    className={`max-w-[84%] p-3 rounded-2xl text-xs sm:text-sm leading-relaxed ${msg.sender === "user"
                         ? "bg-purple-600 text-white rounded-br-xs shadow-md"
                         : "bg-white text-slate-800 border border-slate-200/80 rounded-bl-xs shadow-xs"
-                    }`}
+                      }`}
                   >
                     <p className="font-medium">{msg.text}</p>
                     {msg.actionButton && (
@@ -570,13 +567,12 @@ export function VoiceAssistantModal({
               )}
               <button
                 onClick={handleMicToggle}
-                className={`size-14 rounded-full flex items-center justify-center text-white shadow-lg transition-all cursor-pointer ${
-                  isRecording
+                className={`size-14 rounded-full flex items-center justify-center text-white shadow-lg transition-all cursor-pointer ${isRecording
                     ? "bg-red-600 scale-110 shadow-red-600/40"
                     : isSpeaking
-                    ? "bg-emerald-600 scale-105 shadow-emerald-600/40"
-                    : "bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 hover:scale-105 shadow-purple-600/40"
-                }`}
+                      ? "bg-emerald-600 scale-105 shadow-emerald-600/40"
+                      : "bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 hover:scale-105 shadow-purple-600/40"
+                  }`}
               >
                 {isRecording ? (
                   <Mic className="size-6 animate-pulse" />
@@ -591,10 +587,10 @@ export function VoiceAssistantModal({
               {isRecording
                 ? "Recording voice... Tap to finish"
                 : isProcessing
-                ? "Processing with Google Gemini AI..."
-                : isSpeaking
-                ? "Speaking response (Gemini Voice)"
-                : "Tap to Speak in Odia / Hindi (माइक चालू करें)"}
+                  ? "Processing with Google Gemini AI..."
+                  : isSpeaking
+                    ? "Speaking response (Gemini Voice)"
+                    : "Tap to Speak in Odia / Hindi (माइक चालू करें)"}
             </span>
           </div>
         </motion.div>

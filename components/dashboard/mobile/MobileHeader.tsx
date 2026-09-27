@@ -41,7 +41,7 @@ export function MobileHeader({
 
         <div className="flex flex-col">
           <span className="text-lg font-extrabold tracking-tight text-slate-900 font-heading leading-tight">
-            Jeevika<span className="text-purple-600">Setu</span>
+            Saksham <span className="text-purple-600">AI</span>
           </span>
           <span className="text-[9.5px] font-semibold text-slate-500 tracking-tight leading-none mt-0.5">
             Skills Today · Better Tomorrow
