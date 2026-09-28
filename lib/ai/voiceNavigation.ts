@@ -1,6 +1,7 @@
 "use client";
 
 import { RECOMMENDED_COURSES, RECOMMENDED_JOBS, SCHEMES_LIST, CourseItem, JobItem } from "@/components/dashboard/DashboardShared";
+import { ALL_EXPANDED_NSQF_COURSES } from "@/lib/skillTrainingGenerator";
 
 export type VoiceNavTarget =
   | "home"
@@ -275,8 +276,744 @@ export function parseVoiceNavigationIntent(
     };
   }
 
-  // 3. Specific Course Requests
-  // Course 1: Electrician
+  // 3. Comprehensive NSQF Course Voice Intent Matching
+  // Helper to find course from ALL_EXPANDED_NSQF_COURSES or RECOMMENDED_COURSES
+  const findCourse = (id: string, keywordFallback?: string) => {
+    return (
+      ALL_EXPANDED_NSQF_COURSES.find((c) => c.id === id) ||
+      RECOMMENDED_COURSES.find((c) => c.id === id) ||
+      (keywordFallback ? ALL_EXPANDED_NSQF_COURSES.find((c) => c.title.toLowerCase().includes(keywordFallback)) : undefined) ||
+      ALL_EXPANDED_NSQF_COURSES[0]
+    );
+  };
+
+  // Course 1: Kisan Drone Pilot & Spraying
+  if (
+    t.includes("drone") ||
+    t.includes("kisan drone") ||
+    t.includes("ड्रोन") ||
+    t.includes("किसान ड्रोन") ||
+    t.includes("छिड़काव") ||
+    t.includes("ଡ୍ରୋନ") ||
+    t.includes("uav")
+  ) {
+    const course = findCourse("nsqf-course-drone-pilot-agri", "drone");
+    return {
+      target: "training",
+      courseId: course.id,
+      course: course,
+      confidence: 0.98,
+      displayText: "किसान ड्रोन पायलट एवं फसल स्वास्थ्य (NSQF Level 4)",
+      spokenFeedback: {
+        hi: "किसान ड्रोन पायलट NSQF Level 4 कोर्स का विवरण खोला जा रहा है।",
+        or: "କିଷାନ ଡ୍ରୋନ ପାଇଲଟ୍ NSQF ଲେଭଲ ୪ କୋର୍ସ ବିବରଣୀ ଖୋଲାଯାଉଛି।",
+        sat: "ᱠᱤᱥᱟᱱ ᱰᱨᱳᱱ ᱯᱟᱭᱞᱚᱴ NSQF Level 4 ᱴᱨᱮᱱᱤᱝ ᱠᱷᱩᱞᱟᱹᱜ ᱠᱟᱱᱟ।",
+        en: "Opening Kisan Drone Pilot & Crop Health Analyst Course."
+      }
+    };
+  }
+
+  // Course 2: Commercial Mushroom & Spawn
+  if (
+    t.includes("mushroom") ||
+    t.includes("मशरूम") ||
+    t.includes("मशरूम की खेती") ||
+    t.includes("छातु") ||
+    t.includes("ଛତୁ") ||
+    t.includes("ଛତୁ ଚାଷ") ||
+    t.includes("spawn")
+  ) {
+    const course = findCourse("nsqf-course-organic-mushroom", "mushroom");
+    return {
+      target: "training",
+      courseId: course.id,
+      course: course,
+      confidence: 0.98,
+      displayText: "मशरूम उत्पादन एवं स्पॉन लैब (NSQF Level 3)",
+      spokenFeedback: {
+        hi: "कमर्शियल मशरूम एवं स्पॉन उत्पादन कोर्स खोला जा रहा है।",
+        or: "ଛତୁ ଚାଷ ଓ ସ୍ପନ୍ ଉତ୍ପାଦନ କୋର୍ସ ବିବରଣୀ ଖୋଲାଯାଉଛି।",
+        sat: "ᱢᱟᱥᱨᱩᱢ ᱪᱟᱥ ᱴᱨᱮᱱᱤᱝ ᱠᱷᱩᱞᱟᱹᱜ ᱠᱟᱱᱟ।",
+        en: "Opening Commercial Mushroom & Spawn Production Course."
+      }
+    };
+  }
+
+  // Course 3: Dairy Processing & Milk Hub
+  if (
+    t.includes("dairy") ||
+    t.includes("milk") ||
+    t.includes("paneer") ||
+    t.includes("ghee") ||
+    t.includes("दूध") ||
+    t.includes("डेयरी") ||
+    t.includes("पनीर") ||
+    t.includes("घी") ||
+    t.includes("ଖୀର") ||
+    t.includes("ପନିର") ||
+    t.includes("ଘିଅ") ||
+    t.includes("ଗୋପାଳନ")
+  ) {
+    const course = findCourse("nsqf-course-dairy-processing", "dairy");
+    return {
+      target: "training",
+      courseId: course.id,
+      course: course,
+      confidence: 0.98,
+      displayText: "डेयरी प्रोसेसिंग एवं दुग्ध केंद्र (NSQF Level 4)",
+      spokenFeedback: {
+        hi: "डेयरी प्रोसेसिंग एवं दुग्ध मूल्य-संवर्धन कोर्स खोला जा रहा है।",
+        or: "ଡାଏରୀ ପ୍ରକ୍ରିୟାକରଣ ଓ ଦୁଗ୍ଧ କେନ୍ଦ୍ର କୋର୍ସ ଖୋଲାଯାଉଛି।",
+        sat: "ᱰᱮᱭᱨᱤ ᱯᱨᱚᱥᱮᱥᱤᱝ ᱴᱨᱮᱱᱤᱝ ᱠᱷᱩᱞᱟᱹᱜ ᱠᱟᱱᱟ।",
+        en: "Opening Dairy Processing & Milk Value-Addition Course."
+      }
+    };
+  }
+
+  // Course 4: Honey Bee Keeping & Apiculture
+  if (
+    t.includes("honey") ||
+    t.includes("bee") ||
+    t.includes("beekeeping") ||
+    t.includes("apiculture") ||
+    t.includes("मधुमक्खी") ||
+    t.includes("शहद") ||
+    t.includes("मौन पालन") ||
+    t.includes("ମହୁ") ||
+    t.includes("ମହୁମାଛି")
+  ) {
+    const course = findCourse("nsqf-course-apiculture-honey", "honey");
+    return {
+      target: "training",
+      courseId: course.id,
+      course: course,
+      confidence: 0.98,
+      displayText: "मधुमक्खी पालन एवं शहद प्रसंस्करण (NSQF Level 3)",
+      spokenFeedback: {
+        hi: "व्यावसायिक मधुमक्खी पालन कोर्स का विवरण खोला जा रहा है।",
+        or: "ମହୁମାଛି ପାଳନ ଓ ମହୁ ପ୍ରକ୍ରିୟାକରଣ କୋର୍ସ ଖୋଲାଯାଉଛି।",
+        sat: "ᱢᱟᱦᱩ ᱢᱟᱪᱷᱤ ᱪᱟᱥ ᱴᱨᱮᱱᱤᱝ ᱠᱷᱩᱞᱟᱹᱜ ᱠᱟᱱᱟ।",
+        en: "Opening Commercial Honey Bee Keeping Course."
+      }
+    };
+  }
+
+  // Course 5: Poultry & Hatchery
+  if (
+    t.includes("poultry") ||
+    t.includes("chicken") ||
+    t.includes("hatchery") ||
+    t.includes("murgi") ||
+    t.includes("मुर्गी") ||
+    t.includes("मुर्गी पालन") ||
+    t.includes("कड़कनाथ") ||
+    t.includes("हॅचरी") ||
+    t.includes("କୁକୁଡ଼ା") ||
+    t.includes("କୁକୁଡ଼ା ଚାଷ")
+  ) {
+    const course = findCourse("nsqf-course-poultry-hatchery", "poultry");
+    return {
+      target: "training",
+      courseId: course.id,
+      course: course,
+      confidence: 0.98,
+      displayText: "पोल्ट्री एवं सोलर हैचरी विशेषज्ञ (NSQF Level 3)",
+      spokenFeedback: {
+        hi: "पोल्ट्री फार्मिंग एवं सोलर हैचरी कोर्स खोला जा रहा है।",
+        or: "କୁକୁଡ଼ା ପାଳନ ଓ ସୋଲାର ହ୍ୟାଚେରୀ ତାଲିମ ଖୋଲାଯାଉଛି।",
+        sat: "ᱥᱤᱢ ᱪᱟᱥ ᱟᱨ ᱦᱮᱪᱮᱨᱤ ᱴᱨᱮᱱᱤᱝ ᱠᱷᱩᱞᱟᱹᱜ ᱠᱟᱱᱟ।",
+        en: "Opening Poultry & Solar Hatchery Training Course."
+      }
+    };
+  }
+
+  // Course 6: Fisheries & Biofloc Aquaculture
+  if (
+    t.includes("fish") ||
+    t.includes("fisheries") ||
+    t.includes("biofloc") ||
+    t.includes("aquaculture") ||
+    t.includes("मछली") ||
+    t.includes("मत्स्य") ||
+    t.includes("मछली पालन") ||
+    t.includes("बायोफ्लॉक") ||
+    t.includes("ମାଛ") ||
+    t.includes("ମାଛ ଚାଷ")
+  ) {
+    const course = findCourse("nsqf-course-aquaculture-biofloc", "fisheries");
+    return {
+      target: "training",
+      courseId: course.id,
+      course: course,
+      confidence: 0.98,
+      displayText: "मत्स्य पालन एवं बायोफ्लॉक फार्मिंग (NSQF Level 4)",
+      spokenFeedback: {
+        hi: "मत्स्य पालन एवं बायोफ्लॉक फिश फार्मिंग कोर्स खोला जा रहा है।",
+        or: "ମାଛ ଚାଷ ଓ ବାୟୋଫ୍ଲକ୍ ତାଲିମ ବିବରଣୀ ଖୋଲାଯାଉଛି।",
+        sat: "ᱦᱟᱹᱠᱩ ᱪᱟᱥ ᱟᱨ ᱵᱟᱭᱳᱯᱷᱞᱚᱠ ᱴᱨᱮᱱᱤᱝ ᱠᱷᱩᱞᱟᱹᱜ ᱠᱟᱱᱟ।",
+        en: "Opening Fisheries, Biofloc Farming & Aqua-Tech Course."
+      }
+    };
+  }
+
+  // Course 7: Shree Anna Millet Bakery & Processing
+  if (
+    t.includes("millet") ||
+    t.includes("mandia") ||
+    t.includes("ragi") ||
+    t.includes("shree anna") ||
+    t.includes("मिलेट") ||
+    t.includes("श्री अन्न") ||
+    t.includes("रागी") ||
+    t.includes("मड़ुआ") ||
+    t.includes("ମାଣ୍ଡିଆ") ||
+    t.includes("ମିଲେଟ") ||
+    t.includes("बेकरी") ||
+    t.includes("बिस्कुट")
+  ) {
+    const course = findCourse("nsqf-course-millet-bakery", "millet");
+    return {
+      target: "training",
+      courseId: course.id,
+      course: course,
+      confidence: 0.98,
+      displayText: "श्री अन्न मिलेट प्रोसेसिंग एवं बेकरी (NSQF Level 4)",
+      spokenFeedback: {
+        hi: "श्री अन्न रागी मिलेट प्रोसेसिंग एवं बेकरी कोर्स खोला जा रहा है।",
+        or: "ଶ୍ରୀ ଅନ୍ନ ମାଣ୍ଡିଆ ପ୍ରକ୍ରିୟାକରଣ ଓ ବେକେରୀ କୋର୍ସ ଖୋଲାଯାଉଛି।",
+        sat: "ᱢᱤᱞᱮᱴ ᱯᱨᱚᱥᱮᱥᱤᱝ ᱟᱨ ᱵᱮᱠᱟᱨᱤ ᱴᱨᱮᱱᱤᱝ ᱠᱷᱩᱞᱟᱹᱜ ᱠᱟᱱᱟ।",
+        en: "Opening Shree Anna Millet Processing & Bakery Course."
+      }
+    };
+  }
+
+  // Course 8: Cold-Press Oil Expeller & Kachi Ghani
+  if (
+    t.includes("oil mill") ||
+    t.includes("cold press") ||
+    t.includes("kachi ghani") ||
+    t.includes("mustard oil") ||
+    t.includes("तेल मिल") ||
+    t.includes("कच्ची घानी") ||
+    t.includes("तेल पेराई") ||
+    t.includes("ତେଲ") ||
+    t.includes("ତେଲ ମିଲ୍") ||
+    t.includes("ତେଲ ଘଣା")
+  ) {
+    const course = findCourse("nsqf-course-cold-press-oil-mill", "oil");
+    return {
+      target: "training",
+      courseId: course.id,
+      course: course,
+      confidence: 0.98,
+      displayText: "कोल्ड-प्रेस कच्ची घानी तेल मिल (NSQF Level 4)",
+      spokenFeedback: {
+        hi: "कोल्ड-प्रेस कच्ची घानी तेल पेराई उद्यम कोर्स खोला जा रहा है।",
+        or: "କୋଲ୍ଡ-ପ୍ରେସ୍ ତେଲ ଘଣା ଓ ପ୍ରକ୍ରିୟାକରଣ କୋର୍ସ ଖୋଲାଯାଉଛି।",
+        sat: "ᱥᱩᱱᱩᱢ ᱯᱮᱲᱟᱣ ᱴᱨᱮᱱᱤᱝ ᱠᱷᱩᱞᱟᱹᱜ ᱠᱟᱱᱟ।",
+        en: "Opening Cold-Press Oil Expeller & Processing Course."
+      }
+    };
+  }
+
+  // Course 9: Spice Pulverizer & Masala Packaging
+  if (
+    t.includes("spice") ||
+    t.includes("masala") ||
+    t.includes("pulverizer") ||
+    t.includes("मसाला") ||
+    t.includes("हल्दी") ||
+    t.includes("धनिया") ||
+    t.includes("मिर्च") ||
+    t.includes("मसाला पिसाई") ||
+    t.includes("ମସଲା") ||
+    t.includes("ହଳଦୀ") ||
+    t.includes("ମସଲା ପେଷାଇ")
+  ) {
+    const course = findCourse("nsqf-course-spice-pulverizer-unit", "spice");
+    return {
+      target: "training",
+      courseId: course.id,
+      course: course,
+      confidence: 0.98,
+      displayText: "मसाला पिसाई एवं पैकेजिंग उद्यम (NSQF Level 4)",
+      spokenFeedback: {
+        hi: "मसाला पिसाई एवं पैकेजिंग इकाई कोर्स का विवरण खोला जा रहा है।",
+        or: "ମସଲା ପେଷାଇ ଓ ପ୍ୟାକେଜିଂ ତାଲିମ ଖୋଲାଯାଉଛି।",
+        sat: "ᱢᱚᱥᱞᱟ ᱜᱩᱸᱰᱟᱹ ᱴᱨᱮᱱᱤᱝ ᱠᱷᱩᱞᱟᱹᱜ ᱠᱟᱱᱟ।",
+        en: "Opening Spice Pulverization & Packaging Course."
+      }
+    };
+  }
+
+  // Course 10: Auto Mechanic & Tractor Service Hub
+  if (
+    t.includes("tractor") ||
+    t.includes("auto mechanic") ||
+    t.includes("motorcycle repair") ||
+    t.includes("bike repair") ||
+    t.includes("ट्रैक्टर") ||
+    t.includes("मैकेनिक") ||
+    t.includes("गाड़ी मरम्मत") ||
+    t.includes("ऑटो मैकेनिक") ||
+    t.includes("ଟ୍ରାକ୍ଟର") ||
+    t.includes("ମରାମତି")
+  ) {
+    const course = findCourse("nsqf-course-auto-tractor-mechanic", "tractor");
+    return {
+      target: "training",
+      courseId: course.id,
+      course: course,
+      confidence: 0.98,
+      displayText: "ऑटो मैकेनिक एवं फार्म ट्रैक्टर सर्विस (NSQF Level 4)",
+      spokenFeedback: {
+        hi: "ऑटोमोबाइल एवं फार्म ट्रैक्टर सर्विस मैकेनिक कोर्स खोला जा रहा है।",
+        or: "ଅଟୋ ମେକାନିକ ଓ ଟ୍ରାକ୍ଟର ମରାମତି କୋର୍ସ ଖୋଲାଯାଉଛି।",
+        sat: "ᱴᱨᱮᱠᱴᱚᱨ ᱟᱨ ᱜᱟᱹᱰᱤ ᱵᱮᱱᱟᱣ ᱴᱨᱮᱱᱤᱝ ᱠᱷᱩᱞᱟᱹᱜ ᱠᱟᱱᱟ।",
+        en: "Opening Auto Mechanic & Farm Tractor Service Course."
+      }
+    };
+  }
+
+  // Course 11: Electric Vehicle (EV) Servicing
+  if (
+    t.includes("ev") ||
+    t.includes("electric vehicle") ||
+    t.includes("e-rickshaw") ||
+    t.includes("ई-रिक्शा") ||
+    t.includes("इलेक्ट्रिक वाहन") ||
+    t.includes("ଇ-ରିକ୍ସା") ||
+    t.includes("ଇଲେକ୍ଟ୍ରିକ")
+  ) {
+    const course = findCourse("nsqf-course-ev-servicing", "electric vehicle");
+    return {
+      target: "training",
+      courseId: course.id,
+      course: course,
+      confidence: 0.98,
+      displayText: "इलेक्ट्रिक वाहन (EV) एवं ई-रिक्शा टेक्नीशियन (NSQF Level 4)",
+      spokenFeedback: {
+        hi: "ई-रिक्शा एवं इलेक्ट्रिक वाहन टेक्नीशियन कोर्स खोला जा रहा है।",
+        or: "ଇ-ରିକ୍ସା ଓ ଇଭି ମରାମତି କୋର୍ସ ବିବରଣୀ ଖୋଲାଯାଉଛି।",
+        sat: "EV ᱟᱨ ᱤ-ᱨᱤᱠᱥᱟ ᱴᱨᱮᱱᱤᱝ ᱠᱷᱩᱞᱟᱹᱜ ᱠᱟᱱᱟ।",
+        en: "Opening EV & E-Rickshaw Technician Course."
+      }
+    };
+  }
+
+  // Course 12: Biogas & GOBAR-dhan Plant
+  if (
+    t.includes("biogas") ||
+    t.includes("gobar dhan") ||
+    t.includes("बायोगैस") ||
+    t.includes("गोबर गैस") ||
+    t.includes("गोबर धन") ||
+    t.includes("ବାୟୋଗ୍ୟାସ")
+  ) {
+    const course = findCourse("nsqf-course-biogas-plant-operator", "biogas");
+    return {
+      target: "training",
+      courseId: course.id,
+      course: course,
+      confidence: 0.98,
+      displayText: "बायोगैस एवं गोबर-धन प्लांट ऑपरेटर (NSQF Level 4)",
+      spokenFeedback: {
+        hi: "बायोगैस एवं ग्रामीण अपशिष्ट ऊर्जा प्लांट ऑपरेटर कोर्स खोला जा रहा है।",
+        or: "ବାୟୋଗ୍ୟାସ ପ୍ଲାଣ୍ଟ ଅପରେଟର କୋର୍ସ ଖୋଲାଯାଉଛି।",
+        sat: "ᱵᱟᱭᱳᱜᱮᱥ ᱯᱞᱟᱱᱴ ᱴᱨᱮᱱᱤᱝ ᱠᱷᱩᱞᱟᱹᱜ ᱠᱟᱱᱟ।",
+        en: "Opening Biogas & Rural Waste-to-Energy Plant Course."
+      }
+    };
+  }
+
+  // Course 13: Solar Agri-Pump & Borewell Specialist
+  if (
+    t.includes("solar pump") ||
+    t.includes("agri pump") ||
+    t.includes("submersible") ||
+    t.includes("borewell") ||
+    t.includes("सोलर पंप") ||
+    t.includes("कृषि पंप") ||
+    t.includes("बोरवेल") ||
+    t.includes("ସୌର ପମ୍ପ") ||
+    t.includes("ପମ୍ପ ମରାମତି")
+  ) {
+    const course = findCourse("nsqf-course-solar-agri-pump", "solar pv agri-pump");
+    return {
+      target: "training",
+      courseId: course.id,
+      course: course,
+      confidence: 0.98,
+      displayText: "सोलर पीवी कृषि पंप विशेषज्ञ (NSQF Level 4)",
+      spokenFeedback: {
+        hi: "सोलर कृषि पंप एवं सबमर्सिबल मोटर विशेषज्ञ कोर्स खोला जा रहा है।",
+        or: "ସୌର କୃଷି ପମ୍ପ ଓ ମୋଟର ୱାଇଣ୍ଡିଂ କୋର୍ସ ଖୋଲାଯାଉଛି।",
+        sat: "ᱥᱳᱞᱟᱨ ᱯᱟᱢᱯ ᱴᱨᱮᱱᱤᱝ ᱠᱷᱩᱞᱟᱹᱜ ᱠᱟᱱᱟ।",
+        en: "Opening Solar PV Agri-Pump Specialist Course."
+      }
+    };
+  }
+
+  // Course 14: Solar Rooftop & Suryamitra
+  if (
+    t.includes("solar") ||
+    t.includes("suryamitra") ||
+    t.includes("rooftop") ||
+    t.includes("सूर्यमित्र") ||
+    t.includes("सोलर") ||
+    t.includes("रूफटॉप") ||
+    t.includes("ସୋଲାର") ||
+    t.includes("ସୌର") ||
+    t.includes("ସୂର୍ଯ୍ୟମିତ୍ର")
+  ) {
+    const course = findCourse("nsqf-course-solar-rooftop-tech", "solar rooftop");
+    return {
+      target: "training",
+      courseId: course.id,
+      course: course,
+      confidence: 0.98,
+      displayText: "सोलर रूफटॉप एवं सूर्यमित्र (NSQF Level 4)",
+      spokenFeedback: {
+        hi: "सोलर रूफटॉप एवं सूर्यमित्र कोर्स का विवरण खोला जा रहा है।",
+        or: "ସୌର ପିଭି ସୂର୍ଯ୍ୟମିତ୍ର କୋର୍ସ ବିବରଣୀ ଖୋଲାଯାଉଛି।",
+        sat: "ᱥᱳᱞᱟᱨ ᱯᱤᱵᱷᱤ ᱥᱩᱨᱭᱚᱢᱤᱛᱨᱚ ᱴᱨᱮᱱᱤᱝ ᱠᱷᱩᱞᱟᱹᱜ ᱠᱟᱱᱟ।",
+        en: "Opening Solar Rooftop & Suryamitra Course."
+      }
+    };
+  }
+
+  // Course 15: Solar CCTV & Smart Village Wi-Fi
+  if (
+    t.includes("cctv") ||
+    t.includes("camera") ||
+    t.includes("wifi") ||
+    t.includes("surveillance") ||
+    t.includes("कैमरा") ||
+    t.includes("सीसीटीवी") ||
+    t.includes("वाईफाई") ||
+    t.includes("ସିସିଟିଭି") ||
+    t.includes("କ୍ୟାମେରା")
+  ) {
+    const course = findCourse("nsqf-course-cctv-village-security", "cctv");
+    return {
+      target: "training",
+      courseId: course.id,
+      course: course,
+      confidence: 0.98,
+      displayText: "सोलर सीसीटीवी एवं स्मार्ट वाई-फाई नेटवर्क (NSQF Level 4)",
+      spokenFeedback: {
+        hi: "सोलर सीसीटीवी कैमरा एवं ग्राम वाई-फाई नेटवर्क कोर्स खोला जा रहा है।",
+        or: "ସୋଲାର ସିସିଟିଭି ଓ ଗ୍ରାମ ୱାଇ-ଫାଇ ନେଟୱର୍କ କୋର୍ସ ଖୋଲାଯାଉଛି।",
+        sat: "CCTV ᱟᱨ Wi-Fi ᱴᱨᱮᱱᱤᱝ ᱠᱷᱩᱞᱟᱹᱜ ᱠᱟᱱᱟ।",
+        en: "Opening Solar CCTV & Smart Village Wi-Fi Course."
+      }
+    };
+  }
+
+  // Course 16: Modern Masonry, Fly-Ash Brick & PMAY
+  if (
+    t.includes("mason") ||
+    t.includes("masonry") ||
+    t.includes("brick") ||
+    t.includes("flyash") ||
+    t.includes("मिस्त्री") ||
+    t.includes("राजमिस्त्री") ||
+    t.includes("ईंट") ||
+    t.includes("फ्लाई ऐश") ||
+    t.includes("भवन निर्माण") ||
+    t.includes("ରାଜମିସ୍ତ୍ରୀ") ||
+    t.includes("ଇଟା")
+  ) {
+    const course = findCourse("nsqf-course-masonry-flyash-brick", "masonry");
+    return {
+      target: "training",
+      courseId: course.id,
+      course: course,
+      confidence: 0.98,
+      displayText: "आधुनिक राजमिस्त्री एवं फ्लाई-ऐश ईंट निर्माण (NSQF Level 4)",
+      spokenFeedback: {
+        hi: "आधुनिक राजमिस्त्री एवं फ्लाई-ऐश ईंट निर्माण कोर्स खोला जा रहा है।",
+        or: "ଆଧୁନିକ ରାଜମିସ୍ତ୍ରୀ ଓ ଫ୍ଲାଏ-ଆଶ ଇଟା ନିର୍ମାଣ କୋର୍ସ ଖୋଲାଯାଉଛି।",
+        sat: "ᱨᱟᱡᱽᱢᱤᱥᱛᱨᱤ ᱟᱨ ᱤᱴᱟᱹ ᱵᱮᱱᱟᱣ ᱴᱨᱮᱱᱤᱝ ᱠᱷᱩᱞᱟᱹᱜ ᱠᱟᱱᱟ।",
+        en: "Opening Modern Masonry & Fly-Ash Brick Course."
+      }
+    };
+  }
+
+  // Course 17: Plumbing & Village RO Water Plant
+  if (
+    t.includes("plumbing") ||
+    t.includes("ro plant") ||
+    t.includes("pipe") ||
+    t.includes("tap") ||
+    t.includes("water treatment") ||
+    t.includes("नल") ||
+    t.includes("प्लंबर") ||
+    t.includes("प्लंबिंग") ||
+    t.includes("आरओ प्लांट") ||
+    t.includes("जल जीवन") ||
+    t.includes("ପାଇପ୍") ||
+    t.includes("ପାଣି ଫିଲ୍ଟର")
+  ) {
+    const course = findCourse("nsqf-course-plumbing-water-plant", "plumbing");
+    return {
+      target: "training",
+      courseId: course.id,
+      course: course,
+      confidence: 0.98,
+      displayText: "प्लंबिंग एवं आरओ वाटर प्लांट ऑपरेटर (NSQF Level 3)",
+      spokenFeedback: {
+        hi: "जल जीवन मिशन प्लंबिंग एवं आरओ वाटर प्लांट कोर्स खोला जा रहा है।",
+        or: "ପ୍ଲମ୍ବିଂ ଓ ଗ୍ରାମ ଆରଓ ପାଣି ପ୍ଲାଣ୍ଟ ତାଲିମ ଖୋଲାଯାଉଛି।",
+        sat: "ᱯᱞᱟᱢᱵᱤᱝ ᱟᱨ ᱫᱟᱜ ᱯᱞᱟᱱᱴ ᱴᱨᱮᱱᱤᱝ ᱠᱷᱩᱞᱟᱹᱜ ᱠᱟᱱᱟ।",
+        en: "Opening Plumbing & RO Water Plant Operator Course."
+      }
+    };
+  }
+
+  // Course 18: Common Service Center (CSC) & e-Gram
+  if (
+    t.includes("csc") ||
+    t.includes("computer") ||
+    t.includes("digital") ||
+    t.includes("e-gram") ||
+    t.includes("aadhar") ||
+    t.includes("pan card") ||
+    t.includes("कंप्यूटर") ||
+    t.includes("सीएससी") ||
+    t.includes("ई-ग्राम") ||
+    t.includes("आधार") ||
+    t.includes("ସିଏସସି") ||
+    t.includes("କମ୍ପ୍ୟୁଟର") ||
+    t.includes("ଆଧାର")
+  ) {
+    const course = findCourse("nsqf-course-csc-digital-gram", "csc");
+    return {
+      target: "training",
+      courseId: course.id,
+      course: course,
+      confidence: 0.98,
+      displayText: "कॉमन सर्विस सेंटर (CSC) एवं डिजिटल ई-ग्राम (NSQF Level 4)",
+      spokenFeedback: {
+        hi: "सीएससी एवं डिजिटल ई-ग्राम केंद्र ऑपरेटर कोर्स खोला जा रहा है।",
+        or: "ସିଏସସି ଓ ଡିଜିଟାଲ ଇ-ଗ୍ରାମ କେନ୍ଦ୍ର କୋର୍ସ ଖୋଲାଯାଉଛି।",
+        sat: "CSC ᱟᱨ ᱠᱚᱢᱯᱤᱭᱩᱴᱟᱨ ᱴᱨᱮᱱᱤᱝ ᱠᱷᱩᱞᱟᱹᱜ ᱠᱟᱱᱟ।",
+        en: "Opening CSC & Digital e-Gram Operator Course."
+      }
+    };
+  }
+
+  // Course 19: Telemedicine & Village Diagnostic Point
+  if (
+    t.includes("telemedicine") ||
+    t.includes("e-sanjeevani") ||
+    t.includes("diagnostic") ||
+    t.includes("टेलीमेडिसिन") ||
+    t.includes("ई-संजीवनी") ||
+    t.includes("जांच केंद्र") ||
+    t.includes("ଇ-ସଞ୍ଜୀବନୀ") ||
+    t.includes("ରକ୍ତ ପରୀକ୍ଷା")
+  ) {
+    const course = findCourse("nsqf-course-telemedicine-operator", "telemedicine");
+    return {
+      target: "training",
+      courseId: course.id,
+      course: course,
+      confidence: 0.98,
+      displayText: "टेलीमेडिसिन एवं ग्राम डायग्नोस्टिक पॉइंट (NSQF Level 4)",
+      spokenFeedback: {
+        hi: "टेलीमेडिसिन एवं डिजिटल हेल्थ डायग्नोस्टिक कोर्स खोला जा रहा है।",
+        or: "ଟେଲିମେଡିସିନ ଓ ଡାଇଗ୍ନୋଷ୍ଟିକ୍ କେନ୍ଦ୍ର ତାଲିମ ଖୋଲାଯାଉଛି।",
+        sat: "ᱴᱮᱞᱤᱢᱮᱰᱤᱥᱤᱱ ᱴᱨᱮᱱᱤᱝ ᱠᱷᱩᱞᱟᱹᱜ ᱠᱟᱱᱟ।",
+        en: "Opening Telemedicine & Village Diagnostic Point Course."
+      }
+    };
+  }
+
+  // Course 20: Healthcare General Duty Assistant (GDA)
+  if (
+    t.includes("hospital") ||
+    t.includes("health") ||
+    t.includes("nursing") ||
+    t.includes("gda") ||
+    t.includes("patient") ||
+    t.includes("स्वास्थ्य") ||
+    t.includes("अस्पताल") ||
+    t.includes("नर्सिंग") ||
+    t.includes("जीडीए") ||
+    t.includes("ଡାକ୍ତରଖାନା") ||
+    t.includes("ସ୍ୱାସ୍ଥ୍ୟ") ||
+    t.includes("ରୋଗୀ ସେବା")
+  ) {
+    const course = findCourse("nsqf-course-healthcare-gda", "healthcare");
+    return {
+      target: "training",
+      courseId: course.id,
+      course: course,
+      confidence: 0.98,
+      displayText: "हेल्थकेयर जनरल ड्यूटी असिस्टेंट (NSQF Level 4)",
+      spokenFeedback: {
+        hi: "हेल्थकेयर जनरल ड्यूटी असिस्टेंट कोर्स का विवरण खोला जा रहा है।",
+        or: "ସ୍ୱାସ୍ଥ୍ୟ ସହାୟକ କୋର୍ସ ବିବରଣୀ ଖୋଲାଯାଉଛି।",
+        sat: "ᱦᱟᱥᱯᱟᱛᱟᱞ ᱜᱚᱲᱚ ᱴᱨᱮᱱᱤᱝ ᱠᱷᱩᱞᱟᱹᱜ ᱠᱟᱱᱟ।",
+        en: "Opening Healthcare General Duty Assistant Course."
+      }
+    };
+  }
+
+  // Course 21: Ayush Herbal Medicine & Distillation
+  if (
+    t.includes("ayush") ||
+    t.includes("herbal") ||
+    t.includes("medicinal") ||
+    t.includes("lemongrass") ||
+    t.includes("tulsi") ||
+    t.includes("essential oil") ||
+    t.includes("जड़ी बूटी") ||
+    t.includes("आयुष") ||
+    t.includes("आयुर्वेद") ||
+    t.includes("तुलसी") ||
+    t.includes("ଆୟୁଷ") ||
+    t.includes("ତୁଳସୀ") ||
+    t.includes("ଔଷଧୀୟ ଗଛ")
+  ) {
+    const course = findCourse("nsqf-course-ayush-herbal-distillation", "ayush");
+    return {
+      target: "training",
+      courseId: course.id,
+      course: course,
+      confidence: 0.98,
+      displayText: "आयुष हर्बल एवं एसेंशियल ऑयल डिस्टिलेशन (NSQF Level 4)",
+      spokenFeedback: {
+        hi: "आयुष हर्बल औषधि एवं तेल डिस्टिलेशन कोर्स खोला जा रहा है।",
+        or: "ଆୟୁଷ ଔଷଧୀୟ ଉଦ୍ଭିଦ ଓ ତେଲ ନିଷ୍କାସନ ତାଲିମ ଖୋଲାଯାଉଛି।",
+        sat: "ᱡᱟᱹᱲᱤ ᱵᱩᱴᱤ ᱟᱨ ᱟᱭᱩᱥ ᱴᱨᱮᱱᱤᱝ ᱠᱷᱩᱞᱟᱹᱜ ᱠᱟᱱᱟ।",
+        en: "Opening Ayush Herbal & Essential Oil Distillation Course."
+      }
+    };
+  }
+
+  // Course 22: Jacquard Handloom Weaving
+  if (
+    t.includes("handloom") ||
+    t.includes("weaving") ||
+    t.includes("jacquard") ||
+    t.includes("saree") ||
+    t.includes("loom") ||
+    t.includes("हथकरघा") ||
+    t.includes("बुनकर") ||
+    t.includes("साड़ी") ||
+    t.includes("ଜାକାର୍ଡ") ||
+    t.includes("ବୁଣାକାର") ||
+    t.includes("ଶାଢ଼ୀ")
+  ) {
+    const course = findCourse("nsqf-course-handloom-jacquard", "handloom");
+    return {
+      target: "training",
+      courseId: course.id,
+      course: course,
+      confidence: 0.98,
+      displayText: "जैकर्ड हथकरघा एवं पारंपरिक वस्त्र (NSQF Level 4)",
+      spokenFeedback: {
+        hi: "जैकर्ड हथकरघा एवं पारंपरिक वस्त्र बुनाई कोर्स खोला जा रहा है।",
+        or: "ଜାକାର୍ଡ ହସ୍ତତନ୍ତ ଓ ଶାଢ଼ୀ ବୁଣା ତାଲିମ ଖୋଲାଯାଉଛି।",
+        sat: "ᱞᱩᱜᱽᱲᱤ ᱛᱮᱧ ᱴᱨᱮᱱᱤᱝ ᱠᱷᱩᱞᱟᱹᱜ ᱠᱟᱱᱟ।",
+        en: "Opening Jacquard Handloom & Traditional Textile Course."
+      }
+    };
+  }
+
+  // Course 23: Bamboo Craft & Eco Lifestyle
+  if (
+    t.includes("bamboo") ||
+    t.includes("craft") ||
+    t.includes("cane") ||
+    t.includes("बांस") ||
+    t.includes("बांस शिल्प") ||
+    t.includes("हस्तशिल्प") ||
+    t.includes("ବାଉଁଶ") ||
+    t.includes("ବାଉଁଶ କାମ") ||
+    t.includes("ମᱟᱫ")
+  ) {
+    const course = findCourse("nsqf-course-bamboo-craft-design", "bamboo");
+    return {
+      target: "training",
+      courseId: course.id,
+      course: course,
+      confidence: 0.98,
+      displayText: "बांस शिल्प एवं इको-लाइफस्टाइल उत्पाद (NSQF Level 3)",
+      spokenFeedback: {
+        hi: "बांस शिल्प एवं इको-लाइफस्टाइल उत्पाद कोर्स खोला जा रहा है।",
+        or: "ବାଉଁଶ ହସ୍ତଶିଳ୍ପ ଓ ଉତ୍ପାଦ ତାଲିମ ଖୋଲାଯାଉଛି।",
+        sat: "ᱢᱟᱫ ᱦᱩᱱᱟᱹᱨ ᱴᱨᱮᱱᱤᱝ ᱠᱷᱩᱞᱟᱹᱜ ᱠᱟᱱᱟ।",
+        en: "Opening Bamboo Craft Design Course."
+      }
+    };
+  }
+
+  // Course 24: Tailoring, Garment & Boutique
+  if (
+    t.includes("tailor") ||
+    t.includes("tailoring") ||
+    t.includes("silai") ||
+    t.includes("sewing") ||
+    t.includes("boutique") ||
+    t.includes("सिलाई") ||
+    t.includes("दर्जी") ||
+    t.includes("सिलाई मशीन") ||
+    t.includes("बुटीक") ||
+    t.includes("ସିଲେଇ") ||
+    t.includes("ସିଲେଇ ମେସିନ") ||
+    t.includes("ଲୁଗା")
+  ) {
+    const course = findCourse("nsqf-course-tailoring-boutique", "tailoring");
+    return {
+      target: "training",
+      courseId: course.id,
+      course: course,
+      confidence: 0.98,
+      displayText: "सिलाई, परिधान एवं फैशन बुटीक (NSQF Level 3)",
+      spokenFeedback: {
+        hi: "सिलाई, गारमेंट एवं बुटीक कोर्स का विवरण खोला जा रहा है।",
+        or: "ସିଲେଇ ଓ ଫ୍ୟାସନ ବୁଟିକ୍ ତାଲିମ ବିବରଣୀ ଖୋଲାଯାଉଛି।",
+        sat: "ᱥᱤᱞᱟᱹᱭ NSQF Level 3 ᱴᱨᱮᱱᱤᱝ ᱠᱷᱩᱞᱟᱹᱜ ᱠᱟᱱᱟ।",
+        en: "Opening Tailoring, Garment Making & Boutique Course."
+      }
+    };
+  }
+
+  // Course 25: Terracotta & Ceramic Pottery
+  if (
+    t.includes("pottery") ||
+    t.includes("clay") ||
+    t.includes("terracotta") ||
+    t.includes("ceramic") ||
+    t.includes("earthenware") ||
+    t.includes("kulhad") ||
+    t.includes("कुम्हार") ||
+    t.includes("मिट्टी के बर्तन") ||
+    t.includes("टेराकोटा") ||
+    t.includes("कुल्हड़") ||
+    t.includes("ମାଟି ପାତ୍ର") ||
+    t.includes("କୁମ୍ଭାର")
+  ) {
+    const course = findCourse("nsqf-course-terracotta-pottery", "pottery");
+    return {
+      target: "training",
+      courseId: course.id,
+      course: course,
+      confidence: 0.98,
+      displayText: "टेराकोटा एवं सेरेमिक पॉटरी स्टूडियो (NSQF Level 3)",
+      spokenFeedback: {
+        hi: "टेराकोटा एवं इलेक्ट्रिक व्हील पॉटरी कोर्स खोला जा रहा है।",
+        or: "ମାଟି ପାତ୍ର ଓ ଟେରାକୋଟା ତାଲିମ ଖୋଲାଯାଉଛି।",
+        sat: "ᱦᱟᱥᱟ ᱵᱟᱥᱚᱱ ᱵᱮᱱᱟᱣ ᱴᱨᱮᱱᱤᱝ ᱠᱷᱩᱞᱟᱹᱜ ᱠᱟᱱᱟ।",
+        en: "Opening Terracotta & Ceramic Pottery Course."
+      }
+    };
+  }
+
+  // Course 26: Electrician
   if (
     t.includes("electrician") ||
     t.includes("electrical") ||
@@ -288,10 +1025,10 @@ export function parseVoiceNavigationIntent(
     t.includes("बिजली") ||
     t.includes("बिजली मिस्त्री")
   ) {
-    const course = RECOMMENDED_COURSES.find((c) => c.id === "course-1") || RECOMMENDED_COURSES[0];
+    const course = findCourse("course-1", "electrician");
     return {
       target: "training",
-      courseId: "course-1",
+      courseId: course.id,
       course: course,
       confidence: 0.98,
       displayText: "इलेक्ट्रीशियन कोर्स (NSQF Level 4)",
@@ -300,201 +1037,6 @@ export function parseVoiceNavigationIntent(
         or: "ଇଲେକ୍ଟ୍ରିସିଆନ୍ NSQF ଲେଭଲ ୪ କୋର୍ସ ବିବରଣୀ ଖୋଲାଯାଉଛି।",
         sat: "ᱤᱞᱮᱠᱴᱨᱤᱥᱤᱭᱟᱱ NSQF Level 4 ᱴᱨᱮᱱᱤᱝ ᱠᱷᱩᱞᱟᱹᱜ ᱠᱟᱱᱟ।",
         en: "Opening Electrician NSQF Level 4 Course."
-      }
-    };
-  }
-
-  // Course 2: Tailoring / Sewing
-  if (
-    t.includes("tailor") ||
-    t.includes("tailoring") ||
-    t.includes("silai") ||
-    t.includes("sewing") ||
-    t.includes("kapda") ||
-    t.includes("dress") ||
-    t.includes("apparel") ||
-    t.includes("ସିଲେଇ") ||
-    t.includes("ଲୁଗା") ||
-    t.includes("सिलाई") ||
-    t.includes("दर्जी") ||
-    t.includes("कपड़े")
-  ) {
-    const course = RECOMMENDED_COURSES.find((c) => c.id === "course-2") || RECOMMENDED_COURSES[1];
-    return {
-      target: "training",
-      courseId: "course-2",
-      course: course,
-      confidence: 0.98,
-      displayText: "सिलाई एवं परिधान (Tailoring)",
-      spokenFeedback: {
-        hi: "सिलाई एवं परिधान NSQF Level 3 कोर्स का विवरण खोला जा रहा है।",
-        or: "ସିଲେଇ ଓ ପରିଧାନ NSQF ଲେଭଲ ୩ କୋର୍ସ ବିବରଣୀ ଖୋଲାଯାଉଛି।",
-        sat: "ᱥᱤᱞᱟᱹᱭ NSQF Level 3 ᱴᱨᱮᱱᱤᱝ ᱠᱷᱩᱞᱟᱹᱜ ᱠᱟᱱᱟ।",
-        en: "Opening Tailoring & Apparel Training Course."
-      }
-    };
-  }
-
-  // Course 3: Food Processing
-  if (
-    t.includes("food processing") ||
-    t.includes("food") ||
-    t.includes("achar") ||
-    t.includes("papad") ||
-    t.includes("preservation") ||
-    t.includes("खाद्य प्रसंस्करण") ||
-    t.includes("खाद्य") ||
-    t.includes("आचार") ||
-    t.includes("ଖାଦ୍ୟ") ||
-    t.includes("ଖାଦ୍ୟ ପ୍ରକ୍ରିୟାକରଣ")
-  ) {
-    const course = RECOMMENDED_COURSES.find((c) => c.id === "course-3") || RECOMMENDED_COURSES[2];
-    return {
-      target: "training",
-      courseId: "course-3",
-      course: course,
-      confidence: 0.98,
-      displayText: "खाद्य प्रसंस्करण (Food Processing)",
-      spokenFeedback: {
-        hi: "खाद्य प्रसंस्करण NSQF Level 4 कोर्स का विवरण खोला जा रहा है।",
-        or: "ଖାଦ୍ୟ ପ୍ରକ୍ରିୟାକରଣ NSQF ଲେଭଲ ୪ କୋର୍ସ ବିବରଣୀ ଖୋଲାଯାଉଛି।",
-        sat: "ᱡᱚᱢᱟᱜ ᱯᱨᱚᱥᱮᱥᱤᱝ ᱴᱨᱮᱱᱤᱝ ᱠᱷᱩᱞᱟᱹᱜ ᱠᱟᱱᱟ।",
-        en: "Opening Food Processing Training Course."
-      }
-    };
-  }
-
-  // Course 4: Solar PV Technician
-  if (
-    t.includes("solar") ||
-    t.includes("suryamitra") ||
-    t.includes("rooftop") ||
-    t.includes("सूर्यमित्र") ||
-    t.includes("सोलर") ||
-    t.includes("ସୋଲାର") ||
-    t.includes("ସୌର")
-  ) {
-    const course = RECOMMENDED_COURSES.find((c) => c.id === "course-4") || RECOMMENDED_COURSES[3];
-    return {
-      target: "training",
-      courseId: "course-4",
-      course: course,
-      confidence: 0.98,
-      displayText: "सोलर पीवी टेक्नीशियन (Suryamitra)",
-      spokenFeedback: {
-        hi: "सोलर पीवी सूर्यमित्र कोर्स का विवरण खोला जा रहा है।",
-        or: "ସୌର ପିଭି ସୂର୍ଯ୍ୟମିତ୍ର କୋର୍ସ ବିବରଣୀ ଖୋଲାଯାଉଛି।",
-        sat: "ᱥᱳᱞᱟᱨ ᱯᱤᱵᱷᱤ ᱥᱩᱨᱭᱚᱢᱤᱛᱨᱚ ᱴᱨᱮᱱᱤᱝ ᱠᱷᱩᱞᱟᱹᱜ ᱠᱟᱱᱟ।",
-        en: "Opening Solar PV Technician Suryamitra Course."
-      }
-    };
-  }
-
-  // Course 5: Healthcare GDA
-  if (
-    t.includes("hospital") ||
-    t.includes("health") ||
-    t.includes("nursing") ||
-    t.includes("gda") ||
-    t.includes("patient") ||
-    t.includes("स्वास्थ्य") ||
-    t.includes("अस्पताल") ||
-    t.includes("ଡାକ୍ତରଖାନା") ||
-    t.includes("ସ୍ୱାସ୍ଥ୍ୟ")
-  ) {
-    const course = RECOMMENDED_COURSES.find((c) => c.id === "course-5") || RECOMMENDED_COURSES[4];
-    return {
-      target: "training",
-      courseId: "course-5",
-      course: course,
-      confidence: 0.98,
-      displayText: "हेल्थकेयर असिस्टेंट (GDA)",
-      spokenFeedback: {
-        hi: "हेल्थकेयर जनरल ड्यूटी असिस्टेंट कोर्स का विवरण खोला जा रहा है।",
-        or: "ସ୍ୱାସ୍ଥ୍ୟ ସହାୟକ କୋର୍ସ ବିବରଣୀ ଖୋଲାଯାଉଛି।",
-        sat: "ᱦᱟᱥᱯᱟᱛᱟᱞ ᱜᱚᱲᱚ ᱴᱨᱮᱱᱤᱝ ᱠᱷᱩᱞᱟᱹᱜ ᱠᱟᱱᱟ।",
-        en: "Opening Healthcare General Duty Assistant Course."
-      }
-    };
-  }
-
-  // Course 6: Bamboo Handicraft
-  if (
-    t.includes("bamboo") ||
-    t.includes("handicraft") ||
-    t.includes("artisan") ||
-    t.includes("बांस") ||
-    t.includes("हस्तशिल्प") ||
-    t.includes("ବାଉଁଶ") ||
-    t.includes("ହସ୍ତଶିଳ୍ପ")
-  ) {
-    const course = RECOMMENDED_COURSES.find((c) => c.id === "course-6") || RECOMMENDED_COURSES[5];
-    return {
-      target: "training",
-      courseId: "course-6",
-      course: course,
-      confidence: 0.98,
-      displayText: "बांस एवं हस्तशिल्प (Bamboo Artisan)",
-      spokenFeedback: {
-        hi: "बांस एवं हस्तशिल्प ट्रेनिंग का विवरण खोला जा रहा है।",
-        or: "ବାଉଁଶ ଓ ହସ୍ତଶିଳ୍ପ ତାଲିମ ବିବରଣୀ ଖୋଲାଯାଉଛି।",
-        sat: "ᱢᱟᱫ ᱟᱨ ᱦᱩᱱᱟᱹᱨ ᱴᱨᱮᱱᱤᱝ ᱠᱷᱩᱞᱟᱹᱜ ᱠᱟᱱᱟ।",
-        en: "Opening Bamboo Handicraft Artisan Course."
-      }
-    };
-  }
-
-  // Course 7: Mobile Repair
-  if (
-    t.includes("mobile") ||
-    t.includes("smartphone") ||
-    t.includes("phone repair") ||
-    t.includes("मोबाइल") ||
-    t.includes("फोन") ||
-    t.includes("ମୋବାଇଲ") ||
-    t.includes("ଫୋନ")
-  ) {
-    const course = RECOMMENDED_COURSES.find((c) => c.id === "course-7") || RECOMMENDED_COURSES[6];
-    return {
-      target: "training",
-      courseId: "course-7",
-      course: course,
-      confidence: 0.98,
-      displayText: "मोबाइल रिपेयर एवं डायग्नोस्टिक्स",
-      spokenFeedback: {
-        hi: "मोबाइल हार्डवेयर रिपेयर कोर्स का विवरण खोला जा रहा है।",
-        or: "ମୋବାଇଲ୍ ମରାମତି କୋର୍ସ ବିବରଣୀ ଖୋଲାଯାଉଛି।",
-        sat: "ᱢᱳᱵᱟᱭᱤᱞ ᱵᱮᱱᱟᱣ ᱴᱨᱮᱱᱤᱝ ᱠᱷᱩᱞᱟᱹᱜ ᱠᱟᱱᱟ।",
-        en: "Opening Mobile Hardware & Diagnostics Course."
-      }
-    };
-  }
-
-  // Course 8: Organic Farming
-  if (
-    t.includes("organic") ||
-    t.includes("farming") ||
-    t.includes("compost") ||
-    t.includes("kheti") ||
-    t.includes("krishi") ||
-    t.includes("जैविक खेती") ||
-    t.includes("कृषि") ||
-    t.includes("खाद") ||
-    t.includes("ଜୈବିକ କୃଷି") ||
-    t.includes("ଚାଷ")
-  ) {
-    const course = RECOMMENDED_COURSES.find((c) => c.id === "course-8") || RECOMMENDED_COURSES[7];
-    return {
-      target: "training",
-      courseId: "course-8",
-      course: course,
-      confidence: 0.98,
-      displayText: "जैविक खेती एवं वर्मीकम्पोस्ट",
-      spokenFeedback: {
-        hi: "जैविक खेती एवं वर्मीकम्पोस्ट कोर्स का विवरण खोला जा रहा है।",
-        or: "ଜୈବିକ କୃଷି ଓ ଖତ କୋର୍ସ ବିବରଣୀ ଖୋଲାଯାଉଛି।",
-        sat: "ᱡᱮᱣᱤᱠ ᱪᱟᱥ ᱴᱨᱮᱱᱤᱝ ᱠᱷᱩᱞᱟᱹᱜ ᱠᱟᱱᱟ।",
-        en: "Opening Organic Farming & Vermicompost Course."
       }
     };
   }

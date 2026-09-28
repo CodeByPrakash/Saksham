@@ -37,6 +37,7 @@
 | **Gemini Multi-Model Fallback Matrix** | `2.5-flash`, `1.5-flash`, `2.0-flash`, `flash-lite`, `1.5-flash-8b` | LLM Models | High-availability resilience layer in `lib/ai/gemini.ts` and `/api/ai/onboarding-agent`. Automatically cycles to the fastest available model to guarantee sub-second latency and zero downtime for rural users. |
 | **Voice Onboarding AI Agent** | Custom Engine (`/api/ai/onboarding-agent`) | Conversational AI | Evaluates spoken inputs against 4 progressive profile milestones: Name & District extraction, NSQF skill categorization, educational qualification mapping, and PM-AJAY capital subsidy alignment. Cleans colloquial noise, prefixes, and conversational prepositions. |
 | **Livelihood Copilot Agent** | Custom Route (`/api/ai/copilot`) | Decision Intelligence | Provides contextual advice on NSQF-certified vocational courses (Solar PV, Agri-Pump Repair, Food Processing, Tailoring), PM-AJAY ₹3,500/month stipends, and nearest certified skill center logistics. |
+| **Dynamic Skill & NSQF Training Page Synthesis Engine** | Custom Engine (`lib/skillTrainingGenerator.ts`) | AI Program Synthesis | Automatically detects any new skill from worker profiles, voice onboarding, or PM-AJAY assessments (e.g. Solar Pump, Drone Spraying, EV Servicing, Mushroom Cultivation, Handloom, Micro-Enterprise) and dynamically synthesizes a complete NSQF Qualification Pack (QP/NOS code, NSQF Level 3-5, ₹3,500/mo DBT stipend, district training center, 4-module curriculum, and dedicated interactive training page). |
 | **Multimodal Audio Transcriber** | Custom Route (`/api/ai/voice`) | Speech-to-Text | Fallback Gemini multimodal audio transcription parsing base64 WebM/WAV voice notes in rural Indic dialects. |
 
 ---
@@ -147,9 +148,16 @@
    - **Technologies**: Next.js Server Components, Tailwind CSS v4, Lucide React, Radix UI Slot.
    - **Capabilities**: Real-time beneficiary status tracking, district-level saturation indices, PM-AJAY micro-enterprise grant disbursements, and training center capacity utilization.
 
-5. **Universal Voice Navigator (`GlobalVoiceNavigator.tsx`)**:
-   - **Technologies**: Web Speech Recognition, Gemini Livelihood Agent, React Portals.
-   - **Capabilities**: Floating audio assistant providing hands-free platform navigation for low-literacy users across the entire web and mobile app.
+5. **Universal Voice Navigator & Intent Classifier (`GlobalVoiceNavigator.tsx`, `lib/ai/voiceNavigation.ts`)**:
+   - **Technologies**: Web Speech Recognition, Phonetic Multilingual Intent Classifier, Client-Side TTS, React Portals.
+   - **Capabilities**: Hands-free voice navigation across 25+ specific NSQF courses, jobs, schemes, profiles, and administrative dashboards in Hindi, Odia, Santhali, Bengali, Marathi, Telugu, and English with audio feedback.
+
+6. **Section-Wise NSQF Skill & Livelihood Hub (`MobileTrainingPage.tsx`, `MobileTrainingDetailPage.tsx`, `WebDashboard.tsx`)**:
+   - **Technologies**: React 19, Framer Motion, Tailwind CSS v4, Lucide React, Custom Synthesis Engine (`lib/skillTrainingGenerator.ts`).
+   - **Capabilities**:
+     - **6 Core Sectors**: Green Energy & Tech, Agriculture & Allied, Handicrafts & SHG, Healthcare & Community, Digital & Infrastructure, Agro-Mills & PM-AJAY Grants.
+     - **25 Comprehensive NSQF Courses**: Solar PV Agri-Pump, Kisan Drone Pilot, EV 2W/3W Technician, Biogas Plant, Commercial Mushroom & Spawn, Dairy Processing, Apiculture Honey, Poultry Hatchery, Fisheries Biofloc, Shree Anna Millet Bakery, Cold-Press Oil Mill, Spice Pulverization, Auto & Tractor Mechanic, Solar CCTV & Wi-Fi, Modern Masonry & Fly-Ash Brick, Plumbing RO Plant, CSC Digital e-Gram, Telemedicine Clinic, Healthcare GDA, Ayush Herbal Distillation, Jacquard Handloom, Bamboo Craft, Fashion Boutique, Terracotta Pottery, and Electrician.
+     - **Pervasive AI Access**: 1-Tap "Ask AI Copilot" prompts on every course card and detail view, instant vernacular TTS playback, dynamic syllabus accordions, wage vs. enterprise earnings, and PM-AJAY DBT stipend breakdown.
 
 ---
 

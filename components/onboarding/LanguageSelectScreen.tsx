@@ -336,7 +336,7 @@ export function LanguageSelectScreen({
 
   /**
    * Voice Recognition for Language Choice:
-   * AI speaks short prompt first, THEN microphone opens with ZERO audio collision.
+   * Opens microphone and listens to user's spoken sentence in any Indian language/dialect.
    */
   const startVoiceLanguageSelection = () => {
     if (voiceFlowState === "user_listening" || voiceFlowState === "processing") {
@@ -346,36 +346,18 @@ export function LanguageSelectScreen({
       return;
     }
 
-    if (voiceFlowState === "ai_speaking") {
-      stopAllVoiceAndAudio();
-      isMatchingLockRef.current = false;
-      startMicListening();
-      return;
-    }
-
     stopAllVoiceAndAudio();
     isMatchingLockRef.current = false;
     setSpokenTranscript("");
     latestTranscriptRef.current = "";
 
-    // If muted, start mic immediately
-    if (isMuted) {
-      startMicListening();
-      return;
-    }
-
-    // Step 1: AI voice speaks short instruction prompt first
-    setVoiceFlowState("ai_speaking");
-    const promptText = "अपनी भाषा में कुछ भी बोलिए";
-
-    playSpokenPrompt(promptText, "hi", false, () => {
-      // Step 2: AI completed speech! Now open microphone with zero audio collision.
-      startMicListening();
-    });
+    startMicListening();
   };
 
   const startMicListening = () => {
     setVoiceFlowState("user_listening");
+    setSpokenTranscript("");
+    latestTranscriptRef.current = "";
 
     if (
       typeof window !== "undefined" &&
@@ -386,9 +368,11 @@ export function LanguageSelectScreen({
           (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
         const rec = new SpeechRecognition();
         recognitionRef.current = rec;
-        rec.continuous = true;
+        rec.continuous = false;
         rec.interimResults = true;
-        rec.maxAlternatives = 5;
+        rec.maxAlternatives = 3;
+        // Default to Indian English / Hindi multilingual recognizer
+        rec.lang = "hi-IN";
 
         rec.onstart = () => {
           setVoiceFlowState("user_listening");
@@ -397,94 +381,84 @@ export function LanguageSelectScreen({
         rec.onresult = (e: any) => {
           if (isMatchingLockRef.current) return;
 
-          let fullTranscript = "";
+          let finalTranscript = "";
+          let interimTranscript = "";
+
           for (let i = 0; i < e.results.length; i++) {
-            fullTranscript += e.results[i][0].transcript + " ";
-          }
-          fullTranscript = fullTranscript.trim();
-
-          if (!fullTranscript) return;
-
-          setSpokenTranscript(fullTranscript);
-          latestTranscriptRef.current = fullTranscript;
-
-          // Gather all candidate alternatives
-          const allCandidates: string[] = [fullTranscript];
-          for (let i = 0; i < e.results.length; i++) {
-            for (let j = 0; j < e.results[i].length; j++) {
-              const altText = e.results[i][j]?.transcript?.trim();
-              if (altText && !allCandidates.includes(altText)) {
-                allCandidates.push(altText);
-              }
+            const res = e.results[i];
+            if (res.isFinal) {
+              finalTranscript += res[0].transcript + " ";
+            } else {
+              interimTranscript += res[0].transcript;
             }
           }
 
-          // Check fast instant script and pattern matching
-          let matchedLang = "";
-          for (const cand of allCandidates) {
-            matchedLang = matchLanguageCodeFromText(cand);
-            if (matchedLang) break;
-          }
+          const currentText = (finalTranscript + interimTranscript).trim();
+          if (!currentText) return;
 
-          if (matchedLang) {
-            applyLanguageSelection(matchedLang);
-            return;
-          }
+          setSpokenTranscript(currentText);
+          latestTranscriptRef.current = currentText;
 
-          // If conversational or random speech, trigger debounced Gemini AI classification
-          setVoiceFlowState("processing");
-          if (aiDebounceTimeoutRef.current) {
-            clearTimeout(aiDebounceTimeoutRef.current);
+          // Check instant script and keyword match
+          const instantMatch = matchLanguageCodeFromText(currentText);
+          if (instantMatch) {
+            try {
+              rec.stop();
+            } catch { }
+            applyLanguageSelection(instantMatch);
           }
-          aiDebounceTimeoutRef.current = setTimeout(() => {
-            if (!isMatchingLockRef.current) {
-              classifyWithGemini(fullTranscript);
-            }
-          }, 500);
         };
 
         rec.onend = () => {
           if (voiceFlowState === "matched" || isMatchingLockRef.current) return;
 
-          if (latestTranscriptRef.current && latestTranscriptRef.current.trim()) {
+          const spokenText = latestTranscriptRef.current.trim();
+          if (spokenText) {
+            // First try local fast match
+            const localMatch = matchLanguageCodeFromText(spokenText);
+            if (localMatch) {
+              applyLanguageSelection(localMatch);
+              return;
+            }
+
+            // Otherwise, send to Gemini AI for deep conversational / dialect language detection
             setVoiceFlowState("processing");
-            classifyWithGemini(latestTranscriptRef.current);
+            classifyWithGemini(spokenText);
           } else {
             setVoiceFlowState("idle");
           }
         };
 
-        rec.onerror = () => {
+        rec.onerror = (err: any) => {
+          console.warn("Speech recognition error:", err);
           if (isMatchingLockRef.current) return;
-          if (latestTranscriptRef.current && latestTranscriptRef.current.trim()) {
+          const spokenText = latestTranscriptRef.current.trim();
+          if (spokenText) {
             setVoiceFlowState("processing");
-            classifyWithGemini(latestTranscriptRef.current);
+            classifyWithGemini(spokenText);
           } else {
-            setVoiceFlowState((prev) => (prev === "matched" ? "matched" : "idle"));
+            setVoiceFlowState("idle");
           }
         };
 
         rec.start();
 
-        // Safety timeout to auto-stop mic after 8 seconds
-        setTimeout(() => {
+        // Safety timeout to auto-stop mic after 7 seconds of inactivity
+        if (speechTimeoutRef.current) clearTimeout(speechTimeoutRef.current);
+        speechTimeoutRef.current = setTimeout(() => {
           if (recognitionRef.current) {
             try {
               recognitionRef.current.stop();
             } catch { }
           }
-        }, 8000);
+        }, 7000);
       } catch (e) {
         console.warn("Recognition start failed:", e);
         setVoiceFlowState("idle");
       }
     } else {
-      // Fallback
-      setVoiceFlowState("processing");
-      setTimeout(() => {
-        setSpokenTranscript("ଓଡ଼ିଆ");
-        applyLanguageSelection("or");
-      }, 1000);
+      // Fallback for browsers without Web Speech API: prompt user to tap
+      setVoiceFlowState("idle");
     }
   };
 
@@ -528,7 +502,8 @@ export function LanguageSelectScreen({
     if (fallbackMatch && !isMatchingLockRef.current) {
       applyLanguageSelection(fallbackMatch);
     } else {
-      setVoiceFlowState("idle");
+      // Default to Hindi if uncertain
+      applyLanguageSelection("hi");
     }
   };
 
@@ -570,15 +545,13 @@ export function LanguageSelectScreen({
     const scriptLang = detectLanguageFromScript(text);
     if (scriptLang) return scriptLang;
 
-    // 1. Odia / Oriya / Odisha & Odia Dialect words & phonetics
+    // 1. Odia / Oriya / Odisha & Odia Distinctive Dialect words
     if (
-      /odia|oriya|odiya|odisha|orissa|audio|audia|ariya|oria|oriyaa|odissi/i.test(
+      /\b(odia|oriya|odiya|odisha|orissa|ଓଡ଼ିଆ|ओडिया|उड़िया|उडिया|ओड़िया)\b/i.test(lower) ||
+      /\b(mote|aame|nahanti|asuchi|heuchi|dorkar|darkar|sikhibaku|sikhibara|namaskar|kahuchi|sau|sahayata|bhouni|khushi|janichu|bujhili|bujhuchi)\b/i.test(
         lower
       ) ||
-      /mote|mu|mun|aame|ame|tame|apana|apananku|nahanti|asuchi|heuchi|dorkar|darkar|sikhiba|sikhibaku|sikhibara|silai|kam|kaam|katha|jani|bapa|ghare|bhalo|namaskar|pani|kahuchi|kahiba|deba|neba|sau|tikiye|chali|sahayata|sahajya|mora|tora|tanka|bhouni|khushi|milba|miluchi|janichu|bujhili|bujhuchi/i.test(
-        lower
-      ) ||
-      /ओडिया|उड़िया|उडिया|ओड़िया|मोते|मुं|मु|आमे|तामे|आपण|कथा|कहूचि|कहूचु|दरकार|दोरकार|सिलाइ|सिखिबा|सिखिबार|अछि|नाहान्ति|आसुचि|हेउचि|खोजुचि|बापा|घरे|भालो|नमस्कार|पाणि|देबा|नेबा|साहाज्य|टंका|भउणी|दिदी|खुसी|मिलिब|मिलूचि|जाणिचु|जाणि|बुझिली|बुझुचि/i.test(
+      /\b(मोते|आमे|कहूचि|कहूचु|दरकार|सिखिबा|नाहान्ति|आसुचि|हेउचि|खोजुचि|नमस्कार|भउणी|दिदी|खुसी|मिलिब|जाणिचु|बुझिली|बुझुचि)\b/i.test(
         lower
       ) ||
       /\b(दो|दूसरा|दुसरा|2|two|second|number two|option two)\b/i.test(lower)
@@ -588,10 +561,9 @@ export function LanguageSelectScreen({
 
     // 2. Santhali / Santali / Ol Chiki & Dialect words
     if (
-      /santhali|santali|santhal|santal|ol chiki|olchiki|ol ciki|johar|chando|kami|nyam|abon|santhal/i.test(
+      /\b(santhali|santali|santhal|santal|ol chiki|olchiki|ol ciki|johar|chando|kami|nyam|abon|ᱥᱟᱱᱛᱟᱲᱤ|ᱡᱚᱦᱟᱨ|संताली|संथाली|संताळी|जोहार|कामी)\b/i.test(
         lower
       ) ||
-      /संताली|संथाली|ᱥᱟᱱᱛᱟᱲᱤ|संताळी|संताडी|जोहार|कामी|ᱧᱟᱢ|ᱡᱚᱦᱟᱨ/i.test(lower) ||
       /\b(तीन|तीसरा|3|three|third|number three|option three)\b/i.test(lower)
     ) {
       return "sat";
@@ -599,10 +571,10 @@ export function LanguageSelectScreen({
 
     // 3. English / Angrezi
     if (
-      /^(english|inglish|englis|angrezi|angreji|अंग्रेजी|अंग्रेज़ी|इंग्लिश|इंगलिश|इंग्रजी)$/i.test(
+      /\b(english|inglish|englis|angrezi|angreji|अंग्रेजी|अंग्रेज़ी|इंग्लिश|इंगलिश|इंग्रजी)\b/i.test(
         lower
       ) ||
-      /\b(english language|speak english|अंग्रेजी में|learn in english)\b/i.test(lower) ||
+      /\b(english language|speak english|अंग्रेजी में|learn in english|i want|i need|training|course)\b/i.test(lower) ||
       /\b(चार|चौथा|4|four|fourth|number four|option four)\b/i.test(lower)
     ) {
       return "en";
@@ -610,8 +582,8 @@ export function LanguageSelectScreen({
 
     // 4. Bhojpuri
     if (
-      /bhojpuri|bhojpuree|bhojpur|भोजपुरी|भोजपुर/i.test(lower) ||
-      /baate|dikat ba|kare ke|hamra|tohar|kaisan|bujhat|बाटे|करे के|हमार|तोहार|कैसन|बुझात|दिक्कत बा/i.test(
+      /\b(bhojpuri|bhojpuree|bhojpur|भोजपुरी|भोजपुर)\b/i.test(lower) ||
+      /\b(baate|dikat ba|kare ke|hamra|tohar|kaisan|bujhat|बाटे|करे के|हमार|तोहार|कैसन|बुझात|दिक्कत बा)\b/i.test(
         lower
       ) ||
       /\b(पांच|पाँच|पाँचवां|5|five|fifth|option five)\b/i.test(lower)
@@ -621,8 +593,8 @@ export function LanguageSelectScreen({
 
     // 5. Bengali / Bangla
     if (
-      /bengali|bangla|bangali|bengoli|বাংলা|বাঙালি|বালী|बंगाली|बांग्ला/i.test(lower) ||
-      /ami kaj|korte chai|shikhte|amake|আমি|কাজ|করতে চাই/i.test(lower) ||
+      /\b(bengali|bangla|bangali|bengoli|বাংলা|বাঙালি|बंगाली|बांग्ला)\b/i.test(lower) ||
+      /\b(ami kaj|korte chai|shikhte|amake|করতে চাই|শিখতে)\b/i.test(lower) ||
       /\b(छह|छठा|6|six|sixth|option six)\b/i.test(lower)
     ) {
       return "bn";
@@ -630,8 +602,8 @@ export function LanguageSelectScreen({
 
     // 6. Telugu
     if (
-      /telugu|telgu|telegu|తెలుగు|तेलुगु|तेलगू/i.test(lower) ||
-      /kavali|nerchukovali|upadhi|training kavali/i.test(lower) ||
+      /\b(telugu|telgu|telegu|తెలుగు|तेलुगु|तेलगू)\b/i.test(lower) ||
+      /\b(kavali|nerchukovali|upadhi|training kavali)\b/i.test(lower) ||
       /\b(सात|सातवां|7|seven|seventh|option seven)\b/i.test(lower)
     ) {
       return "te";
@@ -639,8 +611,8 @@ export function LanguageSelectScreen({
 
     // 7. Marathi
     if (
-      /marathi|marati|मराठी|मरठी/i.test(lower) ||
-      /shikaycha|karaycha|aahe|havay|aamhi|tumhi|काम करायचं|हवंय|आहे|आम्ही|शिकायचं|करायचं/i.test(
+      /\b(marathi|marati|मराठी|मरठी)\b/i.test(lower) ||
+      /\b(shikaycha|karaycha|aahe|havay|aamhi|tumhi|हवंय|आहे|आम्ही|शिकायचं|करायचं)\b/i.test(
         lower
       ) ||
       /\b(आठ|आठवां|8|eight|eighth|option eight)\b/i.test(lower)
@@ -650,8 +622,8 @@ export function LanguageSelectScreen({
 
     // 8. Tamil
     if (
-      /tamil|tamizh|தமிழ்|तमिल|तामिल/i.test(lower) ||
-      /vendum|velai|enakku/i.test(lower) ||
+      /\b(tamil|tamizh|தமிழ்|तमिल|तामिल)\b/i.test(lower) ||
+      /\b(vendum|velai|enakku)\b/i.test(lower) ||
       /\b(नौ|9|nine)\b/i.test(lower)
     ) {
       return "ta";
@@ -659,39 +631,39 @@ export function LanguageSelectScreen({
 
     // 9. Gujarati
     if (
-      /gujarati|gujrati|ગુજરાતી|गुजराती/i.test(lower) ||
-      /joye chhe|kam karvu/i.test(lower) ||
+      /\b(gujarati|gujrati|ગુજરાતી|गुजराती)\b/i.test(lower) ||
+      /\b(joye chhe|kam karvu)\b/i.test(lower) ||
       /\b(दस|10|ten)\b/i.test(lower)
     ) {
       return "gu";
     }
 
     // 10. Kannada
-    if (/kannada|kanada|ಕನ್ನಡ|कन्नड़|कन्नड/i.test(lower) || /beku|kelasa/i.test(lower)) {
+    if (/\b(kannada|kanada|ಕನ್ನಡ|कन्नड़|कन्नड)\b/i.test(lower) || /\b(beku|kelasa)\b/i.test(lower)) {
       return "kn";
     }
 
     // 11. Punjabi
-    if (/punjabi|panjabi|ਪੰਜਾਬੀ|पंजाबी/i.test(lower) || /chahida|kam sikhna/i.test(lower)) {
+    if (/\b(punjabi|panjabi|ਪੰਜਾਬੀ|पंजाबी)\b/i.test(lower) || /\b(chahida|kam sikhna)\b/i.test(lower)) {
       return "pa";
     }
 
     // 12. Assamese
-    if (/assamese|oxomiya|axomiya|অসমীয়া|অসমिया|আসামী/i.test(lower)) {
+    if (/\b(assamese|oxomiya|axomiya|অসমীয়া|অসমिया|আসামী)\b/i.test(lower)) {
       return "as";
     }
 
     // 13. Urdu
-    if (/urdu|اردو|উर्दू/i.test(lower) || /madad chahiye|hunar sikhna/i.test(lower)) {
+    if (/\b(urdu|اردو|উर्दू)\b/i.test(lower) || /\b(madad chahiye|hunar sikhna)\b/i.test(lower)) {
       return "ur";
     }
 
-    // 14. Hindi (Strict trigger or Option 1 ONLY - never greedily catch conversational sentences!)
+    // 14. Hindi (Standard Keywords & Dialect markers)
     if (
-      /^(hindi|hindee|hndi|hindustani|हिन्दी|हिंदी|हिंदुस्तानी|हिनदी|हिन्दुस्तानी)$/i.test(
+      /\b(hindi|hindee|hndi|hindustani|हिन्दी|हिंदी|हिंदुस्तानी|हिनदी|हिन्दुस्तानी)\b/i.test(
         lower
       ) ||
-      /\b(हिन्दी बोलिए|हिंदी भाषा|hindi language|hindi mein|हिंदी में|बोलिए हिंदी)\b/i.test(
+      /\b(हिन्दी बोलिए|हिंदी भाषा|hindi language|hindi mein|हिंदी में|बोलिए हिंदी|मुझे|चाहिए|सीखना|करना है|बताइए|नमस्ते|रोजगार)\b/i.test(
         lower
       ) ||
       /\b(एक|पहला|1|one|first|number one|option one)\b/i.test(lower)
@@ -724,17 +696,18 @@ export function LanguageSelectScreen({
 
     const audioText = featured
       ? featured.audioVoiceText
-      : `${langLabel} भाषा चुनी गई। आगे बढ़ रहे हैं।`;
+      : `${langLabel} भाषा चुनी गई। चलिए शुरू करते हैं।`;
 
-    // Announce in chosen language via Gemini TTS & proceed on finish
+    // Announce in chosen language via Gemini TTS & proceed smoothly on finish
     playSpokenPrompt(audioText, detected, true, () => {
       onLanguageSelected(detected);
     });
 
-    // Backup fallback timer so user never gets stuck
-    setTimeout(() => {
+    // Backup safety timer
+    if (speechTimeoutRef.current) clearTimeout(speechTimeoutRef.current);
+    speechTimeoutRef.current = setTimeout(() => {
       onLanguageSelected(detected);
-    }, 2000);
+    }, 2400);
   };
 
   const handleSelectLanguage = (langCode: string) => {

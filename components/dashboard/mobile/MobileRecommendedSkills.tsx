@@ -1,20 +1,26 @@
-"use client";
-
-import React from "react";
+import React, { useMemo } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { Clock, MapPin, ArrowRight } from "lucide-react";
+import { Clock, MapPin, ArrowRight, Sparkles } from "lucide-react";
 import { CourseItem, RECOMMENDED_COURSES } from "../DashboardShared";
+import { BeneficiaryProfileData } from "@/components/onboarding/PersonalVoiceOnboarding";
+import { getPersonalizedRecommendedCourses, getSafeCourseImage } from "@/lib/skillTrainingGenerator";
 
 interface MobileRecommendedSkillsProps {
   onOpenCourse: (course: CourseItem) => void;
   onSeeAll: () => void;
+  beneficiaryProfile?: BeneficiaryProfileData | null;
 }
 
 export function MobileRecommendedSkills({
   onOpenCourse,
-  onSeeAll
+  onSeeAll,
+  beneficiaryProfile
 }: MobileRecommendedSkillsProps) {
+  const displayCourses = useMemo(() => {
+    return getPersonalizedRecommendedCourses(beneficiaryProfile || null, RECOMMENDED_COURSES);
+  }, [beneficiaryProfile]);
+
   return (
     <div className="space-y-2.5">
       <div className="flex items-center justify-between">
@@ -22,8 +28,9 @@ export function MobileRecommendedSkills({
           <h3 className="font-extrabold text-slate-900 text-sm font-heading">
             Recommended for You
           </h3>
-          <span className="text-[10px] font-bold text-purple-700 bg-purple-100/70 px-2 py-0.5 rounded-full">
-            10 Skills
+          <span className="text-[10px] font-bold text-purple-700 bg-purple-100/70 px-2 py-0.5 rounded-full flex items-center gap-1">
+            <Sparkles className="size-2.5 text-purple-600" />
+            <span>{displayCourses.length} Skills</span>
           </span>
         </div>
         <button
@@ -36,16 +43,20 @@ export function MobileRecommendedSkills({
 
       {/* Smooth Snap Carousel */}
       <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-2 pt-1 no-scrollbar -mx-1 px-1">
-        {RECOMMENDED_COURSES.map((course) => (
+        {displayCourses.map((course) => (
           <motion.div
             key={course.id}
             whileTap={{ scale: 0.98 }}
-            className="w-[200px] shrink-0 snap-start bg-white rounded-3xl border border-[#EDE7D9] shadow-2xs overflow-hidden flex flex-col justify-between group transition-all"
+            className={`w-[200px] shrink-0 snap-start bg-white rounded-3xl border shadow-2xs overflow-hidden flex flex-col justify-between group transition-all ${
+              (course as any).isDetectedSkill
+                ? "border-purple-400 ring-2 ring-purple-400/30 bg-gradient-to-b from-purple-50/40 to-white"
+                : "border-[#EDE7D9]"
+            }`}
           >
             {/* Course Image & Badge */}
             <div className="relative h-28 w-full overflow-hidden bg-slate-100">
               <Image
-                src={course.image}
+                src={getSafeCourseImage(course.image, course.title, (course as any).category)}
                 alt={course.title}
                 fill
                 sizes="200px"
@@ -100,8 +111,8 @@ export function MobileRecommendedSkills({
 
       {/* Carousel Hint & Counter */}
       <div className="flex items-center justify-between px-1 text-[10px] font-semibold text-slate-400">
-        <span>← Swipe horizontally to explore 10 skills →</span>
-        <span className="text-purple-600 font-bold">1 of 10</span>
+        <span>← Swipe horizontally to explore {displayCourses.length} verified skills →</span>
+        <span className="text-purple-600 font-bold">1 of {displayCourses.length}</span>
       </div>
     </div>
   );

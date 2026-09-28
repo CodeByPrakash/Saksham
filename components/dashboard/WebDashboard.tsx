@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -57,6 +57,14 @@ import { ProfileModal } from "./ProfileModal";
 import { GlobalVoiceNavigator } from "@/components/navigation/GlobalVoiceNavigator";
 import { VoiceNavIntent } from "@/lib/ai/voiceNavigation";
 import { BeneficiaryProfileData } from "@/components/onboarding/PersonalVoiceOnboarding";
+import {
+  getPersonalizedRecommendedCourses,
+  getPersonalizedTrainingCourses,
+  SECTOR_DEFINITIONS,
+  ALL_EXPANDED_NSQF_COURSES,
+  NSQFCourseExtra,
+  getSafeCourseImage
+} from "@/lib/skillTrainingGenerator";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
@@ -106,6 +114,13 @@ export function WebDashboard({ beneficiaryProfile }: WebDashboardProps = {}) {
   const [trainingFilter, setTrainingFilter] = useState<string>("all");
   const [jobFilter, setJobFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
+
+  // Dynamic Personalized & Detected Skill Training Courses
+  const { allCourses, detectedCourses, detectedSkillName } = useMemo(() => {
+    return getPersonalizedTrainingCourses(activeProfile, ALL_EXPANDED_NSQF_COURSES);
+  }, [activeProfile]);
+
+  const displayCourses = allCourses;
 
   const sidebarMenuItems = [
     { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -584,7 +599,7 @@ export function WebDashboard({ beneficiaryProfile }: WebDashboardProps = {}) {
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                      {RECOMMENDED_COURSES.slice(0, 3).map((course, idx) => (
+                      {displayCourses.slice(0, 3).map((course, idx) => (
                         <motion.div
                           key={course.id}
                           initial={{ opacity: 0, y: 12 }}
@@ -595,7 +610,7 @@ export function WebDashboard({ beneficiaryProfile }: WebDashboardProps = {}) {
                         >
                           <div className="relative h-32 xl:h-36 w-full overflow-hidden bg-slate-100">
                             <Image
-                              src={course.image}
+                              src={getSafeCourseImage(course.image, course.title, course.category)}
                               alt={course.title}
                               fill
                               className="object-cover group-hover:scale-105 transition-transform duration-300"
@@ -899,13 +914,13 @@ export function WebDashboard({ beneficiaryProfile }: WebDashboardProps = {}) {
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {RECOMMENDED_COURSES.slice(0, 3).map((course) => (
+                    {displayCourses.slice(0, 3).map((course) => (
                       <div
                         key={course.id}
                         className="bg-white rounded-3xl border border-[#EDE7D9] shadow-2xs p-4 flex flex-col justify-between space-y-3 hover:shadow-md transition-all group"
                       >
                         <div className="relative h-32 rounded-2xl overflow-hidden bg-slate-100">
-                          <Image src={course.image} alt={course.title} fill className="object-cover group-hover:scale-105 transition-transform" />
+                          <Image src={getSafeCourseImage(course.image, course.title, course.category)} alt={course.title} fill className="object-cover group-hover:scale-105 transition-transform" />
                           <span className="absolute top-2 right-2 bg-emerald-600 text-white text-[9px] font-extrabold px-2.5 py-0.5 rounded-full">
                             95% Match
                           </span>
@@ -999,7 +1014,7 @@ export function WebDashboard({ beneficiaryProfile }: WebDashboardProps = {}) {
               </motion.div>
             )}
 
-            {/* TAB 3: FULL TRAINING PROGRAMS CATALOG */}
+            {/* TAB 3: FULL NSQF & PM-AJAY TRAINING PROGRAMS CATALOG */}
             {activeMenu === "training" && (
               <motion.div
                 key="view-training"
@@ -1007,72 +1022,193 @@ export function WebDashboard({ beneficiaryProfile }: WebDashboardProps = {}) {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.25 }}
-                className="space-y-5"
+                className="space-y-6"
               >
-                {/* Header & Filter Bar */}
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-white p-4 rounded-3xl border border-[#EDE7D9] shadow-2xs">
-                  <div>
-                    <h2 className="text-lg font-extrabold text-slate-900 font-heading">
-                      NSQF Skill Training Catalog (10 Courses)
-                    </h2>
-                    <p className="text-xs text-slate-500">
-                      All courses offer 100% free tuition, hostel accommodation, and ₹3,500/month stipend.
-                    </p>
+                {/* 1. Detected Skill Match Spotlight Banner (if worker skill detected) */}
+                {detectedCourses.length > 0 && (
+                  <div className="p-5 rounded-3xl bg-gradient-to-r from-purple-900 via-indigo-950 to-slate-900 text-white shadow-lg border border-purple-400/40 relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                    <div className="absolute -right-10 -bottom-10 w-48 h-48 bg-purple-500/20 rounded-full blur-3xl pointer-events-none" />
+                    <div className="space-y-1.5 z-10 max-w-2xl">
+                      <div className="flex items-center gap-2">
+                        <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-[10px] font-black uppercase">
+                          PM-AJAY 100% Free Grant
+                        </span>
+                        <span className="text-xs font-bold text-purple-200">
+                          ✨ AI Matched Trade: {detectedSkillName}
+                        </span>
+                      </div>
+                      <h3 className="text-xl font-extrabold text-white font-heading">
+                        {detectedCourses[0].title}
+                      </h3>
+                      <p className="text-xs text-purple-100/90 leading-relaxed">
+                        Dedicated NSQF Level 4 training program synthesized for your background with ₹3,500/month DBT stipend and ₹35,000 tool kit subsidy.
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-2 z-10 shrink-0">
+                      <button
+                        onClick={() => handleOpenCourse(detectedCourses[0])}
+                        className="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white font-bold text-xs px-4 py-2.5 rounded-2xl shadow-md flex items-center gap-1.5 cursor-pointer transition-all"
+                      >
+                        <Sparkles className="size-3.5 text-amber-300" />
+                        <span>Open Course Details</span>
+                      </button>
+
+                      <button
+                        onClick={() => handleOpenVoiceWithPrompt(`मुझे ${detectedCourses[0].title} के पाठ्यक्रम, स्टाइपेंड और केंद्र के बारे में विस्तार से बताएं।`)}
+                        className="size-10 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 flex items-center justify-center text-purple-200 hover:text-white cursor-pointer transition-colors"
+                        title="Ask AI Copilot"
+                      >
+                        <Mic className="size-4" />
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* 2. Header & Sector Navigation Bar */}
+                <div className="space-y-3 bg-white p-5 rounded-3xl border border-[#EDE7D9] shadow-2xs">
+                  <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+                    <div>
+                      <h2 className="text-xl font-extrabold text-slate-900 font-heading">
+                        NSQF Skill Training Catalog ({displayCourses.length} Programs)
+                      </h2>
+                      <p className="text-xs text-slate-500">
+                        100% free tuition, ₹3,500/month stipend, hostel accommodation & PM-AJAY micro-enterprise capital grant.
+                      </p>
+                    </div>
+
+                    {/* Search & Voice AI Trigger */}
+                    <div className="flex items-center gap-2 w-full md:w-auto">
+                      <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2 w-full md:w-64 focus-within:border-purple-500 focus-within:bg-white transition-all">
+                        <Search className="size-4 text-slate-400 shrink-0" />
+                        <input
+                          type="text"
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          placeholder="Search courses, skills, trades..."
+                          className="w-full bg-transparent text-xs font-medium text-slate-800 focus:outline-none placeholder:text-slate-400"
+                        />
+                      </div>
+
+                      <button
+                        onClick={() => handleOpenVoiceWithPrompt("मुझे सभी उपलब्ध कौशल प्रशिक्षण पाठ्यक्रमों के बारे में बताएं।")}
+                        className="px-3 py-2 rounded-2xl bg-purple-50 hover:bg-purple-100 border border-purple-200 text-purple-700 text-xs font-bold flex items-center gap-1.5 cursor-pointer shrink-0"
+                      >
+                        <Mic className="size-3.5 text-purple-600" />
+                        <span>Ask AI</span>
+                      </button>
+                    </div>
                   </div>
 
-                  {/* Filter Pills */}
-                  <div className="flex items-center gap-1.5 overflow-x-auto text-xs">
-                    {["all", "technical", "agriculture", "service", "self_employment"].map((f) => (
-                      <button
-                        key={f}
-                        onClick={() => setTrainingFilter(f)}
-                        className={`px-3 py-1.5 rounded-xl font-bold transition-all cursor-pointer ${
-                          trainingFilter === f
-                            ? "bg-purple-600 text-white shadow-xs"
-                            : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                        }`}
-                      >
-                        {f === "all" ? "All Courses" : f.charAt(0).toUpperCase() + f.slice(1).replace("_", " ")}
-                      </button>
-                    ))}
+                  {/* Sector Filter Badges */}
+                  <div className="flex gap-2 overflow-x-auto pb-1 pt-2 no-scrollbar">
+                    {SECTOR_DEFINITIONS.map((sec) => {
+                      const count =
+                        sec.id === "all"
+                          ? displayCourses.length
+                          : displayCourses.filter((c: any) => c.sectorId === sec.id || c.category === sec.category).length;
+                      const isActive = trainingFilter === sec.id;
+
+                      return (
+                        <button
+                          key={sec.id}
+                          onClick={() => setTrainingFilter(sec.id)}
+                          className={`px-3 py-1.5 rounded-2xl text-xs font-bold shrink-0 flex items-center gap-1.5 cursor-pointer transition-all border ${
+                            isActive
+                              ? "bg-purple-600 border-purple-700 text-white shadow-xs font-extrabold"
+                              : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100"
+                          }`}
+                        >
+                          <span>{sec.name}</span>
+                          <span
+                            className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
+                              isActive ? "bg-white/25 text-white" : "bg-slate-200 text-slate-600"
+                            }`}
+                          >
+                            {count}
+                          </span>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
 
-                {/* 10 Course Cards Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {RECOMMENDED_COURSES.map((course) => (
-                    <div
-                      key={course.id}
-                      className="bg-white rounded-3xl border border-[#EDE7D9] shadow-2xs hover:shadow-lg transition-all p-4 flex flex-col justify-between space-y-3 group"
-                    >
-                      <div className="relative h-36 rounded-2xl overflow-hidden bg-slate-100">
-                        <Image src={course.image} alt={course.title} fill className="object-cover group-hover:scale-105 transition-transform" />
-                        <span className="absolute top-2.5 right-2.5 bg-purple-600 text-white text-[9px] font-extrabold px-2.5 py-0.5 rounded-full">
-                          NSQF Level {course.nsqfLevel}
-                        </span>
-                      </div>
+                {/* 3. Training Course Cards Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                  {displayCourses
+                    .filter((course: any) => {
+                      const matchesCategory =
+                        trainingFilter === "all" ||
+                        course.sectorId === trainingFilter ||
+                        course.category === trainingFilter;
+                      const q = searchQuery.toLowerCase().trim();
+                      const matchesSearch =
+                        !q ||
+                        course.title.toLowerCase().includes(q) ||
+                        course.description.toLowerCase().includes(q) ||
+                        (course.shortDesc && course.shortDesc.toLowerCase().includes(q));
+                      return matchesCategory && matchesSearch;
+                    })
+                    .map((course: any) => (
+                      <div
+                        key={course.id}
+                        className="bg-white rounded-3xl border border-[#EDE7D9] shadow-2xs hover:shadow-lg transition-all p-4 flex flex-col justify-between space-y-3 group"
+                      >
+                        <div className="relative h-40 rounded-2xl overflow-hidden bg-slate-100">
+                          <Image src={getSafeCourseImage(course.image, course.title, course.category)} alt={course.title} fill className="object-cover group-hover:scale-105 transition-transform" />
+                          <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5">
+                            <span className="bg-purple-600 text-white text-[9.5px] font-extrabold px-2.5 py-0.5 rounded-full shadow-xs">
+                              NSQF Level {course.nsqfLevel}
+                            </span>
+                            {course.qpCode && (
+                              <span className="bg-black/60 backdrop-blur-xs text-white text-[9px] font-mono font-bold px-2 py-0.5 rounded-full">
+                                {course.qpCode}
+                              </span>
+                            )}
+                          </div>
+                          <span className="absolute top-2.5 right-2.5 bg-emerald-600 text-white text-[9.5px] font-extrabold px-2.5 py-0.5 rounded-full shadow-xs">
+                            ₹3,500/mo
+                          </span>
+                        </div>
 
-                      <div>
-                        <h4 className="font-extrabold text-slate-900 text-sm font-heading">{course.title}</h4>
-                        <p className="text-xs text-purple-700 font-bold mt-1">{course.stipend}</p>
-                        <div className="flex items-center gap-2 text-[11px] text-slate-500 mt-1">
-                          <Clock className="size-3 text-slate-400" />
-                          <span>{course.duration}</span>
-                          <span>•</span>
-                          <MapPin className="size-3 text-slate-400" />
-                          <span>{course.location}</span>
+                        <div className="space-y-1">
+                          <span className="text-[10px] font-extrabold uppercase text-purple-700">
+                            {course.sectorName || "Skill Trade"}
+                          </span>
+                          <h4 className="font-extrabold text-slate-900 text-sm font-heading leading-snug line-clamp-2">
+                            {course.title}
+                          </h4>
+                          <p className="text-[11.5px] text-slate-500 line-clamp-2 leading-relaxed">
+                            {course.shortDesc || course.description}
+                          </p>
+                          <div className="flex items-center gap-2 text-[11px] text-slate-500 font-medium pt-1">
+                            <Clock className="size-3 text-slate-400 shrink-0" />
+                            <span>{course.duration}</span>
+                            <span>•</span>
+                            <MapPin className="size-3 text-slate-400 shrink-0" />
+                            <span className="truncate">{course.location}</span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
+                          <button
+                            onClick={() => handleOpenVoiceWithPrompt(`मुझे ${course.title} के बारे में बताएं। इसमें क्या सिखाया जाएगा और कौन सी नौकरी या उद्यम शुरू कर सकते हैं?`)}
+                            className="px-3 py-2 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 text-xs font-bold flex items-center gap-1 transition-colors cursor-pointer"
+                          >
+                            <Mic className="size-3.5 text-purple-600" />
+                            <span>Ask AI</span>
+                          </button>
+
+                          <button
+                            onClick={() => handleOpenCourse(course)}
+                            className="flex-1 bg-slate-900 hover:bg-purple-900 text-white font-bold text-xs py-2 rounded-xl flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                          >
+                            <span>View Training Details</span>
+                            <ArrowRight className="size-3.5" />
+                          </button>
                         </div>
                       </div>
-
-                      <button
-                        onClick={() => handleOpenCourse(course)}
-                        className="w-full bg-purple-50 hover:bg-purple-100 text-purple-700 font-bold text-xs py-2 rounded-xl flex items-center justify-center gap-1.5 transition-colors"
-                      >
-                        <span>View Details & Apply</span>
-                        <ArrowRight className="size-3" />
-                      </button>
-                    </div>
-                  ))}
+                    ))}
                 </div>
               </motion.div>
             )}
@@ -1333,6 +1469,7 @@ export function WebDashboard({ beneficiaryProfile }: WebDashboardProps = {}) {
         course={selectedCourse}
         isOpen={isCourseModalOpen}
         onClose={() => setIsCourseModalOpen(false)}
+        onOpenVoiceAssistant={handleOpenVoiceWithPrompt}
       />
 
       <JobDetailModal

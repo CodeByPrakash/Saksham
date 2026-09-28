@@ -31,6 +31,7 @@ import {
 import { CourseItem } from "../DashboardShared";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { getSafeCourseImage } from "@/lib/skillTrainingGenerator";
 import confetti from "canvas-confetti";
 
 interface MobileTrainingDetailPageProps {
@@ -49,10 +50,10 @@ export function MobileTrainingDetailPage({
   const [isPlayingAudio, setIsPlayingAudio] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<"overview" | "syllabus" | "center" | "benefits">("overview");
 
-  // Detailed syllabus modules based on course
-  const syllabusModules = [
+  // Detailed syllabus modules based on course (dynamic if detected or default fallback)
+  const syllabusModules: { title: string; duration: string; topics: string[] }[] = (course as any).syllabusModules || [
     {
-      title: "Module 1: Foundations & Occupational Safety",
+      title: `Module 1: Foundations & Occupational Safety (${course.title.split("(")[0].trim()})`,
       duration: "40 Hours",
       topics: [
         "Workplace safety standards & PPE protocols",
@@ -79,7 +80,7 @@ export function MobileTrainingDetailPage({
       ]
     },
     {
-      title: "Module 4: On-The-Job Training (OJT) & Internship",
+      title: "Module 4: On-The-Job Training (OJT) & Enterprise Launch",
       duration: "150 Hours",
       topics: [
         "Hands-on live deployment at certified industry partners",
@@ -88,6 +89,14 @@ export function MobileTrainingDetailPage({
       ]
     }
   ];
+
+  const careerOutcomes: string[] = (course as any).careerOutcomes || [
+    "Certified Skilled Contractor in Local Region",
+    "PM-AJAY Supported Micro-Enterprise Entrepreneur",
+    "Average Monthly Earnings: ₹20,000 – ₹38,000"
+  ];
+
+  const subsidyGrantAmount: string = (course as any).subsidyGrantAmount || "₹35,000 PM-AJAY Capital Subsidy Grant";
 
   const handleApply = () => {
     setIsApplied(true);
@@ -151,12 +160,31 @@ export function MobileTrainingDetailPage({
         </div>
       </div>
 
+      {/* Dynamic Detected Skill Indicator */}
+      {(course as any).isDetectedSkill && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="p-3 bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 rounded-2xl flex items-center gap-2.5 text-xs text-purple-900"
+        >
+          <Sparkles className="size-4 text-purple-600 shrink-0 animate-pulse" />
+          <div className="flex-1">
+            <span className="font-extrabold block text-purple-950">
+              ✨ Custom AI Synthesized Training Program
+            </span>
+            <span className="text-[11px] text-purple-700">
+              {(course as any).detectedReason || "Specially generated based on your detected skill match."}
+            </span>
+          </div>
+        </motion.div>
+      )}
+
       {/* 2. HERO COURSE CARD */}
       <div className="relative overflow-hidden rounded-[32px] border border-[#EDE7D9] bg-white shadow-sm">
         {/* Cover Photo */}
         <div className="relative h-48 w-full bg-slate-100">
           <Image
-            src={course.image}
+            src={getSafeCourseImage(course.image, course.title, (course as any).category)}
             alt={course.title}
             fill
             sizes="(max-width: 768px) 100vw, 450px"

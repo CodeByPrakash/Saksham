@@ -277,8 +277,9 @@ export function MobileDashboard({
                 onSeeAll={() => setIsSchemesModalOpen(true)}
               />
 
-              {/* D. Recommended for You (10-Skill Snap Carousel) */}
+              {/* D. Recommended for You (Personalized & Detected Skill Carousel) */}
               <MobileRecommendedSkills
+                beneficiaryProfile={activeProfile}
                 onOpenCourse={handleOpenCourse}
                 onSeeAll={() => {
                   setActiveTab("training");
@@ -299,7 +300,11 @@ export function MobileDashboard({
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
             >
-              <MobileTrainingPage onOpenCourse={handleOpenCourse} />
+              <MobileTrainingPage
+                beneficiaryProfile={activeProfile}
+                onOpenCourse={handleOpenCourse}
+                onOpenVoiceAssistant={handleOpenVoiceWithPrompt}
+              />
             </motion.div>
           ) : activeTab === "jobs" ? (
             <motion.div

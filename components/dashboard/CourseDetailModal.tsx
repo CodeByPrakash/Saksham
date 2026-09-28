@@ -14,20 +14,24 @@ import {
   Coins,
   ShieldCheck,
   Send,
-  Sparkles
+  Sparkles,
+  Mic,
+  Volume2
 } from "lucide-react";
 import { CourseItem } from "./DashboardShared";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { getSafeCourseImage } from "@/lib/skillTrainingGenerator";
 import confetti from "canvas-confetti";
 
 interface CourseDetailModalProps {
   course: CourseItem | null;
   isOpen: boolean;
   onClose: () => void;
+  onOpenVoiceAssistant?: (prompt?: string) => void;
 }
 
-export function CourseDetailModal({ course, isOpen, onClose }: CourseDetailModalProps) {
+export function CourseDetailModal({ course, isOpen, onClose, onOpenVoiceAssistant }: CourseDetailModalProps) {
   const [isApplied, setIsApplied] = useState<boolean>(false);
 
   if (!isOpen || !course) return null;
@@ -55,7 +59,7 @@ export function CourseDetailModal({ course, isOpen, onClose }: CourseDetailModal
           {/* Cover Image & Badges */}
           <div className="relative h-48 sm:h-56 w-full bg-slate-100">
             <Image
-              src={course.image}
+              src={getSafeCourseImage(course.image, course.title, (course as any).category)}
               alt={course.title}
               fill
               className="object-cover"
@@ -124,6 +128,21 @@ export function CourseDetailModal({ course, isOpen, onClose }: CourseDetailModal
               </div>
             </div>
 
+            {/* Detected Skill Notice */}
+            {(course as any).isDetectedSkill && (
+              <div className="p-3 bg-purple-50 border border-purple-200 rounded-2xl flex items-start gap-2.5 text-xs text-purple-900">
+                <Sparkles className="size-4 text-purple-600 shrink-0 mt-0.5 animate-pulse" />
+                <div>
+                  <span className="font-extrabold block text-purple-950">
+                    ✨ Custom AI Synthesized Training Program
+                  </span>
+                  <span className="text-[11px] text-purple-700">
+                    {(course as any).detectedReason || "Specially generated based on your detected skill match."}
+                  </span>
+                </div>
+              </div>
+            )}
+
             {/* Description */}
             <div className="space-y-1.5">
               <h4 className="text-xs font-extrabold text-slate-900 uppercase tracking-wider">Course Overview</h4>
@@ -131,6 +150,33 @@ export function CourseDetailModal({ course, isOpen, onClose }: CourseDetailModal
                 {course.description}
               </p>
             </div>
+
+            {/* Curriculum Modules */}
+            {(course as any).syllabusModules && (course as any).syllabusModules.length > 0 && (
+              <div className="space-y-2">
+                <h4 className="text-xs font-extrabold text-slate-900 uppercase tracking-wider flex items-center justify-between">
+                  <span>NSQF Curriculum Modules</span>
+                  <span className="text-[10px] text-purple-700 bg-purple-100/80 px-2 py-0.5 rounded">
+                    {(course as any).syllabusModules.length} Modules
+                  </span>
+                </h4>
+                <div className="space-y-2">
+                  {(course as any).syllabusModules.map((mod: any, idx: number) => (
+                    <div key={idx} className="p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs space-y-1">
+                      <div className="flex items-center justify-between font-bold text-slate-800">
+                        <span>{mod.title}</span>
+                        <span className="text-[10px] text-slate-500 bg-white px-1.5 py-0.5 rounded border">{mod.duration}</span>
+                      </div>
+                      <ul className="text-[11px] text-slate-600 space-y-0.5 pl-3 list-disc">
+                        {mod.topics.map((t: string, tIdx: number) => (
+                          <li key={tIdx}>{t}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Training Center Info */}
             <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 space-y-2">
@@ -175,7 +221,7 @@ export function CourseDetailModal({ course, isOpen, onClose }: CourseDetailModal
           </div>
 
           {/* Footer Action */}
-          <div className="p-4 sm:p-5 bg-slate-50 border-t border-slate-200 flex items-center justify-between gap-3">
+          <div className="p-4 sm:p-5 bg-slate-50 border-t border-slate-200 flex items-center justify-between gap-2.5">
             <Button
               onClick={onClose}
               variant="outline"
@@ -183,6 +229,20 @@ export function CourseDetailModal({ course, isOpen, onClose }: CourseDetailModal
             >
               Back
             </Button>
+
+            {onOpenVoiceAssistant && (
+              <button
+                onClick={() => {
+                  onClose();
+                  onOpenVoiceAssistant(`मुझे ${course.title} के बारे में विस्तार से बताएं। इसमें क्या योग्यता चाहिए, कितना स्टाइपेंड मिलेगा और कोर्स के बाद क्या अवसर हैं?`);
+                }}
+                className="px-3.5 py-2.5 rounded-2xl bg-purple-100 hover:bg-purple-200 text-purple-800 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer shrink-0"
+                title="Ask AI Copilot about this course"
+              >
+                <Mic className="size-3.5 text-purple-600" />
+                <span>Ask AI</span>
+              </button>
+            )}
 
             <Button
               onClick={handleApply}
