@@ -40,9 +40,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { BeneficiaryProfileData } from "@/components/onboarding/PersonalVoiceOnboarding";
 import confetti from "canvas-confetti";
 
-export function BeneficiaryExperience() {
+interface BeneficiaryExperienceProps {
+  beneficiaryProfile?: BeneficiaryProfileData | null;
+}
+
+export function BeneficiaryExperience({ beneficiaryProfile }: BeneficiaryExperienceProps = {}) {
   const [viewMode, setViewMode] = useState<"dashboard" | "advanced_tools">("dashboard");
   const [selectedBeneficiaryId, setSelectedBeneficiaryId] = useState<string>("BEN-2026-901");
   const [isRecording, setIsRecording] = useState<boolean>(false);
@@ -88,7 +93,11 @@ export function BeneficiaryExperience() {
   if (viewMode === "dashboard") {
     return (
       <div className="w-full">
-        {isMobile ? <MobileDashboard /> : <WebDashboard />}
+        {isMobile ? (
+          <MobileDashboard beneficiaryProfile={beneficiaryProfile} />
+        ) : (
+          <WebDashboard beneficiaryProfile={beneficiaryProfile} />
+        )}
       </div>
     );
   }

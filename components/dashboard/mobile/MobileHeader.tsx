@@ -4,19 +4,23 @@ import React from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { Bell, ChevronDown } from "lucide-react";
-import { CURRENT_BENEFICIARY } from "../DashboardShared";
+import { CURRENT_BENEFICIARY, BeneficiaryData } from "../DashboardShared";
 
 interface MobileHeaderProps {
   onOpenVoice: () => void;
   onOpenProfile: () => void;
   onLogoClick?: () => void;
+  beneficiary?: BeneficiaryData;
 }
 
 export function MobileHeader({
   onOpenVoice,
   onOpenProfile,
-  onLogoClick
+  onLogoClick,
+  beneficiary
 }: MobileHeaderProps) {
+  const currentName = beneficiary?.name || CURRENT_BENEFICIARY.name;
+  const currentAvatar = beneficiary?.avatarUrl || CURRENT_BENEFICIARY.avatarUrl;
   return (
     <header className="px-5 py-2 flex items-center justify-between shrink-0">
       {/* Brand Logo & Tagline */}
@@ -71,8 +75,8 @@ export function MobileHeader({
         >
           <div className="relative size-8 rounded-full overflow-hidden border border-purple-200">
             <Image
-              src={CURRENT_BENEFICIARY.avatarUrl}
-              alt={CURRENT_BENEFICIARY.name}
+              src={currentAvatar}
+              alt={currentName}
               fill
               className="object-cover object-top"
             />

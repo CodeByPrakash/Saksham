@@ -4,13 +4,16 @@ import React from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { Mic, ArrowRight } from "lucide-react";
-import { CURRENT_BENEFICIARY } from "../DashboardShared";
+import { CURRENT_BENEFICIARY, BeneficiaryData } from "../DashboardShared";
 
 interface MobileHeroCardProps {
   onStartVoice: () => void;
+  beneficiary?: BeneficiaryData;
 }
 
-export function MobileHeroCard({ onStartVoice }: MobileHeroCardProps) {
+export function MobileHeroCard({ onStartVoice, beneficiary }: MobileHeroCardProps) {
+  const currentName = beneficiary?.name || CURRENT_BENEFICIARY.name;
+
   return (
     <div className="relative overflow-hidden rounded-[32px] border border-[#EDE7D9] p-5 shadow-xs min-h-[220px] flex flex-col justify-between">
       {/* Full-width seamless village scenery background */}
@@ -33,7 +36,7 @@ export function MobileHeroCard({ onStartVoice }: MobileHeroCardProps) {
         <div className="space-y-0.5 max-w-[210px]">
           <p className="text-xs font-semibold text-slate-600">Welcome back,</p>
           <h2 className="text-xl font-extrabold text-slate-900 font-heading flex items-center gap-1.5 leading-tight">
-            <span>{CURRENT_BENEFICIARY.name}</span>
+            <span>{currentName}</span>
             <span className="inline-block origin-bottom-right">👋</span>
           </h2>
           <p className="text-[11px] text-slate-600 font-medium leading-snug pt-0.5">

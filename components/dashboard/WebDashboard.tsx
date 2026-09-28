@@ -56,10 +56,40 @@ import { SchemesModal } from "./SchemesModal";
 import { ProfileModal } from "./ProfileModal";
 import { GlobalVoiceNavigator } from "@/components/navigation/GlobalVoiceNavigator";
 import { VoiceNavIntent } from "@/lib/ai/voiceNavigation";
+import { BeneficiaryProfileData } from "@/components/onboarding/PersonalVoiceOnboarding";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
-export function WebDashboard() {
+interface WebDashboardProps {
+  beneficiaryProfile?: BeneficiaryProfileData | null;
+}
+
+export function WebDashboard({ beneficiaryProfile }: WebDashboardProps = {}) {
+  const [localProfile, setLocalProfile] = useState<BeneficiaryProfileData | null>(() => {
+    if (beneficiaryProfile) return beneficiaryProfile;
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem("saksham_beneficiary_profile");
+        if (saved) return JSON.parse(saved);
+      } catch { }
+    }
+    return null;
+  });
+
+  const activeProfile = beneficiaryProfile || localProfile;
+  const beneficiaryName = activeProfile?.fullName || CURRENT_BENEFICIARY.name;
+  const beneficiaryDistrict = activeProfile?.district || CURRENT_BENEFICIARY.district;
+  const beneficiaryState = activeProfile?.state || CURRENT_BENEFICIARY.state;
+
+  const currentBeneficiaryData = {
+    ...CURRENT_BENEFICIARY,
+    name: beneficiaryName,
+    district: beneficiaryDistrict,
+    state: beneficiaryState,
+    education: activeProfile?.education || CURRENT_BENEFICIARY.education,
+    lookingFor: activeProfile?.aspiration || CURRENT_BENEFICIARY.lookingFor
+  };
+
   const [activeMenu, setActiveMenu] = useState<string>("dashboard");
   const [selectedCourse, setSelectedCourse] = useState<CourseItem | null>(null);
   const [selectedJob, setSelectedJob] = useState<JobItem | null>(null);
@@ -301,11 +331,11 @@ export function WebDashboard() {
             <div>
               <p className="text-xs font-semibold text-slate-500">Welcome back,</p>
               <h1 className="text-2xl xl:text-3xl font-extrabold text-slate-900 tracking-tight font-heading flex items-center gap-2">
-                <span>{CURRENT_BENEFICIARY.name}</span>
+                <span>{beneficiaryName}</span>
                 <span className="animate-wave inline-block origin-bottom-right">👋</span>
               </h1>
               <p className="text-xs text-slate-500 font-medium">
-                Kalahandi, Odisha • NSQF & PM-AJAY Livelihood Intelligence
+                {beneficiaryDistrict}, {beneficiaryState} • NSQF & PM-AJAY Livelihood Intelligence
               </p>
             </div>
 
@@ -360,7 +390,7 @@ export function WebDashboard() {
                 <span className="absolute top-2 right-2 size-2 rounded-full bg-red-500 ring-2 ring-white"></span>
               </motion.button>
 
-              {/* Savitri Devi Profile Avatar & Dropdown */}
+              {/* Savitri Devi / Beneficiary Profile Avatar & Dropdown */}
               <div className="relative">
                 <button
                   onClick={() => setIsProfileModalOpen(true)}
@@ -369,13 +399,13 @@ export function WebDashboard() {
                   <div className="relative size-8 rounded-xl overflow-hidden border border-purple-200">
                     <Image
                       src={CURRENT_BENEFICIARY.avatarUrl}
-                      alt={CURRENT_BENEFICIARY.name}
+                      alt={beneficiaryName}
                       fill
                       className="object-cover object-top"
                     />
                   </div>
                   <span className="text-xs font-bold text-slate-900 hidden sm:inline">
-                    {CURRENT_BENEFICIARY.name}
+                    {beneficiaryName}
                   </span>
                   <ChevronDown className="size-3 text-slate-400" />
                 </button>
@@ -466,7 +496,7 @@ export function WebDashboard() {
                       <div className="relative w-36 xl:w-40 h-full">
                         <Image
                           src="/landingPage/person_2_landing.webp"
-                          alt="Savitri Devi"
+                          alt={beneficiaryName}
                           fill
                           className="object-contain object-bottom drop-shadow-md"
                           priority
@@ -629,14 +659,14 @@ export function WebDashboard() {
                         <div className="relative size-12 rounded-2xl overflow-hidden border border-purple-200">
                           <Image
                             src={CURRENT_BENEFICIARY.avatarUrl}
-                            alt={CURRENT_BENEFICIARY.name}
+                            alt={beneficiaryName}
                             fill
                             className="object-cover object-top"
                           />
                         </div>
                         <div>
                           <h4 className="font-extrabold text-slate-900 text-sm xl:text-base font-heading">
-                            {CURRENT_BENEFICIARY.name}
+                            {beneficiaryName}
                           </h4>
                           <p className="text-[10px] font-bold text-purple-700">
                             {CURRENT_BENEFICIARY.beneficiaryType}
@@ -656,11 +686,11 @@ export function WebDashboard() {
                     <div className="space-y-2 text-xs text-slate-600 font-medium pt-1">
                       <div className="flex items-center gap-2">
                         <MapPin className="size-3.5 text-purple-600 shrink-0" />
-                        <span>{CURRENT_BENEFICIARY.district}, {CURRENT_BENEFICIARY.state}</span>
+                        <span>{beneficiaryDistrict}, {beneficiaryState}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <GraduationCap className="size-3.5 text-blue-600 shrink-0" />
-                        <span>{CURRENT_BENEFICIARY.education}</span>
+                        <span>{currentBeneficiaryData.education}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Sprout className="size-3.5 text-emerald-600 shrink-0" />
@@ -668,7 +698,7 @@ export function WebDashboard() {
                       </div>
                       <div className="flex items-center gap-2">
                         <Briefcase className="size-3.5 text-amber-600 shrink-0" />
-                        <span>Looking for: {CURRENT_BENEFICIARY.lookingFor}</span>
+                        <span>Looking for: {currentBeneficiaryData.lookingFor}</span>
                       </div>
                     </div>
 
@@ -841,10 +871,10 @@ export function WebDashboard() {
                       AI Personalized Matches
                     </span>
                     <h2 className="text-2xl font-black font-heading">
-                      Recommended for Savitri Devi
+                      Recommended for {beneficiaryName}
                     </h2>
                     <p className="text-xs text-purple-200/80">
-                      Based on your 10th qualification, tailoring interest, and high-demand trades in Kalahandi.
+                      Based on your {currentBeneficiaryData.education} qualification, {currentBeneficiaryData.lookingFor} interest, and high-demand trades in {beneficiaryDistrict}.
                     </p>
                   </div>
 
@@ -1190,7 +1220,7 @@ export function WebDashboard() {
                   <div className="flex items-center justify-between">
                     <div>
                       <h3 className="text-lg font-extrabold text-slate-900 font-heading">
-                        Savitri Devi · Skills Passport & Verification
+                        {beneficiaryName} · Skills Passport & Verification
                       </h3>
                       <p className="text-xs text-slate-500">60% Completed · SIDH & PM-AJAY Certified Profile</p>
                     </div>
@@ -1295,6 +1325,8 @@ export function WebDashboard() {
         onClose={() => setIsVoiceModalOpen(false)}
         initialPrompt={voiceAssistantInitialPrompt}
         onNavigateTarget={handleVoiceNavigate}
+        beneficiaryName={beneficiaryName}
+        district={`${beneficiaryDistrict}, ${beneficiaryState}`}
       />
 
       <CourseDetailModal
@@ -1318,6 +1350,8 @@ export function WebDashboard() {
       <ProfileModal
         isOpen={isProfileModalOpen}
         onClose={() => setIsProfileModalOpen(false)}
+        beneficiary={currentBeneficiaryData}
+        beneficiaryProfile={activeProfile}
       />
     </div>
   );

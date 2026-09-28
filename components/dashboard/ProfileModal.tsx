@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -15,21 +15,38 @@ import {
   Save,
   ShieldCheck,
   Smartphone,
-  Phone
+  Phone,
+  Wrench,
+  Award,
+  Sparkles
 } from "lucide-react";
-import { CURRENT_BENEFICIARY } from "./DashboardShared";
+import { CURRENT_BENEFICIARY, BeneficiaryData } from "./DashboardShared";
+import { BeneficiaryProfileData } from "@/components/onboarding/PersonalVoiceOnboarding";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
 interface ProfileModalProps {
   isOpen: boolean;
   onClose: () => void;
+  beneficiary?: BeneficiaryData;
+  beneficiaryProfile?: BeneficiaryProfileData | null;
 }
 
-export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
+export function ProfileModal({
+  isOpen,
+  onClose,
+  beneficiary,
+  beneficiaryProfile
+}: ProfileModalProps) {
   const [isEditing, setIsEditing] = useState<boolean>(false);
-  const [profile, setProfile] = useState(CURRENT_BENEFICIARY);
+  const [profile, setProfile] = useState<BeneficiaryData>(beneficiary || CURRENT_BENEFICIARY);
   const [savedSuccess, setSavedSuccess] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (beneficiary) {
+      setProfile(beneficiary);
+    }
+  }, [beneficiary, isOpen]);
 
   if (!isOpen) return null;
 
@@ -38,6 +55,14 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
     setSavedSuccess(true);
     setTimeout(() => setSavedSuccess(false), 2500);
   };
+
+  const displayName = beneficiaryProfile?.fullName || profile.name;
+  const displayDistrict = beneficiaryProfile?.district || profile.district;
+  const displayState = beneficiaryProfile?.state || profile.state;
+  const displayEdu = beneficiaryProfile?.education || profile.education;
+  const displayCourse = beneficiaryProfile?.nsqfCourse || "Solar PV Agri-Pump Specialist";
+  const displayCode = beneficiaryProfile?.nsqfCode || "ELE/Q5901";
+  const displayGrant = beneficiaryProfile?.grantEligibility || "₹35,000 Capital Subsidy + ₹3,500/mo Stipend";
 
   return (
     <AnimatePresence>
@@ -52,17 +77,17 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
           {/* Header Banner */}
           <div className="p-5 bg-gradient-to-r from-purple-900 via-indigo-900 to-purple-950 text-white flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="relative size-12 rounded-full overflow-hidden border-2 border-white/40">
+              <div className="relative size-12 rounded-full overflow-hidden border-2 border-white/40 bg-purple-800">
                 <Image
                   src={profile.avatarUrl}
-                  alt={profile.name}
+                  alt={displayName}
                   fill
                   className="object-cover object-top"
                 />
               </div>
               <div>
                 <h3 className="font-extrabold text-lg tracking-tight font-heading">
-                  {profile.name}
+                  {displayName}
                 </h3>
                 <p className="text-xs text-purple-200/80">{profile.beneficiaryType}</p>
               </div>
@@ -84,6 +109,40 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
                 <span>Profile details updated successfully!</span>
               </div>
             )}
+
+            {/* PM-AJAY Livelihood Passport Card */}
+            <div className="bg-gradient-to-br from-slate-950 via-indigo-950 to-purple-950 text-white rounded-2xl p-4 shadow-md border border-purple-800/40 space-y-2.5">
+              <div className="flex items-center justify-between border-b border-white/15 pb-2">
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className="size-4 text-emerald-400" />
+                  <span className="text-xs font-extrabold tracking-wide uppercase font-heading">
+                    PM-AJAY Livelihood Passport
+                  </span>
+                </div>
+                <Badge className="text-[9px] bg-emerald-500/20 text-emerald-300 border-emerald-400/40 font-bold">
+                  ✓ Verified Issued
+                </Badge>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 text-[11px]">
+                <div className="bg-white/10 p-2 rounded-xl">
+                  <span className="text-[10px] text-purple-200 block">Candidate Name</span>
+                  <span className="font-extrabold text-white truncate block">{displayName}</span>
+                </div>
+                <div className="bg-white/10 p-2 rounded-xl">
+                  <span className="text-[10px] text-purple-200 block">Location</span>
+                  <span className="font-extrabold text-white truncate block">{displayDistrict}, {displayState}</span>
+                </div>
+                <div className="bg-white/10 p-2 rounded-xl">
+                  <span className="text-[10px] text-amber-200 block">NSQF Skill Alignment</span>
+                  <span className="font-extrabold text-white truncate block">{displayCourse}</span>
+                </div>
+                <div className="bg-white/10 p-2 rounded-xl">
+                  <span className="text-[10px] text-emerald-200 block">Capital Support</span>
+                  <span className="font-extrabold text-emerald-300 truncate block">{displayGrant}</span>
+                </div>
+              </div>
+            </div>
 
             {/* Information Grid */}
             <div className="space-y-3">
@@ -107,7 +166,7 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
                     Location
                   </span>
                   <p className="font-bold text-slate-900">
-                    {profile.district}, {profile.state}
+                    {displayDistrict}, {displayState}
                   </p>
                 </div>
 
@@ -116,7 +175,7 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
                     <GraduationCap className="size-3 text-blue-600" />
                     Education Level
                   </span>
-                  <p className="font-bold text-slate-900">{profile.education}</p>
+                  <p className="font-bold text-slate-900">{displayEdu}</p>
                 </div>
 
                 <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-1">
@@ -132,7 +191,7 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
                     <Briefcase className="size-3 text-amber-600" />
                     Looking For
                   </span>
-                  <p className="font-bold text-slate-900">{profile.lookingFor}</p>
+                  <p className="font-bold text-slate-900">{beneficiaryProfile?.aspiration || profile.lookingFor}</p>
                 </div>
               </div>
             </div>

@@ -27,6 +27,8 @@ interface VoiceAssistantModalProps {
   onClose: () => void;
   initialPrompt?: string;
   onNavigateTarget?: (intent: VoiceNavIntent) => void;
+  beneficiaryName?: string;
+  district?: string;
 }
 
 interface ChatMessage {
@@ -46,8 +48,43 @@ export function VoiceAssistantModal({
   isOpen,
   onClose,
   initialPrompt,
-  onNavigateTarget
+  onNavigateTarget,
+  beneficiaryName: propBeneficiaryName,
+  district: propDistrict
 }: VoiceAssistantModalProps) {
+  const [activeName, setActiveName] = useState<string>(() => {
+    if (propBeneficiaryName) return propBeneficiaryName;
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem("saksham_beneficiary_profile");
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed.fullName) return parsed.fullName;
+        }
+      } catch { }
+    }
+    return "Savitri Devi";
+  });
+
+  const [activeDistrict, setActiveDistrict] = useState<string>(() => {
+    if (propDistrict) return propDistrict;
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem("saksham_beneficiary_profile");
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed.district) return `${parsed.district}${parsed.state ? `, ${parsed.state}` : ""}`;
+        }
+      } catch { }
+    }
+    return "Kalahandi, Odisha";
+  });
+
+  useEffect(() => {
+    if (propBeneficiaryName) setActiveName(propBeneficiaryName);
+    if (propDistrict) setActiveDistrict(propDistrict);
+  }, [propBeneficiaryName, propDistrict, isOpen]);
+
   const [selectedLanguage, setSelectedLanguage] = useState<string>("hindi");
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
@@ -61,13 +98,13 @@ export function VoiceAssistantModal({
   const audioChunksRef = useRef<Blob[]>([]);
   const currentAudioElementRef = useRef<HTMLAudioElement | null>(null);
 
-  const [messages, setMessages] = useState<ChatMessage[]>([
+  const [messages, setMessages] = useState<ChatMessage[]>(() => [
     {
       id: "msg-1",
       sender: "ai",
-      text: "नमस्ते सावित्री देवी जी! मैं सक्षम जीविका सेतु एआई सहायक हूँ। आप बोलकर अपने कौशल, ट्रेनिंग कोर्स या पीएम-अजय अनुदान के बारे में पूछ सकती हैं।",
+      text: `नमस्ते ${activeName} जी! मैं सक्षम जीविका सेतु एआई सहायक हूँ। आप बोलकर अपने कौशल, ट्रेनिंग कोर्स या पीएम-अजय अनुदान के बारे में पूछ सकती हैं।`,
       translatedText:
-        "Namaste Savitri Devi ji! I am Saksham-AI Voice AI. You can speak to explore NSQF skill courses and PM-AJAY grants in your language."
+        `Namaste ${activeName} ji! I am Saksham-AI Voice AI. You can speak to explore NSQF skill courses and PM-AJAY grants in your language.`
     }
   ]);
 
@@ -215,13 +252,13 @@ export function VoiceAssistantModal({
         body: JSON.stringify({
           query: queryText,
           language: selectedLanguage,
-          beneficiaryName: "Savitri Devi",
-          district: "Kalahandi, Odisha"
+          beneficiaryName: activeName,
+          district: activeDistrict
         })
       });
 
       const data = await res.json();
-      const replyText = data.replyText || "सावित्री देवी जी, आपके लिए कालाहांडी में नि:शुल्क सिलाई और इलेक्ट्रीशियन कोर्स उपलब्ध हैं।";
+      const replyText = data.replyText || `${activeName} जी, आपके लिए ${activeDistrict} में नि:शुल्क सिलाई और इलेक्ट्रीशियन कोर्स उपलब्ध हैं।`;
       const audioUrl = data.audioUrl || null;
 
       const detectedIntent = parseVoiceNavigationIntent(queryText, selectedLanguage);
@@ -247,7 +284,7 @@ export function VoiceAssistantModal({
     } catch (err) {
       console.error("Voice assistant query error:", err);
       setIsProcessing(false);
-      const fallbackText = "सावित्री देवी जी, कालाहांडी के PMKK सेंटर में सिलाई एवं इलेक्ट्रीशियन के नए बैच 15 अक्टूबर से शुरू हो रहे हैं।";
+      const fallbackText = `${activeName} जी, ${activeDistrict} के PMKK सेंटर में सिलाई एवं इलेक्ट्रीशियन के नए बैच 15 अक्टूबर से शुरू हो रहे हैं।`;
       const detectedIntent = parseVoiceNavigationIntent(queryText, selectedLanguage);
       const aiMsg: ChatMessage = {
         id: `ai-${Date.now()}`,
@@ -337,8 +374,8 @@ export function VoiceAssistantModal({
       const formData = new FormData();
       formData.append("file", blob, "audio.webm");
       formData.append("language", selectedLanguage);
-      formData.append("name", "Savitri Devi");
-      formData.append("district", "Kalahandi, Odisha");
+      formData.append("name", activeName);
+      formData.append("district", activeDistrict);
 
       const res = await fetch("/api/ai/voice", {
         method: "POST",
@@ -347,7 +384,7 @@ export function VoiceAssistantModal({
 
       const data = await res.json();
       const transcript = data.transcript || "सिलाई और इलेक्ट्रीशियन कोर्स";
-      const replyText = data.replyText || "सावित्री देवी जी, आपके लिए कालाहांडी में नि:शुल्क ट्रेनिंग उपलब्ध है।";
+      const replyText = data.replyText || `${activeName} जी, आपके लिए ${activeDistrict} में नि:शुल्क ट्रेनिंग उपलब्ध है।`;
       const audioUrl = data.audioUrl || null;
 
       // Add user message

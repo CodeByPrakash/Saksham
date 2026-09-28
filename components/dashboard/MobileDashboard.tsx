@@ -42,15 +42,43 @@ import { SchemesModal } from "./SchemesModal";
 import { ProfileModal } from "./ProfileModal";
 import { GlobalVoiceNavigator } from "@/components/navigation/GlobalVoiceNavigator";
 import { VoiceNavIntent } from "@/lib/ai/voiceNavigation";
+import { BeneficiaryProfileData } from "@/components/onboarding/PersonalVoiceOnboarding";
 
 interface MobileDashboardProps {
   initialTab?: MobileTab;
   initialCourseId?: string;
   initialJobId?: string;
+  beneficiaryProfile?: BeneficiaryProfileData | null;
 }
 
-export function MobileDashboard({ initialTab = "home", initialCourseId, initialJobId }: MobileDashboardProps) {
+export function MobileDashboard({
+  initialTab = "home",
+  initialCourseId,
+  initialJobId,
+  beneficiaryProfile
+}: MobileDashboardProps) {
   const [activeTab, setActiveTab] = useState<MobileTab>(initialTab);
+  const [localProfile, setLocalProfile] = useState<BeneficiaryProfileData | null>(() => {
+    if (beneficiaryProfile) return beneficiaryProfile;
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem("saksham_beneficiary_profile");
+        if (saved) return JSON.parse(saved);
+      } catch { }
+    }
+    return null;
+  });
+
+  const activeProfile = beneficiaryProfile || localProfile;
+  const currentBeneficiaryData = {
+    ...CURRENT_BENEFICIARY,
+    name: activeProfile?.fullName || CURRENT_BENEFICIARY.name,
+    district: activeProfile?.district || CURRENT_BENEFICIARY.district,
+    state: activeProfile?.state || CURRENT_BENEFICIARY.state,
+    education: activeProfile?.education || CURRENT_BENEFICIARY.education,
+    lookingFor: activeProfile?.aspiration || CURRENT_BENEFICIARY.lookingFor
+  };
+
   const [selectedCourse, setSelectedCourse] = useState<CourseItem | null>(() => {
     if (initialCourseId) {
       return RECOMMENDED_COURSES.find(c => c.id === initialCourseId) || null;
@@ -174,6 +202,7 @@ export function MobileDashboard({ initialTab = "home", initialCourseId, initialJ
       
       {/* 1. TOP APP BAR */}
       <MobileHeader
+        beneficiary={currentBeneficiaryData}
         onOpenVoice={() => setIsVoiceModalOpen(true)}
         onOpenProfile={() => setIsProfileModalOpen(true)}
         onLogoClick={() => {
@@ -234,7 +263,10 @@ export function MobileDashboard({ initialTab = "home", initialCourseId, initialJ
               className="space-y-4"
             >
               {/* A. Hero Card */}
-              <MobileHeroCard onStartVoice={() => setIsVoiceModalOpen(true)} />
+              <MobileHeroCard
+                beneficiary={currentBeneficiaryData}
+                onStartVoice={() => setIsVoiceModalOpen(true)}
+              />
 
               {/* B. Your Progress Card */}
               <MobileProgressCard onViewAll={() => setIsProfileModalOpen(true)} />
@@ -288,7 +320,10 @@ export function MobileDashboard({ initialTab = "home", initialCourseId, initialJ
               transition={{ duration: 0.2 }}
               className="space-y-4"
             >
-              <MobileHeroCard onStartVoice={() => setIsVoiceModalOpen(true)} />
+              <MobileHeroCard
+                onStartVoice={() => setIsVoiceModalOpen(true)}
+                beneficiary={currentBeneficiaryData}
+              />
               <MobileUpcomingSteps
                 onStartStep={() => setIsVoiceModalOpen(true)}
                 onSeeAll={() => setIsVoiceModalOpen(true)}
@@ -304,10 +339,10 @@ export function MobileDashboard({ initialTab = "home", initialCourseId, initialJ
               className="space-y-4"
             >
               <div className="bg-white rounded-3xl border border-[#EDE7D9] p-5 shadow-2xs text-center flex flex-col items-center space-y-3">
-                <div className="relative size-20 rounded-full overflow-hidden border-2 border-purple-300 shadow-md">
+                <div className="relative size-20 rounded-full overflow-hidden border-2 border-purple-300 shadow-md bg-purple-800">
                   <Image
-                    src={CURRENT_BENEFICIARY.avatarUrl}
-                    alt={CURRENT_BENEFICIARY.name}
+                    src={currentBeneficiaryData.avatarUrl}
+                    alt={currentBeneficiaryData.name}
                     fill
                     sizes="80px"
                     className="object-cover object-top"
@@ -316,25 +351,29 @@ export function MobileDashboard({ initialTab = "home", initialCourseId, initialJ
 
                 <div>
                   <h3 className="font-extrabold text-lg text-slate-900 font-heading">
-                    {CURRENT_BENEFICIARY.name}
+                    {currentBeneficiaryData.name}
                   </h3>
                   <span className="inline-block text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-purple-100 text-purple-700 mt-1">
-                    {CURRENT_BENEFICIARY.beneficiaryType}
+                    {currentBeneficiaryData.beneficiaryType}
                   </span>
                 </div>
 
                 <div className="w-full text-left bg-slate-50 p-4 rounded-2xl border border-slate-200/80 space-y-2 text-xs">
                   <div className="flex justify-between">
                     <span className="text-slate-500">Location:</span>
-                    <span className="font-bold text-slate-900">{CURRENT_BENEFICIARY.district}, {CURRENT_BENEFICIARY.state}</span>
+                    <span className="font-bold text-slate-900">{currentBeneficiaryData.district}, {currentBeneficiaryData.state}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-500">Education:</span>
-                    <span className="font-bold text-slate-900">{CURRENT_BENEFICIARY.education}</span>
+                    <span className="font-bold text-slate-900">{currentBeneficiaryData.education}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-500">Occupation:</span>
-                    <span className="font-bold text-slate-900">{CURRENT_BENEFICIARY.familyOccupation}</span>
+                    <span className="text-slate-500">NSQF Skill Course:</span>
+                    <span className="font-bold text-purple-700">{activeProfile?.nsqfCourse || "Solar PV Agri-Pump Specialist"}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">PM-AJAY Grant:</span>
+                    <span className="font-bold text-emerald-600">{activeProfile?.grantEligibility || "₹35,000 Subsidy"}</span>
                   </div>
                 </div>
 
@@ -343,7 +382,7 @@ export function MobileDashboard({ initialTab = "home", initialCourseId, initialJ
                   onClick={() => setIsProfileModalOpen(true)}
                   className="w-full bg-purple-600 text-white font-bold py-2.5 rounded-2xl text-xs shadow-md"
                 >
-                  Edit Complete Profile
+                  View Livelihood Passport & Profile
                 </motion.button>
               </div>
             </motion.div>
@@ -364,6 +403,8 @@ export function MobileDashboard({ initialTab = "home", initialCourseId, initialJ
         onClose={() => setIsVoiceModalOpen(false)}
         initialPrompt={voiceAssistantInitialPrompt}
         onNavigateTarget={handleVoiceNavigate}
+        beneficiaryName={currentBeneficiaryData.name}
+        district={`${currentBeneficiaryData.district}, ${currentBeneficiaryData.state}`}
       />
 
       <SchemesModal
@@ -374,6 +415,8 @@ export function MobileDashboard({ initialTab = "home", initialCourseId, initialJ
       <ProfileModal
         isOpen={isProfileModalOpen}
         onClose={() => setIsProfileModalOpen(false)}
+        beneficiary={currentBeneficiaryData}
+        beneficiaryProfile={activeProfile}
       />
     </div>
   );

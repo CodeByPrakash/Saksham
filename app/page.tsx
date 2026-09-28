@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { AppHeader, AppMode } from "@/components/navigation/AppHeader";
 import { OnboardingFlow } from "@/components/onboarding/OnboardingFlow";
@@ -26,6 +26,16 @@ export default function Home() {
 
   const isMobile = useIsMobile();
 
+  // Load any previously spoken/saved profile on mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("saksham_beneficiary_profile");
+      if (saved) {
+        setBeneficiaryProfile(JSON.parse(saved));
+      }
+    } catch { }
+  }, []);
+
   const handleOnboardingComplete = () => {
     setFlowStage("login");
   };
@@ -41,6 +51,9 @@ export default function Home() {
 
   const handlePersonalOnboardingComplete = (profileData: BeneficiaryProfileData) => {
     setBeneficiaryProfile(profileData);
+    try {
+      localStorage.setItem("saksham_beneficiary_profile", JSON.stringify(profileData));
+    } catch { }
     setFlowStage("dashboard");
   };
 
@@ -126,7 +139,9 @@ export default function Home() {
                 <PersonalVoiceOnboarding
                   onComplete={handlePersonalOnboardingComplete}
                   onSkip={() => setFlowStage("dashboard")}
+                  onBack={() => setFlowStage("login")}
                   initialLanguage={language.toLowerCase()}
+                  onLanguageChange={setLanguage}
                 />
               </motion.main>
             )}
@@ -152,7 +167,9 @@ export default function Home() {
                 )}
 
                 <main className={`flex-1 ${currentMode !== "beneficiary" ? "pb-16" : ""}`}>
-                  {currentMode === "beneficiary" && <BeneficiaryExperience />}
+                  {currentMode === "beneficiary" && (
+                    <BeneficiaryExperience beneficiaryProfile={beneficiaryProfile} />
+                  )}
                   {currentMode === "field_worker" && <FieldWorkerCopilot />}
                   {currentMode === "government" && <GovernmentDashboard />}
                 </main>
@@ -242,7 +259,9 @@ export default function Home() {
                   <PersonalVoiceOnboarding
                     onComplete={handlePersonalOnboardingComplete}
                     onSkip={() => setFlowStage("dashboard")}
+                    onBack={() => setFlowStage("login")}
                     initialLanguage={language.toLowerCase()}
+                    onLanguageChange={setLanguage}
                   />
                 </motion.div>
               )}
@@ -255,7 +274,9 @@ export default function Home() {
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.25 }}
                 >
-                  {currentMode === "beneficiary" && <BeneficiaryExperience />}
+                  {currentMode === "beneficiary" && (
+                    <BeneficiaryExperience beneficiaryProfile={beneficiaryProfile} />
+                  )}
                   {currentMode === "field_worker" && <FieldWorkerCopilot />}
                   {currentMode === "government" && <GovernmentDashboard />}
                 </motion.div>

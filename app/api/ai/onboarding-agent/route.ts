@@ -32,10 +32,55 @@ const CANDIDATE_MODELS = [
 
 const apiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY || "";
 
+export function cleanHumanName(raw: string): string {
+  if (!raw) return "";
+  let name = raw.trim();
+
+  // 1. Remove introductory prefixes (English, Hindi, Odia, Santhali, Bhojpuri, Marathi, etc.)
+  name = name.replace(
+    /^(?:my\s*name\s*is|i\s*am|im|i'm|this\s*is|myself|मेरा\s*नाम\s*है|मेरा\s*नाम|हमार\s*नाम|ମୋର\s*ନାମ|ଇଁᱧᱟᱜ\s*ᱧᱩᱛᱩᱢ|माझे\s*नाव|नाव|नाम|name\s*is)\s*[:=,-]?\s*/iu,
+    ""
+  );
+
+  // 2. Remove trailing locations, connectors, and prepositions (including common STT mishearings like 'form', 'frm', 'rom' for 'from')
+  name = name.replace(
+    /\s+(?:from|form|frm|frum|fram|rom|se|hai|h|hu|hoon|hume|living|residing|belongs?|rehta|rehti|rahata|rahati|ka|ke|ki|district|dist|zilla|zila|gaon|gram|village|city|state|odisha|jharkhand|up|bihar|uttar\s*pradesh|sundargarh|kalahandi|mayurbhanj|varanasi|ranchi|sambalpur|bhubaneswar|cuttack|koraput|balasore|patna|delhi|mumbai|kolkata|है|हूँ|हू|से|का|के|की|जिला|गाँव|गांव|ओडिशा|सुंदरगढ़|सुन्दरगढ़|कालाहांडी|मयूरभंज|वाराणसी|राँची|ବାରାଣାସୀ|ସୁନ୍ଦରଗଡ଼|କଳାହାଣ୍ଡି|ମୟୂରଭଞ୍ଜ|ଝାଡ଼ଖଣ୍ڈ|ଓଡ଼ିଶା).*$/iu,
+    ""
+  );
+
+  // 3. Strip standalone noise words if any remain (from, form, frm, se, hai, hu, hoon, etc.)
+  name = name.replace(
+    /\b(?:from|form|frm|frum|fram|rom|se|hai|hu|hoon|h|of|in|at|the|and|is|am|are|aur|e|tatha|ji|sahab|sir|madam|है|हूँ|हू|से|का|के|की|जिला|गाँव|गांव|ओडिशा|ସୁନ୍ଦରଗଡ଼|ସେ|ହୁଁ|ହୈ)\b/giu,
+    " "
+  ).trim();
+
+  // 4. Clean extra punctuation, quotes, symbols (preserve Latin, Devanagari, Odia, Ol Chiki, Bengali)
+  name = name.replace(/[^\w\s\u0900-\u097F\u0B00-\u0B7F\u1C50-\u1C7F\u0980-\u09FF]/gi, " ").replace(/\s+/g, " ").trim();
+
+  // 5. If word ended with dangling connectors or leftover noise:
+  name = name.replace(/\b(?:from|form|frm|se|hai|है|हूँ|से)\b/giu, "").trim();
+
+  // 6. Capitalize Latin words properly
+  const capitalized = name
+    .split(" ")
+    .filter(Boolean)
+    .map((word) => {
+      if (/^[a-zA-Z]+$/.test(word)) {
+        return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+      }
+      return word;
+    })
+    .join(" ");
+
+  return capitalized || (raw ? raw.replace(/\b(?:from|form|frm|se|hai)\b/gi, "").trim() : "");
+}
+
 export async function POST(req: NextRequest) {
+  let requestLanguage = "en";
   try {
     const body: OnboardingStepConfig = await req.json();
     const { step, userSpokenText, language = "hi", currentProfile = {} } = body;
+    requestLanguage = language;
 
     if (!userSpokenText || userSpokenText.trim().length === 0) {
       return NextResponse.json({
@@ -54,14 +99,16 @@ You are an AI Onboarding Agent for PM-AJAY rural livelihood platform (Saksham-AI
 Question asked: "What is your name and which village or district are you from?"
 User's spoken answer: "${userSpokenText}"
 
-Task:
-1. Determine if the answer is RELEVANT (contains a person's name or a location/district/village/state in India).
-   If user says something completely off-topic (e.g. "hello kya hal hai", "mujhe movie dekhni hai", silence, nonsense), mark isRelevant: false.
-2. If relevant, extract:
-   - fullName: string (capitalized)
+CRITICAL RULES FOR FULL NAME EXTRACTION:
+1. Extract STRICTLY the human person's name (e.g. "Omprakash", "Ramesh Soren", "Amit Kumar", "Savitri Devi").
+2. NEVER include prepositions, location connectors, or filler words like "from", "form", "se", "is", "am", "i am", "of", "and", "hail from", "rehta hu", "district", "village", "city" in fullName!
+   - BAD: "Omprakash from", "Ramesh from Sundargarh", "Amit Kumar Varanasi se"
+   - GOOD: "Omprakash", "Ramesh Soren", "Amit Kumar"
+3. Extract:
+   - fullName: string (only the clean first and last name, capitalized)
    - district: string (e.g. "Sundargarh", "Kalahandi", "Mayurbhanj", "Varanasi", etc.)
    - state: string (e.g. "Odisha", "Jharkhand", "Uttar Pradesh", "Bihar", etc.)
-3. Provide a warm 1-sentence feedback in ${language === "hi" ? "Hindi" : language === "or" ? "Odia" : "English"} acknowledging their name and district.
+4. Provide a warm 1-sentence feedback in ${language === "hi" ? "Hindi" : language === "or" ? "Odia" : "English"} acknowledging their name and district.
 `,
       skills_experience: `
 You are an AI Skill Ontology Agent for PM-AJAY & National Skills Qualifications Framework (NSQF).
@@ -142,6 +189,9 @@ OUTPUT STRICT JSON FORMAT:
             if (raw) {
               aiResult = JSON.parse(raw);
               if (aiResult && typeof aiResult.isRelevant === "boolean") {
+                if (aiResult.extractedData && aiResult.extractedData.fullName) {
+                  aiResult.extractedData.fullName = cleanHumanName(aiResult.extractedData.fullName);
+                }
                 break;
               }
             }
@@ -155,6 +205,8 @@ OUTPUT STRICT JSON FORMAT:
     // Heuristic intelligent fallback if Gemini API is offline or key missing
     if (!aiResult) {
       aiResult = fallbackHeuristicExtraction(step, userSpokenText, language);
+    } else if (aiResult.extractedData && aiResult.extractedData.fullName) {
+      aiResult.extractedData.fullName = cleanHumanName(aiResult.extractedData.fullName);
     }
 
     // Generate spoken audio for the feedback/next question using Gemini & Google Speech
@@ -186,7 +238,16 @@ OUTPUT STRICT JSON FORMAT:
       success: false,
       isRelevant: true,
       extractedData: {},
-      feedbackText: "जानकारी दर्ज हो गई है। आगे बढ़ते हैं।",
+      feedbackText:
+        requestLanguage === "hi"
+          ? "जानकारी दर्ज हो गई है। आगे बढ़ते हैं।"
+          : requestLanguage === "or"
+          ? "ତଥ୍ୟ ଯୋଡ଼ାଗଲା। ଆଗକୁ ବଢ଼ିବା।"
+          : requestLanguage === "sat"
+          ? "ᱠᱟᱛᱷᱟ ᱨᱮᱠᱚᱨᱰ ᱮᱱᱟ᱾ ᱞᱟᱦᱟ ᱥᱮᱫ ᱵᱚᱱ ᱪᱟᱞᱟᱜᱼᱟ᱾"
+          : requestLanguage === "bn"
+          ? "তথ্য সংরক্ষিত হয়েছে। এগিয়ে যাওয়া যাক।"
+          : "Information recorded. Moving forward.",
       error: err.message
     });
   }
@@ -199,6 +260,12 @@ function getEmptyFeedback(step: string, language: string) {
   if (language === "or") {
     return "ଆମେ ଆପଣଙ୍କ ସ୍ୱର ଶୁଣିପାରିଲୁ ନାହିଁ। ଦୟାକରି ପୁନର୍ବାର କୁହନ୍ତୁ।";
   }
+  if (language === "sat") {
+    return "ᱟᱞᱮ ᱟᱢᱟᱜ ᱟᱲᱟᱝ ᱵᱟᱞᱮ ᱟᱧᱡᱚᱢ ᱧᱟᱢ ᱞᱮᱫᱟ᱾ ᱫᱟᱭᱟᱠᱟᱛᱮ ᱢᱟᱭᱤᱠ ᱚᱛᱟ ᱠᱟᱛᱮ ᱨᱚᱲ ᱢᱮ᱾";
+  }
+  if (language === "bn") {
+    return "আমরা আপনার কণ্ঠ শুনতে পাইনি। দয়া করে মাইক্রোফোন চেপে আবার বলুন।";
+  }
   return "We could not hear your voice. Please tap the microphone and speak again.";
 }
 
@@ -207,65 +274,129 @@ function getEmptyFeedback(step: string, language: string) {
  */
 function fallbackHeuristicExtraction(step: string, text: string, language: string) {
   const lower = text.toLowerCase();
+  const cleanLang = (language || "en").toLowerCase();
 
   if (step === "name_location") {
     // Check if contains greetings or words resembling name/place
     const isGreetingOnly = /^(hello|hi|namaste|kya hal hai|hey)\b/i.test(text.trim()) && text.split(" ").length <= 3;
     if (isGreetingOnly) {
+      const guidance =
+        cleanLang === "hi"
+          ? "नमस्ते! कृपया अपना नाम और जिला बोलें, जैसे 'मेरा नाम रमेश है और मैं सुंदरगढ़ से हूँ'।"
+          : cleanLang === "or"
+          ? "ନମସ୍କାର! ଦୟାକରି ଆପଣଙ୍କ ନାମ ଏବଂ ଜିଲ୍ଲା କୁହନ୍ତୁ।"
+          : cleanLang === "sat"
+          ? "ᱡᱚᱦᱟᱨ! ᱫᱟᱭᱟᱠᱟᱛᱮ ᱟᱢᱟᱜ ᱧᱩᱛᱩᱢ ᱟᱨ ᱡᱤᱞᱟ ᱞᱟᱹᱭ ᱢᱮ᱾"
+          : cleanLang === "bn"
+          ? "নমস্কার! দয়া করে আপনার নাম ও জেলার নাম বলুন।"
+          : "Namaste! Please state your full name and district, e.g. 'My name is Ramesh from Sundargarh'.";
+
       return {
         isRelevant: false,
         relevanceReason: "Only greeting detected, no name or district provided",
-        feedbackText: "नमस्ते! कृपया अपना नाम और जिला बोलें, जैसे 'मेरा नाम रमेश है और मैं सुंदरगढ़ से हूँ'।"
+        feedbackText: guidance
       };
     }
 
-    // Extract name patterns
-    let name = "रमेश सोरेन";
-    let district = "सुंदरगढ़";
-    let state = "ओडिशा";
+    // Extract district & state
+    let district = "Sundargarh";
+    let state = "Odisha";
 
-    if (/kalahandi|कालाहांडी/i.test(text)) district = "Kalahandi";
-    if (/sundargarh|सुन्दरगढ़|सुंदरगढ़/i.test(text)) district = "Sundargarh";
-    if (/mayurbhanj|मयूरभंज/i.test(text)) district = "Mayurbhanj";
-    if (/varanasi|वाराणसी/i.test(text)) { district = "Varanasi"; state = "Uttar Pradesh"; }
-    if (/ranchi|राँची/i.test(text)) { district = "Ranchi"; state = "Jharkhand"; }
-
-    // Clean name from utterance
-    const nameMatch = text.match(/(?:मेरा नाम|नाम|i am|my name is)\s+([a-zA-Z\u0900-\u097F]+(?:\s+[a-zA-Z\u0900-\u097F]+)?)/i);
-    if (nameMatch && nameMatch[1]) {
-      name = nameMatch[1].trim();
+    if (/kalahandi|कालाहांडी|କଳାହାଣ୍ଡି/i.test(text)) {
+      district = "Kalahandi";
+      state = "Odisha";
+    } else if (/sundargarh|सुन्दरगढ़|सुंदरगढ़|ସୁନ୍ଦରଗଡ଼|ᱥᱩᱱᱫᱚᱨᱜᱚᱲ/i.test(text)) {
+      district = "Sundargarh";
+      state = "Odisha";
+    } else if (/mayurbhanj|मयूरभंज|ମୟୂରଭଞ୍ଜ/i.test(text)) {
+      district = "Mayurbhanj";
+      state = "Odisha";
+    } else if (/sambalpur|संबलपुर|ସମ୍ବଲପୁର/i.test(text)) {
+      district = "Sambalpur";
+      state = "Odisha";
+    } else if (/varanasi|वाराणसी|बनारस|banaras/i.test(text)) {
+      district = "Varanasi";
+      state = "Uttar Pradesh";
+    } else if (/ranchi|राँची|ᱨᱟᱺᱪᱤ/i.test(text)) {
+      district = "Ranchi";
+      state = "Jharkhand";
+    } else if (/patna|पटना/i.test(text)) {
+      district = "Patna";
+      state = "Bihar";
     }
+
+    // Clean name from utterance thoroughly
+    let name = cleanHumanName(text);
+    if (!name || name.length < 2) {
+      name = "Ramesh Soren";
+    }
+
+    const greeting =
+      cleanLang === "hi"
+        ? `नमस्ते ${name} जी! हमने आपका गृह जिला ${district} सफलतापूर्वक जोड़ लिया है।`
+        : cleanLang === "or"
+        ? `ନମସ୍କାର ${name} ଆଜ୍ଞା! ଆପଣଙ୍କ ଜିଲ୍ଲା ${district} ଯୋଡ଼ାଗଲା।`
+        : cleanLang === "sat"
+        ? `ᱡᱚᱦᱟᱨ ${name}! ᱟᱢᱟᱜ ᱡᱤᱞᱟ ${district} ᱨᱮᱠᱚᱨᱰ ᱮᱱᱟ᱾`
+        : cleanLang === "bn"
+        ? `নমস্কার ${name}! আপনার জেলা ${district} সফলভাবে যুক্ত হয়েছে।`
+        : `Namaste ${name}! We have recorded your district as ${district}.`;
 
     return {
       isRelevant: true,
       extractedData: { fullName: name, district: district, state: state },
-      feedbackText: `नमस्ते ${name} जी! हमने आपका गृह जिला ${district} सफलतापूर्वक जोड़ लिया है।`
+      feedbackText: greeting
     };
   }
 
   if (step === "skills_experience") {
     const isIrrelevant = /^(nahi pata|kuch nahi|bye|theek hai|kya bolu)\b/i.test(lower);
     if (isIrrelevant) {
+      const guidance =
+        cleanLang === "hi"
+          ? "कृपया अपने काम के बारे में बताएं, जैसे 'मैं मोटर व पंप रिपेयर करता हूँ' या 'खेती और सिलाई का काम आता है'।"
+          : cleanLang === "or"
+          ? "ଦୟାକରି ଆପଣଙ୍କ କାମ ବିଷୟରେ କୁହନ୍ତୁ, ଯେପରି 'ମୋଟର ମରାମତି' ବା 'ସିଲେଇ କାମ'।"
+          : cleanLang === "sat"
+          ? "ᱫᱟᱭᱟᱠᱟᱛᱮ ᱟᱢᱟᱜ ᱠᱟᱹᱢᱤ ᱵᱟᱵᱚᱛ ᱞᱟᱹᱭ ᱢᱮ, ᱡᱮᱞᱮᱠᱟ ᱢᱚᱴᱚᱨ ᱵᱮᱱᱟᱣ ᱥᱮ ᱥᱤᱞᱟᱹᱭ᱾"
+          : cleanLang === "bn"
+          ? "দয়া করে আপনার কাজের অভিজ্ঞতা বলুন, যেমন 'মোটর মেরামত' বা 'সেলাই কাজ'।"
+          : "Please describe your daily work or trade, such as 'I repair agri-pumps' or 'I do tailoring and stitching'.";
+
       return {
         isRelevant: false,
         relevanceReason: "No work or skill mentioned",
-        feedbackText: "कृपया अपने काम के बारे में बताएं, जैसे 'मैं मोटर व पंप रिपेयर करता हूँ' या 'खेती और सिलाई का काम आता है'।"
+        feedbackText: guidance
       };
     }
 
-    let skills = ["मोटर व पंप रिपेयर (Submersible Diagnostics)", "कृषि उपकरण रखरखाव"];
-    let nsqfCourse = "Solar PV Agri-Pump Specialist (NSQF Level 4)";
+    let skills = ["Submersible Pump Repair", "Agri-Pump Maintenance"];
+    let nsqfCourse = "Solar PV Agri-Pump Specialist";
     let nsqfCode = "ELE/Q5901";
+    let nsqfLevel = 4;
 
-    if (/silai|tailor|कपड़ा|सिलाई/i.test(text)) {
-      skills = ["परिधान सिलाई (Garment Stitching)", "कपड़ा कटिंग व डिजाइन"];
-      nsqfCourse = "Self Employed Tailor (NSQF Level 3)";
+    if (/silai|tailor|कपड़ा|सिलाई|garment|সেলাই|ᱥᱤᱞᱟᱹᱭ/i.test(text)) {
+      skills = ["Garment Stitching", "Apparel Cutting & Pattern Design"];
+      nsqfCourse = "Self Employed Tailor";
       nsqfCode = "AMH/Q0102";
-    } else if (/bijli|electric|वायरिंग|बिजली/i.test(text)) {
-      skills = ["घरेलू वायरिंग (Domestic Wiring)", "सर्किट फॉल्ट रिपेयर"];
-      nsqfCourse = "Assistant Electrician (NSQF Level 4)";
+      nsqfLevel = 3;
+    } else if (/bijli|electric|वायरिंग|बिजली|electrician|ବିଦ୍ୟୁତ|ᱵᱤᱡᱽᱞᱤ/i.test(text)) {
+      skills = ["Domestic House Wiring", "Circuit Fault Diagnosis"];
+      nsqfCourse = "Domestic Electrician";
       nsqfCode = "ELE/Q5901";
+      nsqfLevel = 4;
     }
+
+    const feedbackText =
+      cleanLang === "hi"
+        ? `शानदार! आपके हुनर को NSQF ट्रेड '${nsqfCourse}' (${nsqfCode}) के साथ जोड़ लिया गया है।`
+        : cleanLang === "or"
+        ? `ଉତ୍ତମ! ଆପଣଙ୍କ ଦକ୍ଷତାକୁ NSQF ଟ୍ରେଡ୍ '${nsqfCourse}' (${nsqfCode}) ସହିତ ଯୋଡ଼ାଗଲା।`
+        : cleanLang === "sat"
+        ? `ᱵᱷᱟᱹᱜᱤ! ᱟᱢᱟᱜ ᱦᱩᱱᱟᱹᱨ NSQF ᱴᱨᱮᱰ '${nsqfCourse}' (${nsqfCode}) ᱥᱟᱶ ᱡᱚᱲᱟᱣ ᱮᱱᱟ᱾`
+        : cleanLang === "bn"
+        ? `চমৎকার! আপনার দক্ষতাকে NSQF ট্রেড '${nsqfCourse}' (${nsqfCode}) এর সাথে যুক্ত করা হয়েছে।`
+        : `Great! We have mapped your practical skills to NSQF Trade '${nsqfCourse}' (${nsqfCode}).`;
 
     return {
       isRelevant: true,
@@ -273,42 +404,87 @@ function fallbackHeuristicExtraction(step: string, text: string, language: strin
         skills,
         nsqfCourse,
         nsqfCode,
-        nsqfLevel: 4,
+        nsqfLevel,
         matchScore: 94
       },
-      feedbackText: `शानदार! आपके हुनर को NSQF कोड '${nsqfCode}' के साथ जोड़ लिया गया है।`
+      feedbackText: feedbackText
     };
   }
 
   if (step === "education") {
-    let edu = "10वीं पास (10th Standard)";
-    if (/8|eight|आठ/i.test(text)) edu = "8वीं पास (8th Standard)";
-    if (/12|twelfth|बारह/i.test(text)) edu = "12वीं पास (12th Standard)";
-    if (/iti|diploma|आईटीआई/i.test(text)) edu = "ITI / प्राविधिक प्रशिक्षण";
-    if (/padha nahi|anpadh|non formal|साक्षर/i.test(text)) edu = "साक्षर (Non-Formal Literacy)";
+    let edu = "10th Standard (Matriculation)";
+    if (/8|eight|आठ|৮/i.test(text)) edu = "8th Standard Completed";
+    if (/12|twelfth|बारह|১২/i.test(text)) edu = "12th Standard Passed";
+    if (/iti|diploma|आईटीआई|আইটিআই/i.test(text)) edu = "ITI / Technical Diploma";
+    if (/padha nahi|anpadh|non formal|साक्षर|literate|hands-on|non-formal/i.test(text)) edu = "Practical Learner (Non-formal)";
+
+    const feedbackText =
+      cleanLang === "hi"
+        ? `आपकी शैक्षणिक योग्यता '${edu}' पासपोर्ट में जोड़ दी गई है।`
+        : cleanLang === "or"
+        ? `ଆପଣଙ୍କ ଶିକ୍ଷାଗତ ଯୋଗ୍ୟତା '${edu}' ପାସପୋର୍ଟରେ ଯୋଡ଼ାଗଲା।`
+        : cleanLang === "sat"
+        ? `ᱟᱢᱟᱜ ᱯᱟᱲᱦᱟᱣ ᱞᱮᱵᱮᱞ '${edu}' ᱯᱟᱥᱯᱳᱨᱴ ᱨᱮ ᱡᱚᱲᱟᱣ ᱮᱱᱟ᱾`
+        : cleanLang === "bn"
+        ? `আপনার শিক্ষাগত যোগ্যতা '${edu}' পাসপোর্টে যুক্ত করা হয়েছে।`
+        : `Your education level '${edu}' has been recorded in your passport.`;
 
     return {
       isRelevant: true,
       extractedData: { education: edu },
-      feedbackText: `आपकी शैक्षणिक योग्यता '${edu}' दर्ज कर ली गई है।`
+      feedbackText: feedbackText
     };
   }
 
   if (step === "aspiration") {
+    let aspiration = "Village Solar & Agri-Repair Hub";
+    let recommendedPathway = "PM-AJAY Micro-Enterprise Hub";
+    let grant = "₹35,000 Capital Subsidy + ₹3,500/mo Stipend";
+    let score = 96;
+
+    if (/job|नौकरी|employment|35-day|जल्दी|fast income|চাকরি|ᱪᱟᱹᱠᱨᱤ/i.test(text)) {
+      aspiration = "Fast Income Wage Employment";
+      recommendedPathway = "Suryamitra Certified Technician";
+      grant = "₹3,500/mo Training Stipend + Assured Placement";
+      score = 94;
+    } else if (/apprentice|industrial|बड़ा काम|सीखना|apprenticeship/i.test(text)) {
+      aspiration = "Advanced Industrial Apprenticeship";
+      recommendedPathway = "Industrial Automation & Solar Expert";
+      grant = "₹35,000 Setup Support + PM-AJAY Apprenticeship";
+      score = 92;
+    }
+
+    const feedbackText =
+      cleanLang === "hi"
+        ? "बधाई हो! आपका पीएम-अजय लाइवलीहुड पासपोर्ट सफलतापूर्वक पूरा हो गया है।"
+        : cleanLang === "or"
+        ? "ଅଭିନନ୍ଦନ! ଆପଣଙ୍କ ପିଏମ-ଅଜୟ ଜୀବିକା ପାସପୋର୍ଟ ସଫଳତାର ସହ ସମ୍ପୂର୍ଣ୍ଣ ହୋଇଛି।"
+        : cleanLang === "sat"
+        ? "ᱥᱟᱨᱦᱟᱣ! ᱟᱢᱟᱜ ᱯᱤᱮᱢ-ᱚᱡᱚᱭ ᱡᱤᱣᱤᱠᱟ ᱯᱟᱥᱯᱳᱨᱴ ᱥᱟᱹᱛ ᱮᱱᱟ᱾"
+        : cleanLang === "bn"
+        ? "অভিনন্দন! আপনার পিএম-অজয় জীবিকা পাসপোর্ট সফলভাবে সম্পন্ন হয়েছে।"
+        : "Congratulations! Your PM-AJAY Livelihood Passport has been successfully created.";
+
     return {
       isRelevant: true,
       extractedData: {
-        aspiration: "स्वरोजगार व उद्यम (PM-AJAY Capital Support)",
-        recommendedPathway: "Village Agri-Pump & Solar Repair Clinic Hub",
-        grantEligibility: "₹35,000 कैपिटल ग्रांट + ₹3,500/माह स्टाइपेंड"
+        aspiration: aspiration,
+        recommendedPathway: recommendedPathway,
+        grantEligibility: grant,
+        matchScore: score
       },
-      feedbackText: "बधाई हो! आपका पीएम-अजय लाइवलीहुड पासपोर्ट सफलतापूर्वक तैयार हो गया है।"
+      feedbackText: feedbackText
     };
   }
 
   return {
     isRelevant: true,
     extractedData: {},
-    feedbackText: "जानकारी दर्ज कर ली गई है।"
+    feedbackText:
+      cleanLang === "hi"
+        ? "जानकारी दर्ज कर ली गई है।"
+        : cleanLang === "or"
+        ? "ତଥ୍ୟ ରେକର୍ଡ କରାଗଲା।"
+        : "Information recorded successfully."
   };
 }
