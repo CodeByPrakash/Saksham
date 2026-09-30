@@ -35,6 +35,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { LanguageSelector } from "@/components/navigation/LanguageSelector";
 import confetti from "canvas-confetti";
+import { getNSQFAgeBracket, getAvatarForGender } from "@/lib/nsqfAge";
 
 export interface BeneficiaryProfileData {
   fullName: string;
@@ -77,37 +78,37 @@ interface StepQuestion {
 const ONBOARDING_QUESTIONS: StepQuestion[] = [
   {
     id: "name_location",
-    title: "Step 1 of 4 • Name & Location",
+    title: "Step 1 of 4 • Name, Location, Age & Gender",
     subtitle: {
-      en: "Your Name and District",
-      hi: "आपका नाम और जिला",
-      or: "ଆପଣଙ୍କ ନାମ ଏବଂ ଜିଲ୍ଲା",
-      sat: "ᱟᱢᱟᱜ ᱧᱩᱛᱩᱢ ᱟᱨ ᱡᱤᱞᱟ",
-      bn: "আপনার নাম এবং জেলা",
-      bho: "रउरा नाम आ जिला",
-      mr: "तुमचे नाव आणि जिल्हा"
+      en: "Your Name, District, Age & Gender",
+      hi: "आपका नाम, जिला, आयु व लिंग",
+      or: "ଆପଣଙ୍କ ନାମ, ଜିଲ୍ଲା, ବୟସ ଏବଂ ଲିଙ୍ଗ",
+      sat: "ᱟᱢᱟᱜ ᱧᱩᱛᱩᱢ, ᱡᱤᱞᱟ, ᱩᱢᱮᱨ ᱟᱨ ᱡᱟᱱᱟᱝ",
+      bn: "আপনার নাম, জেলা, বয়স ও লিঙ্গ",
+      bho: "रउरा नाम, जिला, उमिर आ लिंग",
+      mr: "तुमचे नाव, जिल्हा, वय आणि लिंग"
     },
     aiPromptText: {
-      en: "Namaste! What is your name and which village or district are you from?",
-      hi: "नमस्ते! आपका नाम क्या है और आप किस गाँव या जिले से हैं?",
-      or: "ନମସ୍କାର! ଆପଣଙ୍କ ନାମ କ’ଣ ଏବଂ ଆପଣ କେଉଁ ଗାଁ ବା ଜିଲ୍ଲାରୁ ଆସିଛନ୍ତି?",
-      sat: "ᱡᱚᱦᱟᱨ! ᱟᱢᱟᱜ ᱧᱩᱛᱩᱢ ᱪᱮᱫ ᱟᱨ ᱟᱢ ᱚᱠᱟ ᱟᱹᱛᱩ ᱥᱮ ᱡᱤᱞᱟ ᱠᱷᱚᱱ ᱦᱮᱡ ᱟᱠᱟᱱᱟᱢ?",
-      bn: "নমস্কার! আপনার নাম কি এবং আপনি কোন গ্রাম বা জেলা থেকে এসেছেন?",
-      bho: "प्रणाम! रउरा नाम का ह आ रउरा कवन गाँव भा जिला से बानी?",
-      mr: "नमस्ते! आपले नाव काय आहे आणि आपण कोणत्या गावातून किंवा जिल्ह्यातून आला आहात?"
+      en: "Namaste! What is your name, district, age and gender?",
+      hi: "नमस्ते! आपका नाम, जिला, उम्र और लिंग क्या है?",
+      or: "ନମସ୍କାର! ଆପଣଙ୍କ ନାମ, ଜିଲ୍ଲା, ବୟସ ଏବଂ ଲିଙ୍ଗ କ’ଣ?",
+      sat: "ᱡᱚᱦᱟᱨ! ᱟᱢᱟᱜ ᱧᱩᱛᱩᱢ, ᱡᱤᱞᱟ, ᱩᱢᱮᱨ ᱟᱨ ᱡᱟᱱᱟᱝ ᱪᱮᱫ?",
+      bn: "নমস্কার! আপনার নাম, জেলা, বয়স ও লিঙ্গ কি?",
+      bho: "प्रणाम! रउरा नाम, जिला, उमिर आ लिंग का ह?",
+      mr: "नमस्ते! आपले नाव, जिल्हा, वय आणि लिंग काय आहे?"
     },
     sampleChips: [
       {
         label: {
-          en: "👤 Ramesh Soren (Sundargarh)",
-          hi: "👤 रमेश सोरेन (सुंदरगढ़)",
-          or: "👤 ରମେଶ ସୋରେନ (ସୁନ୍ଦରଗଡ଼)",
-          sat: "👤 ᱨᱚᱢᱮᱥ ᱥᱚᱨᱮᱱ (ᱥᱩᱱᱫᱚᱨᱜᱚᱲ)",
-          bn: "👤 রমেশ সোরেন (সুন্দরগড়)",
-          bho: "👤 रमेश सोरेन (सुंदरगढ़)",
-          mr: "👤 रमेश सोरेन (सुंदरगड)",
-          te: "👤 రమేష్ సోరెన్ (సుందర్‌గఢ్)",
-          ta: "👤 ரமேஷ் சோரன் (சுந்தர்கர்)"
+          en: "Ramesh Soren (Sundargarh)",
+          hi: "रमेश सोरेन (सुंदरगढ़)",
+          or: "ରମେଶ ସୋରେନ (ସୁନ୍ଦରଗଡ଼)",
+          sat: "ᱨᱚᱢᱮᱥ ᱥᱚᱨᱮᱱ (ᱥᱩᱱᱫᱚᱨᱜᱚᱲ)",
+          bn: "রমেশ সোরেন (সুন্দরগড়)",
+          bho: "रमेश सोरेन (सुंदरगढ़)",
+          mr: "रमेश सोरेन (सुंदरगड)",
+          te: "రమేష్ సోరెన్ (సుందర్‌గఢ్)",
+          ta: "ரமேஷ் சோரன் (சுந்தர்கர்)"
         },
         spokenText: {
           en: "My name is Ramesh Soren and I am from Sundargarh district.",
@@ -123,15 +124,15 @@ const ONBOARDING_QUESTIONS: StepQuestion[] = [
       },
       {
         label: {
-          en: "👤 Savitri Devi (Kalahandi)",
-          hi: "👤 सावित्री देवी (कालाहांडी)",
-          or: "👤 ସାବିତ୍ରୀ ଦେବୀ (କଳାହାଣ୍ଡି)",
-          sat: "👤 ᱥᱟᱵᱤᱛᱨᱤ ᱫᱮᱵᱤ (ᱠᱟᱞᱟᱦᱟᱱᱰᱤ)",
-          bn: "👤 সাবিত্রী দেবী (কালাহান্ডি)",
-          bho: "👤 सावित्री देवी (कालाहांडी)",
-          mr: "👤 सावित्री देवी (कालाहांडी)",
-          te: "👤 సావిత్రి దేవి (కలహండి)",
-          ta: "👤 சாவித்ரி தேவி (காலாஹண்டி)"
+          en: "Savitri Devi (Kalahandi)",
+          hi: "सावित्री देवी (कालाहांडी)",
+          or: "ସାବିତ୍ରୀ ଦେବୀ (କଳାହାଣ୍ଡି)",
+          sat: "ᱥᱟᱵᱤତ୍ରᱤ ᱫᱮବᱤ (ᱠᱟᱞᱟᱦᱟᱱᱰᱤ)",
+          bn: "সাবিত্রী देवी (कालाहांडी)",
+          bho: "सावित्री देवी (कालाहांडी)",
+          mr: "सावित्री देवी (कालाहांडी)",
+          te: "సావిత్రి దేవి (కలహండి)",
+          ta: "சாவித்ரி தேவி (காலாஹண்டி)"
         },
         spokenText: {
           en: "My name is Savitri Devi, from Kalahandi Odisha.",
@@ -628,26 +629,26 @@ export function formatLocation(district: string, state: string, lang: string): s
     (/सुंदरगढ़|ସୁନ୍ଦରଗଡ଼|ᱥᱩᱱᱫᱚᱨᱜᱚᱲ/i.test(d)
       ? "sundargarh"
       : /कालाहांडी|କଳାହାଣ୍ଡି/i.test(d)
-      ? "kalahandi"
-      : /मयूरभंज|ମୟୂରଭଞ୍ଜ/i.test(d)
-      ? "mayurbhanj"
-      : /वाराणसी|बनारस|ବାରାଣାସୀ/i.test(d)
-      ? "varanasi"
-      : /राँची|ରାଞ୍ଚି/i.test(d)
-      ? "ranchi"
-      : "sundargarh");
+        ? "kalahandi"
+        : /मयूरभंज|ମୟୂରଭଞ୍ଜ/i.test(d)
+          ? "mayurbhanj"
+          : /वाराणसी|बनारस|ବାରାଣାସୀ/i.test(d)
+            ? "varanasi"
+            : /राँची|ରାଞ୍ଚି/i.test(d)
+              ? "ranchi"
+              : "sundargarh");
 
   const sKey =
     s.toLowerCase().replace(/[\u0900-\u097F\u0B00-\u0B7F\u1C50-\u1C7F]/g, "").trim() ||
     (/ओडिशा|ଓଡ଼ିଶା|ᱳᱰᱤᱥᱟ/i.test(s)
       ? "odisha"
       : /उत्तर प्रदेश|ଉତ୍ତର ପ୍ରଦେଶ/i.test(s)
-      ? "uttar pradesh"
-      : /झारखंड|ଝାଡ଼ଖଣ୍ଡ/i.test(s)
-      ? "jharkhand"
-      : /बिहार|ବିହାର/i.test(s)
-      ? "bihar"
-      : "odisha");
+        ? "uttar pradesh"
+        : /झारखंड|ଝାଡ଼ଖଣ୍ଡ/i.test(s)
+          ? "jharkhand"
+          : /बिहार|ବିହାର/i.test(s)
+            ? "bihar"
+            : "odisha");
 
   const localizedDistrict = districtMap[dKey]?.[cleanLang] || districtMap[dKey]?.en || d || "Sundargarh";
   const localizedState = stateMap[sKey]?.[cleanLang] || stateMap[sKey]?.en || s || "Odisha";
@@ -1802,6 +1803,111 @@ export const ONBOARDING_I18N: Record<string, {
   }
 };
 
+export interface GenderAgeI18n {
+  selectGenderAndAge: string;
+  gender: string;
+  male: string;
+  female: string;
+  age: string;
+  years: string;
+}
+
+export const GENDER_AGE_I18N: Record<string, GenderAgeI18n> = {
+  hi: {
+    selectGenderAndAge: "लिंग व आयु चुनें",
+    gender: "लिंग",
+    male: "पुरुष",
+    female: "महिला",
+    age: "उम्र",
+    years: "वर्ष"
+  },
+  en: {
+    selectGenderAndAge: "Select Gender & Age",
+    gender: "Gender",
+    male: "Male",
+    female: "Female",
+    age: "Age",
+    years: "Years"
+  },
+  or: {
+    selectGenderAndAge: "ଲିଙ୍ଗ ଓ ବୟସ ବାଛନ୍ତୁ",
+    gender: "ଲିଙ୍ଗ",
+    male: "ପୁରୁଷ",
+    female: "ମହିଳା",
+    age: "ବୟସ",
+    years: "ବର୍ଷ"
+  },
+  sat: {
+    selectGenderAndAge: "ᱡᱟᱱᱟᱝ ᱟᱨ ᱩᱢᱮᱨ ᱵᱟᱪᱷᱟᱣ ᱢᱮ",
+    gender: "ᱡᱟᱱᱟᱝ",
+    male: "ᱠᱚᱲᱟ",
+    female: "ᱠᱩᱲᱤ",
+    age: "ᱩᱢᱮᱨ",
+    years: "ᱥᱮᱨᱢᱟ"
+  },
+  bn: {
+    selectGenderAndAge: "লিঙ্গ ও বয়স নির্বাচন করুন",
+    gender: "লিঙ্গ",
+    male: "পুরুষ",
+    female: "মহিলা",
+    age: "বয়স",
+    years: "বছর"
+  },
+  bho: {
+    selectGenderAndAge: "लिंग आ उमिर चुनीं",
+    gender: "लिंग",
+    male: "पुरुष",
+    female: "महिला",
+    age: "उमिर",
+    years: "बरिस"
+  },
+  mr: {
+    selectGenderAndAge: "लिंग आणि वय निवडा",
+    gender: "लिंग",
+    male: "पुरुष",
+    female: "स्त्री",
+    age: "वय",
+    years: "वर्षे"
+  },
+  te: {
+    selectGenderAndAge: "లింగం మరియు వయస్సును ఎంచుకోండి",
+    gender: "లింగం",
+    male: "పురుషుడు",
+    female: "మహిళ",
+    age: "వయస్సు",
+    years: "సంవత్సరాలు"
+  },
+  ta: {
+    selectGenderAndAge: "பாலினம் மற்றும் வயதை தேர்வு செய்க",
+    gender: "பாலினம்",
+    male: "ஆண்",
+    female: "பெண்",
+    age: "வயது",
+    years: "ஆண்டுகள்"
+  },
+  as: {
+    selectGenderAndAge: "লিংগ আৰু বয়স বাছক",
+    gender: "লিংগ",
+    male: "পুৰুষ",
+    female: "মহিলা",
+    age: "বয়স",
+    years: "বছৰ"
+  },
+  mai: {
+    selectGenderAndAge: "लिंग आ उमिर चुनू",
+    gender: "लिंग",
+    male: "पुरुष",
+    female: "महिला",
+    age: "उमिर",
+    years: "वर्ष"
+  }
+};
+
+export function getGenderAgeI18n(lang: string): GenderAgeI18n {
+  const cleanLang = (lang || "hi").toLowerCase();
+  return GENDER_AGE_I18N[cleanLang] || GENDER_AGE_I18N.hi || GENDER_AGE_I18N.en;
+}
+
 export function getI18n(lang: string) {
   const cleanLang = (lang || "en").toLowerCase();
   return ONBOARDING_I18N[cleanLang] || ONBOARDING_I18N.en;
@@ -1854,7 +1960,10 @@ export function PersonalVoiceOnboarding({
     aspiration: "",
     recommendedPathway: "",
     grantEligibility: "",
-    matchScore: 0
+    matchScore: 0,
+    gender: "male",
+    age: 28,
+    avatarUrl: "/landingPage/person_3_landing.webp"
   });
 
   // Working copy for the manual edit modal
@@ -1870,7 +1979,10 @@ export function PersonalVoiceOnboarding({
     aspiration: "",
     recommendedPathway: "",
     grantEligibility: "",
-    matchScore: 94
+    matchScore: 94,
+    gender: "male",
+    age: 28,
+    avatarUrl: "/landingPage/person_3_landing.webp"
   });
 
   const isStep1Done = Boolean(profile.fullName && profile.fullName.trim().length > 0);
@@ -1888,6 +2000,7 @@ export function PersonalVoiceOnboarding({
   const safeStepIndex = Math.min(Math.max(0, currentStepIndex), ONBOARDING_QUESTIONS.length - 1);
   const currentStep = ONBOARDING_QUESTIONS[safeStepIndex] || ONBOARDING_QUESTIONS[0];
   const t = getI18n(language);
+  const gI18n = getGenderAgeI18n(language);
 
   const handleLanguageChange = (code: string) => {
     const clean = (code || "en").toLowerCase();
@@ -2361,16 +2474,67 @@ export function PersonalVoiceOnboarding({
     const spoken = getChipSpokenText(chip, language);
     setSpokenTranscript(spoken);
     setStepTranscripts((prev) => ({ ...prev, [currentStepIndex]: spoken }));
+
+    if (currentStepIndex === 0) {
+      if (spoken.toLowerCase().includes("savitri") || spoken.includes("सावित्री") || spoken.includes("କଳାହାଣ୍ଡି")) {
+        setProfile((prev) => ({
+          ...prev,
+          fullName: "सावित्री देवी",
+          district: "Kalahandi",
+          state: "Odisha",
+          gender: "female",
+          age: 52,
+          avatarUrl: "/landingPage/person_1_landing.webp"
+        }));
+        setEditableProfile((prev) => ({
+          ...prev,
+          fullName: "सावित्री देवी",
+          district: "Kalahandi",
+          state: "Odisha",
+          gender: "female",
+          age: 52,
+          avatarUrl: "/landingPage/person_1_landing.webp"
+        }));
+      } else if (spoken.toLowerCase().includes("ramesh") || spoken.includes("रमेश") || spoken.includes("ସୁନ୍ଦରଗଡ଼")) {
+        setProfile((prev) => ({
+          ...prev,
+          fullName: "रमेश सोरेन",
+          district: "Sundargarh",
+          state: "Odisha",
+          gender: "male",
+          age: 28,
+          avatarUrl: "/landingPage/person_3_landing.webp"
+        }));
+        setEditableProfile((prev) => ({
+          ...prev,
+          fullName: "रमेश सोरेन",
+          district: "Sundargarh",
+          state: "Odisha",
+          gender: "male",
+          age: 28,
+          avatarUrl: "/landingPage/person_3_landing.webp"
+        }));
+      }
+    }
+
     evaluateSpokenAnswer(spoken);
   };
 
   const handleCompleteOnboarding = (overrideProfile?: BeneficiaryProfileData) => {
     // Ensure all 4 slots are populated with clean verified values
     const profToUse = overrideProfile || profile;
+    const finalGender = profToUse.gender || "male";
+    const finalAge = profToUse.age || 28;
+    const ageInfo = getNSQFAgeBracket(finalAge);
+
     const finalProfile: BeneficiaryProfileData = {
       fullName: cleanHumanName(profToUse.fullName) || "रमेश सोरेन",
       district: profToUse.district || "Sundargarh",
       state: profToUse.state || "Odisha",
+      gender: finalGender,
+      age: finalAge,
+      ageCategory: ageInfo.category,
+      avatarUrl: profToUse.avatarUrl || getAvatarForGender(finalGender),
       skills: profToUse.skills && profToUse.skills.length > 0 ? profToUse.skills : ["Submersible Diagnostics", "Agri-Pump Repair"],
       nsqfCode: profToUse.nsqfCode || "ELE/Q5901",
       nsqfLevel: profToUse.nsqfLevel || 4,
@@ -2579,9 +2743,8 @@ export function PersonalVoiceOnboarding({
                 {/* Pulsating Voice Bot Emblem */}
                 <div className="relative shrink-0 mt-0.5">
                   <div
-                    className={`size-11 sm:size-12 rounded-2xl bg-gradient-to-br from-purple-600 via-indigo-600 to-purple-700 flex items-center justify-center text-white shadow-md ${
-                      isAiSpeaking ? "ring-4 ring-purple-300 animate-pulse" : ""
-                    }`}
+                    className={`size-11 sm:size-12 rounded-2xl bg-gradient-to-br from-purple-600 via-indigo-600 to-purple-700 flex items-center justify-center text-white shadow-md ${isAiSpeaking ? "ring-4 ring-purple-300 animate-pulse" : ""
+                      }`}
                   >
                     <Sparkles className="size-5" />
                   </div>
@@ -2673,7 +2836,7 @@ export function PersonalVoiceOnboarding({
                     <Radio className={`size-3.5 ${isListening ? "text-red-500 animate-pulse" : "text-purple-600"}`} />
                     <span>{isListening ? t.listening : t.yourResponse}</span>
                   </span>
-                  
+
                   {/* Toggle inline text typing */}
                   <button
                     onClick={() => {
@@ -2702,11 +2865,10 @@ export function PersonalVoiceOnboarding({
                       onClick={toggleListening}
                       type="button"
                       aria-label={t.tapMicToSpeak}
-                      className={`size-16 sm:size-18 rounded-full flex items-center justify-center text-white shadow-xl transition-all cursor-pointer ring-4 ${
-                        isListening
+                      className={`size-16 sm:size-18 rounded-full flex items-center justify-center text-white shadow-xl transition-all cursor-pointer ring-4 ${isListening
                           ? "bg-gradient-to-r from-red-500 to-rose-600 ring-rose-300 scale-105"
                           : "bg-gradient-to-r from-[#6B34EB] via-[#7539F4] to-[#8042F6] hover:from-[#5E2DD8] hover:to-[#7335EC] ring-purple-200"
-                      }`}
+                        }`}
                     >
                       {isListening ? (
                         <MicOff className="size-8 animate-pulse" />
@@ -2777,6 +2939,110 @@ export function PersonalVoiceOnboarding({
                   </div>
                 )}
 
+                {/* Step 1 Interactive Age & Gender Quick Selection Field */}
+                {currentStepIndex === 0 && (
+                  <div className="p-3 bg-gradient-to-r from-purple-50/90 via-indigo-50/70 to-purple-50/90 rounded-2xl border border-purple-200 shadow-xs space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-extrabold text-purple-950 flex items-center gap-1.5">
+                        <User className="size-3.5 text-purple-600" />
+                        <span>{gI18n.selectGenderAndAge}</span>
+                      </span>
+                      <Badge variant="outline" className="text-[9px] font-bold border-purple-300 text-purple-700 bg-white shadow-xs">
+                        {getNSQFAgeBracket(profile.age || 28).tag} NSQF
+                      </Badge>
+                    </div>
+
+                    {/* Gender Selection Buttons */}
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const newGender = "male";
+                          setProfile((prev) => ({
+                            ...prev,
+                            gender: newGender,
+                            avatarUrl: getAvatarForGender(newGender)
+                          }));
+                          setEditableProfile((prev) => ({
+                            ...prev,
+                            gender: newGender,
+                            avatarUrl: getAvatarForGender(newGender)
+                          }));
+                        }}
+                        className={`flex items-center justify-center gap-2 py-2 px-3 rounded-xl font-bold text-xs transition-all cursor-pointer border ${(profile.gender || "male") === "male"
+                            ? "bg-purple-600 text-white border-purple-600 shadow-md ring-2 ring-purple-300"
+                            : "bg-white text-slate-700 border-slate-200 hover:bg-purple-50/60 hover:border-purple-300"
+                          }`}
+                      >
+                        <span>{gI18n.male}</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const newGender = "female";
+                          setProfile((prev) => ({
+                            ...prev,
+                            gender: newGender,
+                            avatarUrl: getAvatarForGender(newGender)
+                          }));
+                          setEditableProfile((prev) => ({
+                            ...prev,
+                            gender: newGender,
+                            avatarUrl: getAvatarForGender(newGender)
+                          }));
+                        }}
+                        className={`flex items-center justify-center gap-2 py-2 px-3 rounded-xl font-bold text-xs transition-all cursor-pointer border ${profile.gender === "female"
+                            ? "bg-purple-600 text-white border-purple-600 shadow-md ring-2 ring-purple-300"
+                            : "bg-white text-slate-700 border-slate-200 hover:bg-purple-50/60 hover:border-purple-300"
+                          }`}
+                      >
+                        <span>{gI18n.female}</span>
+                      </button>
+                    </div>
+
+                    {/* Age Stepper & NSQF Live Calculation */}
+                    <div className="flex items-center justify-between bg-white p-2 rounded-xl border border-purple-100 gap-2 shadow-2xs">
+                      <span className="text-[11px] font-bold text-slate-700 pl-1 shrink-0">
+                        {gI18n.age}:
+                      </span>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const newAge = Math.max(14, (profile.age || 28) - 1);
+                            setProfile((prev) => ({ ...prev, age: newAge }));
+                            setEditableProfile((prev) => ({ ...prev, age: newAge }));
+                          }}
+                          className="size-7 rounded-lg bg-purple-50 hover:bg-purple-100 text-purple-700 font-black text-sm flex items-center justify-center border border-purple-200 cursor-pointer transition-colors"
+                        >
+                          -
+                        </button>
+                        <div className="px-2.5 py-0.5 bg-purple-50/80 rounded-lg border border-purple-200 font-extrabold text-xs text-purple-900 min-w-[58px] text-center">
+                          {profile.age || 28} {gI18n.years}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const newAge = Math.min(85, (profile.age || 28) + 1);
+                            setProfile((prev) => ({ ...prev, age: newAge }));
+                            setEditableProfile((prev) => ({ ...prev, age: newAge }));
+                          }}
+                          className="size-7 rounded-lg bg-purple-50 hover:bg-purple-100 text-purple-700 font-black text-sm flex items-center justify-center border border-purple-200 cursor-pointer transition-colors"
+                        >
+                          +
+                        </button>
+                      </div>
+                      <span
+                        className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md truncate max-w-[135px]"
+                        title={getNSQFAgeBracket(profile.age || 28).badgeLabel}
+                      >
+                        {getNSQFAgeBracket(profile.age || 28).badgeLabel}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
                 {/* Quick Spoken Chips for 1-Tap Voice Simulation */}
                 <div className="space-y-1.5 pt-1">
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
@@ -2816,19 +3082,18 @@ export function PersonalVoiceOnboarding({
                     </div>
                     <Badge
                       variant="purple"
-                      className={`text-[9px] font-bold px-2 py-0.5 transition-all ${
-                        completedCount === 4
+                      className={`text-[9px] font-bold px-2 py-0.5 transition-all ${completedCount === 4
                           ? "bg-emerald-500/20 text-emerald-300 border-emerald-400/40"
                           : completedCount > 0
-                          ? `bg-purple-500/30 text-purple-200 border-purple-400/40`
-                          : "bg-slate-800/80 text-slate-400 border-slate-700"
-                      }`}
+                            ? `bg-purple-500/30 text-purple-200 border-purple-400/40`
+                            : "bg-slate-800/80 text-slate-400 border-slate-700"
+                        }`}
                     >
                       {completedCount === 4
                         ? t.verified
                         : completedCount > 0
-                        ? `${t.building} (${completedCount}/4)`
-                        : t.awaitingInput}
+                          ? `${t.building} (${completedCount}/4)`
+                          : t.awaitingInput}
                     </Badge>
                   </div>
 
@@ -2852,11 +3117,10 @@ export function PersonalVoiceOnboarding({
                       initial={{ opacity: 0, y: 3, scale: 0.98 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       onClick={() => setCurrentStepIndex(0)}
-                      className={`flex items-center justify-between p-2.5 rounded-xl border shadow-xs group cursor-pointer transition-all ${
-                        currentStepIndex === 0
+                      className={`flex items-center justify-between p-2.5 rounded-xl border shadow-xs group cursor-pointer transition-all ${currentStepIndex === 0
                           ? "bg-purple-950/90 border-purple-400 ring-2 ring-purple-400/40"
                           : "bg-white/10 hover:bg-white/15 border-emerald-500/30"
-                      }`}
+                        }`}
                     >
                       <div className="flex items-center gap-2.5 min-w-0 flex-1">
                         <div className="size-7 rounded-lg bg-purple-500/20 flex items-center justify-center text-purple-300 shrink-0">
@@ -2866,6 +3130,13 @@ export function PersonalVoiceOnboarding({
                           <span className="text-[10px] text-purple-200 block font-medium">{t.slot1Title}</span>
                           <span className="font-extrabold text-white truncate block">
                             {cleanHumanName(profile.fullName)} {profile.district ? `(${formatLocation(profile.district, profile.state, language)})` : ""}
+                          </span>
+                          <span className="text-[10px] text-purple-300 font-medium flex items-center gap-1.5 mt-0.5 truncate">
+                            <span>{profile.gender === "female" ? gI18n.female : gI18n.male}</span>
+                            <span>•</span>
+                            <span>{profile.age || 28} {gI18n.years}</span>
+                            <span>•</span>
+                            <span className="text-emerald-300 font-bold">{getNSQFAgeBracket(profile.age || 28).tag}</span>
                           </span>
                         </div>
                       </div>
@@ -2895,8 +3166,8 @@ export function PersonalVoiceOnboarding({
                             {isListening
                               ? t.listening
                               : isEvaluating
-                              ? "Analyzing..."
-                              : t.tapToSpeakOrSelect}
+                                ? "Analyzing..."
+                                : t.tapToSpeakOrSelect}
                           </span>
                         </div>
                       </div>
@@ -2929,11 +3200,10 @@ export function PersonalVoiceOnboarding({
                       initial={{ opacity: 0, y: 3, scale: 0.98 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       onClick={() => setCurrentStepIndex(1)}
-                      className={`flex items-center justify-between p-2.5 rounded-xl border shadow-xs group cursor-pointer transition-all ${
-                        currentStepIndex === 1
+                      className={`flex items-center justify-between p-2.5 rounded-xl border shadow-xs group cursor-pointer transition-all ${currentStepIndex === 1
                           ? "bg-amber-950/90 border-amber-400 ring-2 ring-amber-400/40"
                           : "bg-white/10 hover:bg-white/15 border-emerald-500/30"
-                      }`}
+                        }`}
                     >
                       <div className="flex items-center gap-2.5 min-w-0 flex-1">
                         <div className="size-7 rounded-lg bg-amber-500/20 flex items-center justify-center text-amber-300 shrink-0">
@@ -2972,8 +3242,8 @@ export function PersonalVoiceOnboarding({
                             {isListening
                               ? t.listening
                               : isEvaluating
-                              ? "Matching NSQF..."
-                              : t.tapToSpeakOrSelect}
+                                ? "Matching NSQF..."
+                                : t.tapToSpeakOrSelect}
                           </span>
                         </div>
                       </div>
@@ -3006,11 +3276,10 @@ export function PersonalVoiceOnboarding({
                       initial={{ opacity: 0, y: 3, scale: 0.98 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       onClick={() => setCurrentStepIndex(2)}
-                      className={`flex items-center justify-between p-2.5 rounded-xl border shadow-xs group cursor-pointer transition-all ${
-                        currentStepIndex === 2
+                      className={`flex items-center justify-between p-2.5 rounded-xl border shadow-xs group cursor-pointer transition-all ${currentStepIndex === 2
                           ? "bg-blue-950/90 border-blue-400 ring-2 ring-blue-400/40"
                           : "bg-white/10 hover:bg-white/15 border-emerald-500/30"
-                      }`}
+                        }`}
                     >
                       <div className="flex items-center gap-2.5 min-w-0 flex-1">
                         <div className="size-7 rounded-lg bg-blue-500/20 flex items-center justify-center text-blue-300 shrink-0">
@@ -3049,8 +3318,8 @@ export function PersonalVoiceOnboarding({
                             {isListening
                               ? t.listening
                               : isEvaluating
-                              ? "Recording Qualification..."
-                              : t.tapToSpeakOrSelect}
+                                ? "Recording Qualification..."
+                                : t.tapToSpeakOrSelect}
                           </span>
                         </div>
                       </div>
@@ -3083,11 +3352,10 @@ export function PersonalVoiceOnboarding({
                       initial={{ opacity: 0, y: 3, scale: 0.98 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       onClick={() => setCurrentStepIndex(3)}
-                      className={`flex items-center justify-between p-2.5 rounded-xl border shadow-xs group cursor-pointer transition-all ${
-                        currentStepIndex === 3
+                      className={`flex items-center justify-between p-2.5 rounded-xl border shadow-xs group cursor-pointer transition-all ${currentStepIndex === 3
                           ? "bg-emerald-950/90 border-emerald-400 ring-2 ring-emerald-400/40"
                           : "bg-white/10 hover:bg-white/15 border-emerald-500/30"
-                      }`}
+                        }`}
                     >
                       <div className="flex items-center gap-2.5 min-w-0 flex-1">
                         <div className="size-7 rounded-lg bg-emerald-500/20 flex items-center justify-center text-emerald-300 shrink-0">
@@ -3126,8 +3394,8 @@ export function PersonalVoiceOnboarding({
                             {isListening
                               ? t.listening
                               : isEvaluating
-                              ? "Matching Grant..."
-                              : t.tapToSpeakOrSelect}
+                                ? "Matching Grant..."
+                                : t.tapToSpeakOrSelect}
                           </span>
                         </div>
                       </div>
@@ -3338,6 +3606,98 @@ export function PersonalVoiceOnboarding({
                     placeholder="e.g. Ramesh Soren / सावित्री देवी"
                     className="w-full text-xs font-semibold text-slate-900 bg-slate-50 p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500"
                   />
+                </div>
+
+                {/* 1B. Gender & Age */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 bg-purple-50/60 rounded-2xl border border-purple-200/80">
+                  {/* Gender */}
+                  <div className="space-y-1.5">
+                    <label className="font-bold text-slate-900 flex items-center justify-between text-[11px]">
+                      <span>{gI18n.gender}</span>
+                    </label>
+                    <div className="grid grid-cols-2 gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const newGender = "male";
+                          setEditableProfile((prev) => ({
+                            ...prev,
+                            gender: newGender,
+                            avatarUrl: getAvatarForGender(newGender)
+                          }));
+                        }}
+                        className={`py-1.5 px-2 rounded-xl font-bold text-[11px] border transition-all cursor-pointer flex items-center justify-center gap-1 ${(editableProfile.gender || "male") === "male"
+                            ? "bg-purple-600 text-white border-purple-600 shadow-xs"
+                            : "bg-white text-slate-700 border-slate-200 hover:bg-purple-100"
+                          }`}
+                      >
+                        <span>{gI18n.male}</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const newGender = "female";
+                          setEditableProfile((prev) => ({
+                            ...prev,
+                            gender: newGender,
+                            avatarUrl: getAvatarForGender(newGender)
+                          }));
+                        }}
+                        className={`py-1.5 px-2 rounded-xl font-bold text-[11px] border transition-all cursor-pointer flex items-center justify-center gap-1 ${editableProfile.gender === "female"
+                            ? "bg-purple-600 text-white border-purple-600 shadow-xs"
+                            : "bg-white text-slate-700 border-slate-200 hover:bg-purple-100"
+                          }`}
+                      >
+                        <span>{gI18n.female}</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Age Stepper */}
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="font-bold text-slate-900">{gI18n.age}</span>
+                      <span className="font-bold text-emerald-700 text-[10px]">
+                        {getNSQFAgeBracket(editableProfile.age || 28).tag} NSQF
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const newAge = Math.max(14, (editableProfile.age || 28) - 1);
+                          setEditableProfile((prev) => ({ ...prev, age: newAge }));
+                        }}
+                        className="size-7 rounded-lg bg-white hover:bg-purple-100 text-purple-700 font-bold border border-slate-200 cursor-pointer flex items-center justify-center text-xs"
+                      >
+                        -
+                      </button>
+                      <input
+                        type="number"
+                        min={14}
+                        max={85}
+                        value={editableProfile.age || 28}
+                        onChange={(e) => {
+                          const val = parseInt(e.target.value, 10);
+                          if (!isNaN(val)) {
+                            setEditableProfile((prev) => ({ ...prev, age: val }));
+                          }
+                        }}
+                        className="w-full text-center text-xs font-bold text-slate-900 bg-white p-1 rounded-lg border border-slate-200 focus:outline-none focus:ring-1 focus:ring-purple-500"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const newAge = Math.min(85, (editableProfile.age || 28) + 1);
+                          setEditableProfile((prev) => ({ ...prev, age: newAge }));
+                        }}
+                        className="size-7 rounded-lg bg-white hover:bg-purple-100 text-purple-700 font-bold border border-slate-200 cursor-pointer flex items-center justify-center text-xs"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
                 </div>
 
                 {/* 2. Location (District & State) */}

@@ -14,10 +14,8 @@ import {
   CheckCircle2,
   Save,
   ShieldCheck,
-  Smartphone,
-  Phone,
-  Wrench,
-  Award,
+  Plus,
+  Minus,
   Sparkles
 } from "lucide-react";
 import { CURRENT_BENEFICIARY, BeneficiaryData } from "./DashboardShared";
@@ -31,45 +29,95 @@ interface ProfileModalProps {
   onClose: () => void;
   beneficiary?: BeneficiaryData;
   beneficiaryProfile?: BeneficiaryProfileData | null;
+  onUpdateProfile?: (updated: Partial<BeneficiaryProfileData>) => void;
 }
 
 export function ProfileModal({
   isOpen,
   onClose,
   beneficiary,
-  beneficiaryProfile
+  beneficiaryProfile,
+  onUpdateProfile
 }: ProfileModalProps) {
   const [isEditing, setIsEditing] = useState<boolean>(false);
-  const [profile, setProfile] = useState<BeneficiaryData>(beneficiary || CURRENT_BENEFICIARY);
   const [savedSuccess, setSavedSuccess] = useState<boolean>(false);
 
+  // Initial source values
+  const currentGender = (beneficiaryProfile?.gender || beneficiary?.gender || "female") as "male" | "female";
+  const currentAge = beneficiaryProfile?.age || beneficiary?.age || (currentGender === "female" ? 52 : 28);
+  const currentName = beneficiaryProfile?.fullName || beneficiary?.name || CURRENT_BENEFICIARY.name;
+  const currentDistrict = beneficiaryProfile?.district || beneficiary?.district || CURRENT_BENEFICIARY.district;
+  const currentState = beneficiaryProfile?.state || beneficiary?.state || CURRENT_BENEFICIARY.state;
+  const currentEdu = beneficiaryProfile?.education || beneficiary?.education || CURRENT_BENEFICIARY.education;
+  const currentAspiration = beneficiaryProfile?.aspiration || beneficiary?.lookingFor || CURRENT_BENEFICIARY.lookingFor;
+
+  // Editable form fields
+  const [editGender, setEditGender] = useState<"male" | "female">(currentGender);
+  const [editAge, setEditAge] = useState<number>(currentAge);
+  const [editName, setEditName] = useState<string>(currentName);
+  const [editDistrict, setEditDistrict] = useState<string>(currentDistrict);
+  const [editState, setEditState] = useState<string>(currentState);
+  const [editEducation, setEditEducation] = useState<string>(currentEdu);
+  const [editAspiration, setEditAspiration] = useState<string>(currentAspiration);
+
+  // Sync state on open
   useEffect(() => {
-    if (beneficiary) {
-      setProfile(beneficiary);
+    if (isOpen) {
+      setEditGender(currentGender);
+      setEditAge(currentAge);
+      setEditName(currentName);
+      setEditDistrict(currentDistrict);
+      setEditState(currentState);
+      setEditEducation(currentEdu);
+      setEditAspiration(currentAspiration);
+      setIsEditing(false);
+      setSavedSuccess(false);
     }
-  }, [beneficiary, isOpen]);
+  }, [isOpen, beneficiary, beneficiaryProfile]);
 
   if (!isOpen) return null;
 
-  const handleSave = () => {
-    setIsEditing(false);
-    setSavedSuccess(true);
-    setTimeout(() => setSavedSuccess(false), 2500);
-  };
+  // Real-time calculations for active values
+  const activeGender = isEditing ? editGender : currentGender;
+  const activeAge = isEditing ? editAge : currentAge;
+  const activeBracket = getNSQFAgeBracket(activeAge);
+  const activeAvatar = getAvatarForGender(activeGender);
+  const activeName = isEditing ? editName : currentName;
+  const activeDistrict = isEditing ? editDistrict : currentDistrict;
+  const activeState = isEditing ? editState : currentState;
+  const activeEducation = isEditing ? editEducation : currentEdu;
+  const activeAspiration = isEditing ? editAspiration : currentAspiration;
 
-  const displayName = beneficiaryProfile?.fullName || profile.name;
-  const displayDistrict = beneficiaryProfile?.district || profile.district;
-  const displayState = beneficiaryProfile?.state || profile.state;
-  const displayEdu = beneficiaryProfile?.education || profile.education;
   const displayCourse = beneficiaryProfile?.nsqfCourse || "Solar PV Agri-Pump Specialist";
-  const displayCode = beneficiaryProfile?.nsqfCode || "ELE/Q5901";
   const displayGrant = beneficiaryProfile?.grantEligibility || "₹35,000 Capital Subsidy + ₹3,500/mo Stipend";
 
-  const displayGender = beneficiaryProfile?.gender || profile.gender || "female";
-  const displayAge = beneficiaryProfile?.age || profile.age || (displayGender === "female" ? 52 : 28);
-  const ageBracket = getNSQFAgeBracket(displayAge);
-  const displayAgeCategory = beneficiaryProfile?.ageCategory || ageBracket.badgeLabel;
-  const avatarSrc = profile.avatarUrl || beneficiaryProfile?.avatarUrl || getAvatarForGender(displayGender);
+  const handleSave = () => {
+    const updated: Partial<BeneficiaryProfileData> = {
+      fullName: editName,
+      gender: editGender,
+      age: editAge,
+      ageCategory: activeBracket.badgeLabel,
+      district: editDistrict,
+      state: editState,
+      education: editEducation,
+      aspiration: editAspiration,
+      avatarUrl: getAvatarForGender(editGender)
+    };
+
+    if (onUpdateProfile) {
+      onUpdateProfile(updated);
+    } else if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem("saksham_beneficiary_profile");
+        const existing = saved ? JSON.parse(saved) : {};
+        localStorage.setItem("saksham_beneficiary_profile", JSON.stringify({ ...existing, ...updated }));
+      } catch {}
+    }
+
+    setIsEditing(false);
+    setSavedSuccess(true);
+    setTimeout(() => setSavedSuccess(false), 3000);
+  };
 
   return (
     <AnimatePresence>
@@ -84,31 +132,31 @@ export function ProfileModal({
           {/* Header Banner */}
           <div className="p-5 bg-gradient-to-r from-purple-900 via-indigo-900 to-purple-950 text-white flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="relative size-12 rounded-full overflow-hidden border-2 border-white/40 bg-purple-800">
+              <div className="relative size-12 rounded-full overflow-hidden border-2 border-white/40 bg-purple-800 shrink-0">
                 <Image
-                  src={avatarSrc}
-                  alt={displayName}
+                  src={activeAvatar}
+                  alt={activeName}
                   fill
                   className="object-cover object-top"
                 />
               </div>
-              <div>
-                <h3 className="font-extrabold text-lg tracking-tight font-heading">
-                  {displayName}
+              <div className="min-w-0">
+                <h3 className="font-extrabold text-lg tracking-tight font-heading truncate">
+                  {activeName}
                 </h3>
                 <div className="flex items-center gap-2 text-xs text-purple-200/80">
-                  <span className="capitalize">{displayGender}</span>
+                  <span className="capitalize">{activeGender}</span>
                   <span>•</span>
-                  <span>Age {displayAge}</span>
+                  <span>Age {activeAge}</span>
                   <span>•</span>
-                  <span className="text-amber-300 font-semibold">{displayAgeCategory}</span>
+                  <span className="text-amber-300 font-semibold">{activeBracket.tag}</span>
                 </div>
               </div>
             </div>
 
             <button
               onClick={onClose}
-              className="size-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center cursor-pointer transition-colors"
+              className="size-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center cursor-pointer transition-colors shrink-0 ml-2"
             >
               <X className="size-4" />
             </button>
@@ -117,10 +165,14 @@ export function ProfileModal({
           {/* Body Content */}
           <div className="p-5 sm:p-6 overflow-y-auto space-y-4 text-xs sm:text-sm text-slate-700">
             {savedSuccess && (
-              <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-2xl text-emerald-800 font-bold flex items-center gap-2">
-                <CheckCircle2 className="size-4 text-emerald-600" />
-                <span>Profile details updated successfully!</span>
-              </div>
+              <motion.div
+                initial={{ opacity: 0, y: -6 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="p-3 bg-emerald-50 border border-emerald-200 rounded-2xl text-emerald-800 font-bold flex items-center gap-2 text-xs"
+              >
+                <CheckCircle2 className="size-4 text-emerald-600 shrink-0" />
+                <span>Gender, Age & Profile updated successfully!</span>
+              </motion.div>
             )}
 
             {/* PM-AJAY Livelihood Passport Card */}
@@ -141,18 +193,18 @@ export function ProfileModal({
                 <div className="bg-white/10 p-2 rounded-xl">
                   <span className="text-[10px] text-purple-200 block">Candidate & Gender</span>
                   <span className="font-extrabold text-white truncate block capitalize">
-                    {displayName} ({displayGender})
+                    {activeName} ({activeGender})
                   </span>
                 </div>
                 <div className="bg-white/10 p-2 rounded-xl">
                   <span className="text-[10px] text-purple-200 block">Age & NSQF Bracket</span>
                   <span className="font-extrabold text-amber-300 truncate block">
-                    {displayAge} yrs • {displayAgeCategory}
+                    {activeAge} yrs • {activeBracket.tag}
                   </span>
                 </div>
                 <div className="bg-white/10 p-2 rounded-xl">
                   <span className="text-[10px] text-purple-200 block">Location</span>
-                  <span className="font-extrabold text-white truncate block">{displayDistrict}, {displayState}</span>
+                  <span className="font-extrabold text-white truncate block">{activeDistrict}, {activeState}</span>
                 </div>
                 <div className="bg-white/10 p-2 rounded-xl">
                   <span className="text-[10px] text-amber-200 block">NSQF Skill Alignment</span>
@@ -165,74 +217,237 @@ export function ProfileModal({
               </div>
             </div>
 
-            {/* Information Grid */}
+            {/* Profile Editing / View Section */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <h4 className="font-extrabold text-slate-900 uppercase tracking-wider text-xs">
-                  Beneficiary Details
+                <h4 className="font-extrabold text-slate-900 uppercase tracking-wider text-xs flex items-center gap-1.5">
+                  <span>Beneficiary Profile & NSQF Settings</span>
                 </h4>
                 <button
                   onClick={() => setIsEditing(!isEditing)}
-                  className="text-xs font-bold text-purple-700 flex items-center gap-1 hover:underline cursor-pointer"
+                  className="text-xs font-bold text-purple-700 flex items-center gap-1 hover:underline cursor-pointer bg-purple-50 hover:bg-purple-100 px-2.5 py-1 rounded-lg transition-colors"
                 >
                   <Edit3 className="size-3.5" />
                   <span>{isEditing ? "Cancel" : "Edit Profile"}</span>
                 </button>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-1">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase flex items-center gap-1">
-                    <User className="size-3 text-indigo-600" />
-                    Gender, Age & NSQF
-                  </span>
-                  <div className="flex items-center justify-between">
-                    <p className="font-bold text-slate-900 capitalize">
-                      {displayGender} • {displayAge} yrs
-                    </p>
-                    <span className="text-[9.5px] font-extrabold bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full border border-purple-200">
-                      {displayAgeCategory}
-                    </span>
+              {isEditing ? (
+                /* ================= EDIT MODE ================= */
+                <motion.div
+                  initial={{ opacity: 0, y: 4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="space-y-3.5 p-3.5 sm:p-4 bg-purple-50/50 rounded-2xl border border-purple-200"
+                >
+                  {/* 1. GENDER SELECTOR */}
+                  <div className="space-y-1.5">
+                    <label className="font-bold text-slate-900 text-xs block">
+                      Gender / लिंग
+                    </label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setEditGender("male")}
+                        className={`py-2 px-3 rounded-xl text-xs font-bold transition-all border flex items-center justify-center gap-1.5 cursor-pointer ${
+                          editGender === "male"
+                            ? "bg-purple-600 text-white border-purple-600 shadow-sm"
+                            : "bg-white text-slate-700 border-slate-200 hover:bg-purple-50"
+                        }`}
+                      >
+                        <span className="text-sm">👨</span>
+                        <span>Male (पुरुष)</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setEditGender("female")}
+                        className={`py-2 px-3 rounded-xl text-xs font-bold transition-all border flex items-center justify-center gap-1.5 cursor-pointer ${
+                          editGender === "female"
+                            ? "bg-purple-600 text-white border-purple-600 shadow-sm"
+                            : "bg-white text-slate-700 border-slate-200 hover:bg-purple-50"
+                        }`}
+                      >
+                        <span className="text-sm">👩</span>
+                        <span>Female (महिला)</span>
+                      </button>
+                    </div>
                   </div>
-                  <p className="text-[10px] text-slate-500 font-medium">
-                    {ageBracket.description}
-                  </p>
-                </div>
 
-                <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-1">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase flex items-center gap-1">
-                    <MapPin className="size-3 text-purple-600" />
-                    Location
-                  </span>
-                  <p className="font-bold text-slate-900">
-                    {displayDistrict}, {displayState}
-                  </p>
-                </div>
+                  {/* 2. AGE & NSQF LIVE BRACKET */}
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <label className="font-bold text-slate-900 text-xs">
+                        Age & NSQF Category / उम्र
+                      </label>
+                      <span className="text-[10px] font-extrabold text-purple-700 bg-purple-100 px-2 py-0.5 rounded-full border border-purple-200">
+                        {activeBracket.badgeLabel}
+                      </span>
+                    </div>
 
-                <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-1">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase flex items-center gap-1">
-                    <GraduationCap className="size-3 text-blue-600" />
-                    Education Level
-                  </span>
-                  <p className="font-bold text-slate-900">{displayEdu}</p>
-                </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setEditAge((prev) => Math.max(14, prev - 1))}
+                        className="size-9 rounded-xl bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 flex items-center justify-center font-bold cursor-pointer transition-colors"
+                      >
+                        <Minus className="size-3.5" />
+                      </button>
 
-                <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-1">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase flex items-center gap-1">
-                    <Briefcase className="size-3 text-amber-600" />
-                    Looking For
-                  </span>
-                  <p className="font-bold text-slate-900">{beneficiaryProfile?.aspiration || profile.lookingFor}</p>
-                </div>
+                      <input
+                        type="number"
+                        min={14}
+                        max={90}
+                        value={editAge}
+                        onChange={(e) => setEditAge(parseInt(e.target.value, 10) || 18)}
+                        className="flex-1 bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm font-bold text-slate-900 text-center focus:ring-2 focus:ring-purple-400 focus:outline-none"
+                      />
 
-                <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-1 sm:col-span-2">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase flex items-center gap-1">
-                    <Sprout className="size-3 text-emerald-600" />
-                    Family Occupation
-                  </span>
-                  <p className="font-bold text-slate-900">{profile.familyOccupation}</p>
+                      <button
+                        type="button"
+                        onClick={() => setEditAge((prev) => Math.min(90, prev + 1))}
+                        className="size-9 rounded-xl bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 flex items-center justify-center font-bold cursor-pointer transition-colors"
+                      >
+                        <Plus className="size-3.5" />
+                      </button>
+                    </div>
+                    <p className="text-[10.5px] text-purple-900/80 font-medium">
+                      🎯 {activeBracket.description}
+                    </p>
+                  </div>
+
+                  {/* 3. FULL NAME */}
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-900 text-xs block">
+                      Full Name / पूरा नाम
+                    </label>
+                    <input
+                      type="text"
+                      value={editName}
+                      onChange={(e) => setEditName(e.target.value)}
+                      placeholder="e.g. Ramesh Soren / Savitri Devi"
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-purple-400 focus:outline-none"
+                    />
+                  </div>
+
+                  {/* 4. LOCATION (District & State) */}
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="space-y-1">
+                      <label className="font-bold text-slate-900 text-xs block">
+                        District / जिला
+                      </label>
+                      <input
+                        type="text"
+                        value={editDistrict}
+                        onChange={(e) => setEditDistrict(e.target.value)}
+                        placeholder="e.g. Sundargarh"
+                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-purple-400 focus:outline-none"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="font-bold text-slate-900 text-xs block">
+                        State / राज्य
+                      </label>
+                      <input
+                        type="text"
+                        value={editState}
+                        onChange={(e) => setEditState(e.target.value)}
+                        placeholder="e.g. Odisha"
+                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-purple-400 focus:outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  {/* 5. EDUCATION LEVEL */}
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-900 text-xs block">
+                      Education / शिक्षा
+                    </label>
+                    <select
+                      value={editEducation}
+                      onChange={(e) => setEditEducation(e.target.value)}
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-purple-400 focus:outline-none"
+                    >
+                      <option value="10th Pass (Matriculation)">10th Pass (Matriculation)</option>
+                      <option value="8th Standard Completed">8th Standard Completed</option>
+                      <option value="5th Pass / Practical Learner">5th Pass / Practical Learner</option>
+                      <option value="12th / Intermediate">12th / Intermediate</option>
+                      <option value="ITI / Diploma">ITI / Diploma</option>
+                      <option value="Graduate">Graduate</option>
+                    </select>
+                  </div>
+
+                  {/* 6. LOOKING FOR / CAREER GOAL */}
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-900 text-xs block">
+                      Career Goal / स्वरोजगार या नौकरी
+                    </label>
+                    <select
+                      value={editAspiration}
+                      onChange={(e) => setEditAspiration(e.target.value)}
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-purple-400 focus:outline-none"
+                    >
+                      <option value="Own Village Repair Clinic / Shop">🏪 Own Village Repair Clinic / Shop</option>
+                      <option value="Assured Wage Job (Factory/Company)">💼 Assured Wage Job (Factory/Company)</option>
+                      <option value="Self-Employment / Micro-Enterprise">🚀 Self-Employment / Micro-Enterprise</option>
+                      <option value="Skill Certification / RPL">📜 Skill Certification / RPL</option>
+                    </select>
+                  </div>
+                </motion.div>
+              ) : (
+                /* ================= VIEW MODE ================= */
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-1">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase flex items-center gap-1">
+                      <User className="size-3 text-indigo-600" />
+                      Gender, Age & NSQF
+                    </span>
+                    <div className="flex items-center justify-between">
+                      <p className="font-bold text-slate-900 capitalize">
+                        {activeGender} • {activeAge} yrs
+                      </p>
+                      <span className="text-[9.5px] font-extrabold bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full border border-purple-200">
+                        {activeBracket.badgeLabel}
+                      </span>
+                    </div>
+                    <p className="text-[10px] text-slate-500 font-medium">
+                      {activeBracket.description}
+                    </p>
+                  </div>
+
+                  <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-1">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase flex items-center gap-1">
+                      <MapPin className="size-3 text-purple-600" />
+                      Location
+                    </span>
+                    <p className="font-bold text-slate-900">
+                      {activeDistrict}, {activeState}
+                    </p>
+                  </div>
+
+                  <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-1">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase flex items-center gap-1">
+                      <GraduationCap className="size-3 text-blue-600" />
+                      Education Level
+                    </span>
+                    <p className="font-bold text-slate-900">{activeEducation}</p>
+                  </div>
+
+                  <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-1">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase flex items-center gap-1">
+                      <Briefcase className="size-3 text-amber-600" />
+                      Looking For
+                    </span>
+                    <p className="font-bold text-slate-900">{activeAspiration}</p>
+                  </div>
+
+                  <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-1 sm:col-span-2">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase flex items-center gap-1">
+                      <Sprout className="size-3 text-emerald-600" />
+                      Family Occupation
+                    </span>
+                    <p className="font-bold text-slate-900">{beneficiary?.familyOccupation || "Smallholder Agriculture & Animal Husbandry"}</p>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
 
             {/* Scheme Eligibility Box */}
@@ -252,14 +467,14 @@ export function ProfileModal({
             <Button
               onClick={onClose}
               variant="outline"
-              className="text-xs font-bold rounded-xl"
+              className="text-xs font-bold rounded-xl cursor-pointer"
             >
               Close
             </Button>
             {isEditing && (
               <Button
                 onClick={handleSave}
-                className="text-xs font-bold rounded-xl bg-purple-600 hover:bg-purple-700 text-white gap-1"
+                className="text-xs font-bold rounded-xl bg-purple-600 hover:bg-purple-700 text-white gap-1 cursor-pointer"
               >
                 <Save className="size-3.5" />
                 <span>Save Changes</span>

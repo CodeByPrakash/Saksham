@@ -226,6 +226,35 @@ export function WebDashboard({ beneficiaryProfile }: WebDashboardProps = {}) {
     }
   };
 
+  const handleUpdateProfile = (updated: Partial<BeneficiaryProfileData>) => {
+    setLocalProfile((prev) => {
+      const merged: BeneficiaryProfileData = {
+        fullName: updated.fullName !== undefined ? updated.fullName : prev?.fullName || CURRENT_BENEFICIARY.name,
+        district: updated.district !== undefined ? updated.district : prev?.district || CURRENT_BENEFICIARY.district,
+        state: updated.state !== undefined ? updated.state : prev?.state || CURRENT_BENEFICIARY.state,
+        skills: prev?.skills || ["Solar PV Repair", "Agri-Pump Maintenance"],
+        nsqfCode: prev?.nsqfCode || "ELE/Q5901",
+        nsqfLevel: prev?.nsqfLevel || 4,
+        nsqfCourse: prev?.nsqfCourse || "Solar PV Agri-Pump Specialist",
+        education: updated.education !== undefined ? updated.education : prev?.education || CURRENT_BENEFICIARY.education,
+        aspiration: updated.aspiration !== undefined ? updated.aspiration : prev?.aspiration || CURRENT_BENEFICIARY.lookingFor,
+        recommendedPathway: prev?.recommendedPathway || "Micro-Enterprise Rural Technician",
+        grantEligibility: prev?.grantEligibility || "₹35,000 Capital Subsidy + ₹3,500/mo Stipend",
+        matchScore: prev?.matchScore || 94,
+        gender: updated.gender !== undefined ? updated.gender : prev?.gender || "female",
+        age: updated.age !== undefined ? updated.age : prev?.age || 28,
+        ageCategory: updated.ageCategory !== undefined ? updated.ageCategory : prev?.ageCategory || getNSQFAgeBracket(updated.age || 28).badgeLabel,
+        avatarUrl: updated.avatarUrl !== undefined ? updated.avatarUrl : prev?.avatarUrl || getAvatarForGender(updated.gender)
+      };
+      if (typeof window !== "undefined") {
+        try {
+          localStorage.setItem("saksham_beneficiary_profile", JSON.stringify(merged));
+        } catch {}
+      }
+      return merged;
+    });
+  };
+
   const handleOpenVoiceWithPrompt = (prompt?: string) => {
     if (prompt) {
       setVoiceAssistantInitialPrompt(prompt);
@@ -1495,6 +1524,7 @@ export function WebDashboard({ beneficiaryProfile }: WebDashboardProps = {}) {
         onClose={() => setIsProfileModalOpen(false)}
         beneficiary={currentBeneficiaryData}
         beneficiaryProfile={activeProfile}
+        onUpdateProfile={handleUpdateProfile}
       />
 
       <NotificationPopover
