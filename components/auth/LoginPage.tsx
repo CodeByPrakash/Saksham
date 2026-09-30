@@ -23,7 +23,8 @@ import {
   Sparkle,
   MessageSquare,
   VolumeX,
-  X
+  X,
+  Loader2
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -390,6 +391,138 @@ const LOGIN_TRANSLATIONS: Record<
 };
 
 /**
+ * Multi-lingual labels for progressive voice input stages:
+ * 1. Playing instructions prompt
+ * 2. Waiting echo buffer
+ * 3. Active microphone listening
+ * 4. Verification success
+ */
+export const VOICE_STEP_LABELS: Record<
+  string,
+  {
+    promptTitle: string;
+    pleaseWait: string;
+    readySpeak: string;
+    preparing: string;
+    verified: string;
+    skipToSpeak: string;
+  }
+> = {
+  hi: {
+    promptTitle: "🔊 आवाज़ निर्देश सुन रहे हैं...",
+    pleaseWait: "कृपया निर्देश सुनें, इसके बाद माइक शुरू होगा...",
+    readySpeak: "🎙️ माइक चालू है • अब 10 अंकों का मोबाइल नंबर बोलें",
+    preparing: "⏳ तैयार हो रहे हैं...",
+    verified: "✅ मोबाइल नंबर दर्ज हो गया",
+    skipToSpeak: "सीधे बोलना शुरू करें (Skip)"
+  },
+  or: {
+    promptTitle: "🔊 ସ୍ୱର ନିର୍ଦ୍ଦେଶ ଶୁଣୁଛୁ...",
+    pleaseWait: "ଦୟାକରି ନିର୍ଦ୍ଦେଶ ଶୁଣନ୍ତୁ, ଏହାପରେ ମାଇକ୍ ଆରମ୍ଭ ହେବ...",
+    readySpeak: "🎙️ ମାଇକ୍ ଚାଲୁ ଅଛି • ଏବେ 10 ଅଙ୍କ ମୋବାଇଲ୍ ନମ୍ବର କୁହନ୍ତୁ",
+    preparing: "⏳ ପ୍ରସ୍ତୁତ ହେଉଛୁ...",
+    verified: "✅ ମୋବାଇଲ୍ ନମ୍ବର ଯାଞ୍ଚ ହେଲା",
+    skipToSpeak: "ସିଧା କହିବା ଆରମ୍ଭ କରନ୍ତୁ"
+  },
+  sat: {
+    promptTitle: "🔊 Voice Guidance...",
+    pleaseWait: "Instructions anjum me, ona tayom mic chalu-a...",
+    readySpeak: "🎙️ Mic chalu menaq-a • Nitoq 10 digit number rod me",
+    preparing: "⏳ Saprawkanam...",
+    verified: "✅ Mobile number pass ena",
+    skipToSpeak: "Skip & Speak Now"
+  },
+  bho: {
+    promptTitle: "🔊 आवाज़ निर्देश सुनत बानी...",
+    pleaseWait: "कृपया निर्देश सुनीं, एकरा बाद माइक चालू होई...",
+    readySpeak: "🎙️ माइक चालू बा • अब 10 अंक के मोबाइल नंबर बोलीं",
+    preparing: "⏳ तैयार होत बानी...",
+    verified: "✅ मोबाइल नंबर दर्ज हो गइल",
+    skipToSpeak: "सीधे बोले के शुरू करीं"
+  },
+  bn: {
+    promptTitle: "🔊 নির্দেশ শুনছি...",
+    pleaseWait: "অনুগ্রহ করে নির্দেশ শুনুন, এরপর মাইক চালু হবে...",
+    readySpeak: "🎙️ মাইক সক্রিয় • এখন ১০ সংখ্যার মোবাইল নম্বর বলুন",
+    preparing: "⏳ প্রস্তুত হচ্ছি...",
+    verified: "✅ মোবাইল নম্বর যাচাই হয়েছে",
+    skipToSpeak: "সরাসরি বলতে শুরু করুন"
+  },
+  te: {
+    promptTitle: "🔊 సూచనలు వింటున్నారు...",
+    pleaseWait: "దయచేసి సూచనలు వినండి, తరువాత మైక్ ప్రారంభమవుతుంది...",
+    readySpeak: "🎙️ మైక్ ఆన్‌లో ఉంది • ఇప్పుడు 10 అంకెల మొబైల్ నంబర్ చెప్పండి",
+    preparing: "⏳ సిద్ధమవుతోంది...",
+    verified: "✅ మొబైల్ నంబర్ నమోదైంది",
+    skipToSpeak: "నేరుగా మాట్లాడండి"
+  },
+  mr: {
+    promptTitle: "🔊 सूचना ऐकत आहोत...",
+    pleaseWait: "कृपया सूचना ऐका, त्यानंतर माइक सुरू होईल...",
+    readySpeak: "🎙️ माइक सुरू आहे • आता १० अंकी मोबाईल नंबर सांगा",
+    preparing: "⏳ तयार होत आहोत...",
+    verified: "✅ मोबाईल नंबर नोंदवला गेला",
+    skipToSpeak: "थेट बोलणे सुरू करा"
+  },
+  ta: {
+    promptTitle: "🔊 குரல் வழிகாட்டல் கேட்கிறது...",
+    pleaseWait: "வழிமுறைகளைக் கேளுங்கள், பின்னர் மைக் தொடங்கும்...",
+    readySpeak: "🎙️ மைக் இயக்கத்தில் உள்ளது • 10 இலக்க எண்ணைக் கூறுங்கள்",
+    preparing: "⏳ தயாராகிறது...",
+    verified: "✅ கைபேசி எண் சரிபார்க்கப்பட்டது",
+    skipToSpeak: "நேரடியாக பேசவும்"
+  },
+  gu: {
+    promptTitle: "🔊 અવાજ સૂચના સાંભળી રહ્યા છીએ...",
+    pleaseWait: "કૃપા કરીને સૂચના સાંભળો, ત્યારબાદ માઇક શરૂ થશે...",
+    readySpeak: "🎙️ માઇક ચાલુ છે • હવે 10 અંકનો મોબાઇલ નંબર બોલો",
+    preparing: "⏳ તૈયાર થઈ રહ્યા છીએ...",
+    verified: "✅ મોબાઇલ નંબર નોંધાઈ ગયો",
+    skipToSpeak: "સીધા બોલવાનું શરૂ કરો"
+  },
+  pa: {
+    promptTitle: "🔊 ਆਵਾਜ਼ ਹਦਾਇਤਾਂ ਸੁਣ ਰਹੇ ਹਾਂ...",
+    pleaseWait: "ਕਿਰਪਾ ਕਰਕੇ ਹਦਾਇਤਾਂ ਸੁਣੋ, ਇਸ ਤੋਂ ਬਾਅਦ ਮਾਈਕ ਸ਼ੁਰੂ ਹੋਵੇਗਾ...",
+    readySpeak: "🎙️ ਮਾਈਕ ਚਾਲੂ ਹੈ • ਹੁਣ 10 ਅੰਕਾਂ ਦਾ ਮੋਬਾਈਲ ਨੰਬਰ ਬੋਲੋ",
+    preparing: "⏳ ਤਿਆਰ ਹੋ ਰਹੇ ਹਾਂ...",
+    verified: "✅ ਮੋਬਾਈਲ ਨੰਬਰ ਦਰਜ ਹੋ ਗਿਆ",
+    skipToSpeak: "ਸਿੱਧਾ ਬੋਲਣਾ ਸ਼ੁਰੂ ਕਰੋ"
+  },
+  kn: {
+    promptTitle: "🔊 ಧ್ವನಿ ಮಾರ್ಗದರ್ಶನ ಆಲಿಸಲಾಗುತ್ತಿದೆ...",
+    pleaseWait: "ದಯವಿಟ್ಟು ಸೂಚನೆಗಳನ್ನು ಆಲಿಸಿ, ನಂತರ ಮೈಕ್ ಪ್ರಾರಂಭವಾಗುತ್ತದೆ...",
+    readySpeak: "🎙️ ಮೈಕ್ ಸಕ್ರಿಯವಾಗಿದೆ • ಈಗ 10 ಅಂಕಿಯ ಸಂಖ್ಯೆಯನ್ನು ತಿಳಿಸಿ",
+    preparing: "⏳ ಸಿದ್ಧವಾಗುತ್ತಿದೆ...",
+    verified: "✅ ಮೊಬೈಲ್ ಸಂಖ್ಯೆ ದಾಖಲಾಗಿದೆ",
+    skipToSpeak: "ನೇರವಾಗಿ ಮಾತನಾಡಲು ಪ್ರಾರಂಭಿಸಿ"
+  },
+  as: {
+    promptTitle: "🔊 শব্দ নিৰ্দেশনা শুনি আছোঁ...",
+    pleaseWait: "অনুগ্ৰহ কৰি নিৰ্দেশনা শুনক, তাৰ পিছত মাইক আৰম্ভ হ’ব...",
+    readySpeak: "🎙️ মাইক সক্ৰিয় • এতিয়া ১০ সংখ্যাৰ নম্বৰ কওক",
+    preparing: "⏳ প্ৰস্তুত হৈ আছোঁ...",
+    verified: "✅ মোবাইল নম্বৰ লিপিবদ্ধ হ’ল",
+    skipToSpeak: "পোনপটীয়াকৈ কওক"
+  },
+  ur: {
+    promptTitle: "🔊 صوتی ہدایات سن رہے ہیں...",
+    pleaseWait: "براہ کرم ہدایات سنیں، اس کے بعد مائیک شروع ہوگا...",
+    readySpeak: "🎙️ مائیک فعال ہے • اب 10 ہندسوں کا موبائل نمبر بولیں",
+    preparing: "⏳ تیاری ہو رہی ہے...",
+    verified: "✅ موبائل نمبر درج ہو گیا",
+    skipToSpeak: "براہ راست بولنا شروع کریں"
+  },
+  en: {
+    promptTitle: "🔊 Playing Voice Instructions...",
+    pleaseWait: "Please listen to the instructions, mic will start in a moment...",
+    readySpeak: "🎙️ Microphone is active • Speak your 10-digit mobile number now",
+    preparing: "⏳ Getting ready...",
+    verified: "✅ Mobile Number Verified",
+    skipToSpeak: "Skip & Speak Now"
+  }
+};
+
+/**
  * Robust Indic & English Multi-lingual Speech-to-PhoneNumber Parser
  * Handles numeric digits, Devanagari/Odia numerals, and number words
  */
@@ -474,6 +607,7 @@ export function LoginPage({
 
   // Voice Login State
   const [isVoiceModalOpen, setIsVoiceModalOpen] = useState<boolean>(false);
+  const [voiceStep, setVoiceStep] = useState<"idle" | "playing_prompt" | "waiting" | "listening" | "success">("idle");
   const [isListeningVoice, setIsListeningVoice] = useState<boolean>(false);
   const [spokenTranscript, setSpokenTranscript] = useState<string>("");
   const [parsedDigits, setParsedDigits] = useState<string>("");
@@ -481,6 +615,7 @@ export function LoginPage({
 
   const recognitionRef = useRef<any>(null);
   const spokenTranscriptRef = useRef<string>("");
+  const voiceWaitTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Spoken native prompts
   const welcomePrompts: Record<string, { text: string; lang: string }> = {
@@ -711,14 +846,35 @@ export function LoginPage({
     setOtp("");
     const dummyOtp = "1234";
 
-    dummyOtp.split("").forEach((digit, index) => {
+    // Spoken voice announcement repeating the OTP code clearly
+    const spokenOtpPhrases: Record<string, string> = {
+      hi: "आपका ओटीपी एक, दो, तीन, चार है।",
+      or: "ଆପଣଙ୍କ ଓଟିପି ଏକ, ଦୁଇ, ତିନି, ଚାରି ଅଟେ।",
+      sat: "Apanak OTP 1, 2, 3, 4 kana.",
+      bho: "रउआ के ओटीपी एक, दो, तीन, चार बा।",
+      bn: "আপনার ওটিপি এক, দুই, তিন, চার।",
+      te: "మీ ఓటీపీ ఒకటి, రెండు, మూడు, నాలుగు.",
+      mr: "आपला ओटीपी एक, दोन, तीन, चार आहे.",
+      ta: "உங்கள் OTP ஒன்று, இரண்டு, மூன்று, நான்கு.",
+      gu: "તમારો OTP એક, બે, ત્રણ, ચાર છે.",
+      pa: "ਤੁਹਾਡਾ OTP ਇੱਕ, ਦੋ, ਤਿੰਨ, ਚਾਰ ਹੈ।",
+      kn: "ನಿಮ್ಮ OTP ಒಂದು, ಎರಡು, ಮೂರು, ನಾಲ್ಕು.",
+      as: "আপোনাৰ OTP এক, দুই, তিনি, চাৰি।",
+      ur: "آپ کا او ٹی پی ایک، دو، تین، چار ہے۔",
+      en: "Your OTP is one, two, three, four."
+    };
+    const otpVoiceText = spokenOtpPhrases[normLang] || spokenOtpPhrases.hi;
+    playGeminiTts(otpVoiceText, normLang);
+
+    // Cleanly populate OTP field by exact slice index to prevent digit duplication/repeating
+    [1, 2, 3, 4].forEach((len, index) => {
       setTimeout(() => {
-        setOtp((prev) => prev + digit);
+        setOtp(dummyOtp.slice(0, len));
         if (index === 3) {
           setIsAutoFillingOtp(false);
           setTimeout(() => {
             handleVerifyAndLogin();
-          }, 800);
+          }, 1100);
         }
       }, (index + 1) * 350);
     });
@@ -780,27 +936,32 @@ export function LoginPage({
     playGeminiTts(otpText, normLang);
   };
 
+  const vLabels = VOICE_STEP_LABELS[normLang] || VOICE_STEP_LABELS.hi;
+
   /**
    * Start Live Voice Recognition for Phone Number
+   * (Invoked after prompt playback completes, after small pause buffer, or when user skips directly to speaking)
    */
-  const startVoiceLogin = () => {
-    setIsVoiceModalOpen(true);
+  const startListeningNow = () => {
+    if (voiceWaitTimerRef.current) {
+      clearTimeout(voiceWaitTimerRef.current);
+      voiceWaitTimerRef.current = null;
+    }
+
+    setVoiceStep("listening");
     setIsListeningVoice(true);
-    setSpokenTranscript("");
-    setParsedDigits("");
-    spokenTranscriptRef.current = "";
-
-    const activePrompt = t.speakingPrompt;
-    setVoiceFeedbackText(activePrompt + "...");
-
-    // Voice instruction audio via Gemini TTS
-    playGeminiTts(activePrompt, normLang);
+    setVoiceFeedbackText(vLabels.readySpeak);
 
     if (
       typeof window !== "undefined" &&
       ("webkitSpeechRecognition" in window || "SpeechRecognition" in window)
     ) {
       try {
+        if (recognitionRef.current) {
+          try {
+            recognitionRef.current.stop();
+          } catch {}
+        }
         const SpeechRecognition =
           (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
         const rec = new SpeechRecognition();
@@ -853,17 +1014,64 @@ export function LoginPage({
     }
   };
 
+  /**
+   * 1. Open Voice Modal
+   * 2. Playback the speech prompt first
+   * 3. Wait for playback to finish + echo safety buffer
+   * 4. Open microphone and take mobile number input
+   */
+  const startVoiceLogin = () => {
+    stopAllAudio();
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.stop();
+      } catch {}
+    }
+    if (voiceWaitTimerRef.current) {
+      clearTimeout(voiceWaitTimerRef.current);
+      voiceWaitTimerRef.current = null;
+    }
+
+    setIsVoiceModalOpen(true);
+    setVoiceStep("playing_prompt");
+    setIsListeningVoice(false);
+    setSpokenTranscript("");
+    setParsedDigits("");
+    spokenTranscriptRef.current = "";
+
+    const activePrompt = t.speakingPrompt;
+    setVoiceFeedbackText(vLabels.pleaseWait);
+
+    // 1. Playback the instruction speech first
+    playGeminiTts(activePrompt, normLang, () => {
+      // 2. Playback completed -> Enter brief wait state so speaker echo dissipates
+      setVoiceStep("waiting");
+      setVoiceFeedbackText(vLabels.preparing);
+
+      voiceWaitTimerRef.current = setTimeout(() => {
+        // 3. Start microphone listening for mobile number
+        startListeningNow();
+      }, 400);
+    });
+  };
+
   const stopVoiceLogin = () => {
+    if (voiceWaitTimerRef.current) {
+      clearTimeout(voiceWaitTimerRef.current);
+      voiceWaitTimerRef.current = null;
+    }
     if (recognitionRef.current) {
       try {
         recognitionRef.current.stop();
       } catch { }
     }
     setIsListeningVoice(false);
+    setVoiceStep("idle");
     stopAllAudio();
   };
 
   const handleExtractedPhone = (digits: string, customTranscript?: string) => {
+    setVoiceStep("success");
     const validPhone = digits.length >= 10 ? digits.slice(-10) : "9876543210";
     setPhoneNumber(validPhone);
     setParsedDigits(validPhone);
@@ -890,12 +1098,13 @@ export function LoginPage({
     setVoiceFeedbackText(activeSuccess.text);
     setOtpSent(true);
 
-    playGeminiTts(activeSuccess.text, activeSuccess.lang);
-
-    setTimeout(() => {
-      setIsVoiceModalOpen(false);
-      triggerAutoFillOtp();
-    }, 1800);
+    playGeminiTts(activeSuccess.text, activeSuccess.lang, () => {
+      setTimeout(() => {
+        setIsVoiceModalOpen(false);
+        setVoiceStep("idle");
+        triggerAutoFillOtp();
+      }, 400);
+    });
   };
 
   return (
@@ -1497,49 +1706,122 @@ export function LoginPage({
                   stopVoiceLogin();
                   setIsVoiceModalOpen(false);
                 }}
-                className="absolute top-3 right-3 p-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 cursor-pointer"
+                className="absolute top-3 right-3 p-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 cursor-pointer transition-colors"
+                title="Close"
               >
                 <X className="size-4" />
               </button>
 
-              <div className="space-y-1">
-                <span className="text-[11px] font-extrabold uppercase tracking-wider text-purple-700 bg-purple-100 px-3 py-1 rounded-full">
-                  {t.listeningTitle}
-                </span>
-                <h3 className="text-xl font-black text-slate-900 font-heading pt-2">
+              <div className="space-y-1 pt-1">
+                {/* Stage Indicator Badge */}
+                {voiceStep === "playing_prompt" && (
+                  <span className="inline-flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-wider text-purple-700 bg-purple-100 px-3 py-1 rounded-full border border-purple-200 shadow-2xs">
+                    <Volume2 className="size-3.5 text-purple-600 animate-pulse" />
+                    <span>{vLabels.promptTitle}</span>
+                  </span>
+                )}
+                {voiceStep === "waiting" && (
+                  <span className="inline-flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-wider text-amber-800 bg-amber-100 px-3 py-1 rounded-full border border-amber-200 shadow-2xs">
+                    <Loader2 className="size-3.5 text-amber-600 animate-spin" />
+                    <span>{vLabels.preparing}</span>
+                  </span>
+                )}
+                {voiceStep === "listening" && (
+                  <span className="inline-flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-wider text-red-700 bg-red-100 px-3 py-1 rounded-full border border-red-200 shadow-2xs">
+                    <span className="size-2 rounded-full bg-red-600 animate-ping" />
+                    <span>{t.listeningTitle}</span>
+                  </span>
+                )}
+                {voiceStep === "success" && (
+                  <span className="inline-flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-wider text-emerald-800 bg-emerald-100 px-3 py-1 rounded-full border border-emerald-200 shadow-2xs">
+                    <CheckCircle2 className="size-3.5 text-emerald-600" />
+                    <span>{vLabels.verified}</span>
+                  </span>
+                )}
+                {voiceStep === "idle" && (
+                  <span className="inline-flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-wider text-purple-700 bg-purple-100 px-3 py-1 rounded-full">
+                    {t.listeningTitle}
+                  </span>
+                )}
+
+                <h3 className="text-xl font-black text-slate-900 font-heading pt-2 leading-snug">
                   {t.speakingPrompt}
                 </h3>
-                <p className="text-xs text-slate-600">
-                  {voiceFeedbackText}
+                <p className="text-xs font-semibold text-slate-600 min-h-5">
+                  {voiceFeedbackText || vLabels.pleaseWait}
                 </p>
               </div>
 
-              {/* Glowing Pulse Mic Button */}
-              <div className="relative size-28 mx-auto flex items-center justify-center">
-                {isListeningVoice && (
-                  <>
-                    <div className="absolute inset-0 rounded-full bg-purple-600/30 animate-ping" />
-                    <div className="absolute -inset-3 rounded-full bg-amber-400/30 animate-pulse" />
-                  </>
+              {/* Central Visual Orb according to State */}
+              <div className="relative size-28 mx-auto flex flex-col items-center justify-center">
+                {voiceStep === "playing_prompt" && (
+                  <div className="relative flex flex-col items-center">
+                    <div className="absolute -inset-2 rounded-full bg-purple-500/20 animate-pulse" />
+                    <div className="size-20 rounded-full bg-gradient-to-tr from-purple-700 to-indigo-600 flex items-center justify-center text-white shadow-xl shadow-purple-600/30">
+                      <Volume2 className="size-9 text-amber-300 animate-pulse" />
+                    </div>
+                  </div>
                 )}
-                <button
-                  onClick={() => {
-                    if (isListeningVoice) {
-                      stopVoiceLogin();
-                    } else {
-                      startVoiceLogin();
-                    }
-                  }}
-                  className={`size-20 rounded-full flex items-center justify-center text-white shadow-xl cursor-pointer transition-all ${isListeningVoice ? "bg-red-500 scale-105" : "bg-purple-600 hover:bg-purple-700"
-                    }`}
-                >
-                  {isListeningVoice ? (
-                    <Mic className="size-9 animate-pulse" />
-                  ) : (
-                    <MicOff className="size-9" />
-                  )}
-                </button>
+
+                {voiceStep === "waiting" && (
+                  <div className="relative flex flex-col items-center">
+                    <div className="absolute -inset-2 rounded-full bg-amber-400/25 animate-ping" />
+                    <div className="size-20 rounded-full bg-amber-500 flex items-center justify-center text-white shadow-xl shadow-amber-500/30">
+                      <Loader2 className="size-9 animate-spin text-white" />
+                    </div>
+                  </div>
+                )}
+
+                {voiceStep === "listening" && (
+                  <div className="relative flex items-center justify-center">
+                    <div className="absolute inset-0 rounded-full bg-red-600/30 animate-ping" />
+                    <div className="absolute -inset-3 rounded-full bg-amber-400/30 animate-pulse" />
+                    <button
+                      onClick={stopVoiceLogin}
+                      type="button"
+                      className="size-20 rounded-full flex items-center justify-center text-white shadow-xl cursor-pointer transition-all bg-red-500 hover:bg-red-600 scale-105"
+                      title="Click to stop listening"
+                    >
+                      <Mic className="size-9 animate-pulse" />
+                    </button>
+                  </div>
+                )}
+
+                {voiceStep === "success" && (
+                  <div className="relative flex items-center justify-center">
+                    <div className="size-20 rounded-full bg-emerald-600 flex items-center justify-center text-white shadow-xl shadow-emerald-600/40">
+                      <CheckCircle2 className="size-10 text-white" />
+                    </div>
+                  </div>
+                )}
+
+                {voiceStep === "idle" && (
+                  <button
+                    onClick={startVoiceLogin}
+                    type="button"
+                    className="size-20 rounded-full flex items-center justify-center text-white shadow-xl cursor-pointer bg-purple-600 hover:bg-purple-700"
+                  >
+                    <Mic className="size-9" />
+                  </button>
+                )}
               </div>
+
+              {/* Skip Option during audio playback */}
+              {voiceStep === "playing_prompt" && (
+                <motion.button
+                  initial={{ opacity: 0, y: 3 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  onClick={() => {
+                    stopAllAudio();
+                    startListeningNow();
+                  }}
+                  type="button"
+                  className="text-xs font-bold text-purple-700 hover:text-purple-900 bg-purple-50 hover:bg-purple-100 border border-purple-200 px-3 py-1.5 rounded-full cursor-pointer transition-colors shadow-2xs inline-flex items-center gap-1.5 mx-auto"
+                >
+                  <Mic className="size-3.5 text-purple-600" />
+                  <span>{vLabels.skipToSpeak}</span>
+                </motion.button>
+              )}
 
               {/* Detected Spoken Transcript & Extracted Digits */}
               <div className="p-4 bg-white/90 rounded-2xl border border-purple-100 space-y-2">
@@ -1547,7 +1829,13 @@ export function LoginPage({
                   Captured Voice Audio / आपकी आवाज़:
                 </span>
                 <p className="text-sm font-semibold text-slate-800 italic min-h-6">
-                  {spokenTranscript ? `"${spokenTranscript}"` : "बोलिए... जैसे 'नौ आठ सात छह पाँच... '"}
+                  {spokenTranscript ? (
+                    `"${spokenTranscript}"`
+                  ) : voiceStep === "playing_prompt" ? (
+                    <span className="text-slate-400 not-italic">निर्देश चल रहे हैं...</span>
+                  ) : (
+                    "बोलिए... जैसे 'नौ आठ सात छह पाँच... '"
+                  )}
                 </p>
 
                 {parsedDigits && (
