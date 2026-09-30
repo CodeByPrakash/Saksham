@@ -232,23 +232,26 @@ export function WebDashboard({ beneficiaryProfile }: WebDashboardProps = {}) {
         fullName: updated.fullName !== undefined ? updated.fullName : prev?.fullName || CURRENT_BENEFICIARY.name,
         district: updated.district !== undefined ? updated.district : prev?.district || CURRENT_BENEFICIARY.district,
         state: updated.state !== undefined ? updated.state : prev?.state || CURRENT_BENEFICIARY.state,
-        skills: prev?.skills || ["Solar PV Repair", "Agri-Pump Maintenance"],
-        nsqfCode: prev?.nsqfCode || "ELE/Q5901",
-        nsqfLevel: prev?.nsqfLevel || 4,
-        nsqfCourse: prev?.nsqfCourse || "Solar PV Agri-Pump Specialist",
+        skills: updated.skills !== undefined ? updated.skills : prev?.skills || (updated.nsqfCourse ? [updated.nsqfCourse] : ["Vocational Skill Execution"]),
+        nsqfCode: updated.nsqfCode !== undefined ? updated.nsqfCode : prev?.nsqfCode || "NSQF-L4",
+        nsqfLevel: updated.nsqfLevel !== undefined ? updated.nsqfLevel : prev?.nsqfLevel || 4,
+        nsqfCourse: updated.nsqfCourse !== undefined ? updated.nsqfCourse : prev?.nsqfCourse || "Vocational Trade Specialist",
         education: updated.education !== undefined ? updated.education : prev?.education || CURRENT_BENEFICIARY.education,
         aspiration: updated.aspiration !== undefined ? updated.aspiration : prev?.aspiration || CURRENT_BENEFICIARY.lookingFor,
-        recommendedPathway: prev?.recommendedPathway || "Micro-Enterprise Rural Technician",
-        grantEligibility: prev?.grantEligibility || "₹35,000 Capital Subsidy + ₹3,500/mo Stipend",
-        matchScore: prev?.matchScore || 94,
+        recommendedPathway: updated.recommendedPathway !== undefined ? updated.recommendedPathway : prev?.recommendedPathway || "PM-AJAY Micro-Enterprise Hub",
+        grantEligibility: updated.grantEligibility !== undefined ? updated.grantEligibility : prev?.grantEligibility || "₹35,000 Capital Subsidy + ₹3,500/mo Stipend",
+        matchScore: updated.matchScore !== undefined ? updated.matchScore : prev?.matchScore || 95,
         gender: updated.gender !== undefined ? updated.gender : prev?.gender || "female",
         age: updated.age !== undefined ? updated.age : prev?.age || 28,
         ageCategory: updated.ageCategory !== undefined ? updated.ageCategory : prev?.ageCategory || getNSQFAgeBracket(updated.age || 28).badgeLabel,
-        avatarUrl: updated.avatarUrl !== undefined ? updated.avatarUrl : prev?.avatarUrl || getAvatarForGender(updated.gender)
+        avatarUrl: updated.avatarUrl !== undefined ? updated.avatarUrl : prev?.avatarUrl || getAvatarForGender(updated.gender || "female")
       };
       if (typeof window !== "undefined") {
         try {
           localStorage.setItem("Sakhyam_beneficiary_profile", JSON.stringify(merged));
+          if (merged.nsqfCourse) {
+            localStorage.setItem("Sakhyam_detected_job_skill", merged.nsqfCourse);
+          }
         } catch { }
       }
       return merged;

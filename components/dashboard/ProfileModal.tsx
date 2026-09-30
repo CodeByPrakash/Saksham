@@ -16,8 +16,12 @@ import {
   ShieldCheck,
   Plus,
   Minus,
-  Sparkles
+  Sparkles,
+  Wrench,
+  IndianRupee,
+  Check
 } from "lucide-react";
+import confetti from "canvas-confetti";
 import { CURRENT_BENEFICIARY, BeneficiaryData } from "./DashboardShared";
 import { BeneficiaryProfileData } from "@/components/onboarding/PersonalVoiceOnboarding";
 import { Button } from "@/components/ui/button";
@@ -31,6 +35,21 @@ interface ProfileModalProps {
   beneficiaryProfile?: BeneficiaryProfileData | null;
   onUpdateProfile?: (updated: Partial<BeneficiaryProfileData>) => void;
 }
+
+const POPULAR_NSQF_TRADES = [
+  { label: "🚁 Kisan Drone Pilot", value: "Kisan Drone Pilot & Agri-Sprayer (AGR/Q7004)", code: "AGR/Q7004" },
+  { label: "☀️ Solar PV Agri-Pump", value: "Solar PV Agri-Pump Specialist (SGJ/Q0102)", code: "SGJ/Q0102" },
+  { label: "✂️ Self Employed Tailor", value: "Self Employed Tailor (AMH/Q1947)", code: "AMH/Q1947" },
+  { label: "⚡ Domestic Electrician", value: "Domestic Electrician (ELE/Q6001)", code: "ELE/Q6001" },
+  { label: "🏥 Healthcare GDA", value: "Healthcare General Duty Assistant (HSS/Q5101)", code: "HSS/Q5101" },
+  { label: "💻 CSC Digital Mitra", value: "CSC Digital e-Gram Mitra (SSC/Q2212)", code: "SSC/Q2212" },
+  { label: "🍄 Mushroom Cultivation", value: "Commercial Mushroom & Spawn Cultivator (AGR/Q7803)", code: "AGR/Q7803" },
+  { label: "🥛 Dairy Processing", value: "Dairy Processing & Value Added Products (FIC/Q2001)", code: "FIC/Q2001" },
+  { label: "🐟 Biofloc Fisheries", value: "Freshwater Biofloc Aquaculture Specialist (AGR/Q4910)", code: "AGR/Q4910" },
+  { label: "🛢️ Cold-Press Oil Mill", value: "Cold-Press Edible Oil Processing Entrepreneur (FIC/Q5003)", code: "FIC/Q5003" },
+  { label: "🪑 Modular Carpentry", value: "Smart Modular Furniture & Wood Craftsman (FFS/Q0103)", code: "FFS/Q0103" },
+  { label: "🔧 Plumbing & Irrigation", value: "Plumbing & Micro-Irrigation Technician (PSC/Q0104)", code: "PSC/Q0104" }
+];
 
 export function ProfileModal({
   isOpen,
@@ -50,6 +69,9 @@ export function ProfileModal({
   const currentState = beneficiaryProfile?.state || beneficiary?.state || CURRENT_BENEFICIARY.state;
   const currentEdu = beneficiaryProfile?.education || beneficiary?.education || CURRENT_BENEFICIARY.education;
   const currentAspiration = beneficiaryProfile?.aspiration || beneficiary?.lookingFor || CURRENT_BENEFICIARY.lookingFor;
+  const currentCourse = beneficiaryProfile?.nsqfCourse || (beneficiaryProfile?.skills && beneficiaryProfile.skills[0]) || "Kisan Drone Pilot & Agri-Sprayer (AGR/Q7004)";
+  const currentGrant = beneficiaryProfile?.grantEligibility || "₹35,000 Capital Subsidy + ₹3,500/mo Stipend";
+  const currentCode = beneficiaryProfile?.nsqfCode || "AGR/Q7004";
 
   // Editable form fields
   const [editGender, setEditGender] = useState<"male" | "female">(currentGender);
@@ -59,8 +81,10 @@ export function ProfileModal({
   const [editState, setEditState] = useState<string>(currentState);
   const [editEducation, setEditEducation] = useState<string>(currentEdu);
   const [editAspiration, setEditAspiration] = useState<string>(currentAspiration);
+  const [editNsqfCourse, setEditNsqfCourse] = useState<string>(currentCourse);
+  const [editGrantEligibility, setEditGrantEligibility] = useState<string>(currentGrant);
 
-  // Sync state on open
+  // Sync state when modal is opened or props change
   useEffect(() => {
     if (isOpen) {
       setEditGender(currentGender);
@@ -70,6 +94,8 @@ export function ProfileModal({
       setEditState(currentState);
       setEditEducation(currentEdu);
       setEditAspiration(currentAspiration);
+      setEditNsqfCourse(currentCourse);
+      setEditGrantEligibility(currentGrant);
       setIsEditing(false);
       setSavedSuccess(false);
     }
@@ -87,36 +113,59 @@ export function ProfileModal({
   const activeState = isEditing ? editState : currentState;
   const activeEducation = isEditing ? editEducation : currentEdu;
   const activeAspiration = isEditing ? editAspiration : currentAspiration;
-
-  const displayCourse = beneficiaryProfile?.nsqfCourse || "Solar PV Agri-Pump Specialist";
-  const displayGrant = beneficiaryProfile?.grantEligibility || "₹35,000 Capital Subsidy + ₹3,500/mo Stipend";
+  const activeCourse = isEditing ? editNsqfCourse : currentCourse;
+  const activeGrant = isEditing ? editGrantEligibility : currentGrant;
 
   const handleSave = () => {
+    // Determine appropriate QP code if known
+    const matchingPreset = POPULAR_NSQF_TRADES.find((t) => t.value === editNsqfCourse || t.label.includes(editNsqfCourse));
+    const finalCode = matchingPreset ? matchingPreset.code : currentCode;
+
     const updated: Partial<BeneficiaryProfileData> = {
-      fullName: editName,
+      fullName: editName.trim() || currentName,
       gender: editGender,
       age: editAge,
       ageCategory: activeBracket.badgeLabel,
-      district: editDistrict,
-      state: editState,
+      district: editDistrict.trim() || currentDistrict,
+      state: editState.trim() || currentState,
       education: editEducation,
       aspiration: editAspiration,
+      nsqfCourse: editNsqfCourse.trim() || currentCourse,
+      nsqfCode: finalCode,
+      skills: [editNsqfCourse.trim() || currentCourse, "Vocational Skill Execution", "Safety Protocols"],
+      grantEligibility: editGrantEligibility.trim() || currentGrant,
       avatarUrl: getAvatarForGender(editGender)
     };
 
     if (onUpdateProfile) {
       onUpdateProfile(updated);
-    } else if (typeof window !== "undefined") {
+    }
+
+    if (typeof window !== "undefined") {
       try {
         const saved = localStorage.getItem("Sakhyam_beneficiary_profile");
         const existing = saved ? JSON.parse(saved) : {};
-        localStorage.setItem("Sakhyam_beneficiary_profile", JSON.stringify({ ...existing, ...updated }));
+        const merged = { ...existing, ...updated };
+        localStorage.setItem("Sakhyam_beneficiary_profile", JSON.stringify(merged));
+        if (updated.nsqfCourse) {
+          localStorage.setItem("Sakhyam_detected_job_skill", updated.nsqfCourse);
+        }
+        window.dispatchEvent(new CustomEvent("beneficiaryProfileUpdated", { detail: merged }));
       } catch { }
     }
 
     setIsEditing(false);
     setSavedSuccess(true);
-    setTimeout(() => setSavedSuccess(false), 3000);
+
+    try {
+      confetti({
+        particleCount: 80,
+        spread: 60,
+        origin: { y: 0.6 }
+      });
+    } catch { }
+
+    setTimeout(() => setSavedSuccess(false), 4000);
   };
 
   return (
@@ -168,10 +217,10 @@ export function ProfileModal({
               <motion.div
                 initial={{ opacity: 0, y: -6 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="p-3 bg-emerald-50 border border-emerald-200 rounded-2xl text-emerald-800 font-bold flex items-center gap-2 text-xs"
+                className="p-3 bg-emerald-50 border border-emerald-200 rounded-2xl text-emerald-800 font-bold flex items-center gap-2 text-xs shadow-sm"
               >
                 <CheckCircle2 className="size-4 text-emerald-600 shrink-0" />
-                <span>Gender, Age & Profile updated successfully!</span>
+                <span>Profile, NSQF trade, and passport details saved successfully!</span>
               </motion.div>
             )}
 
@@ -208,11 +257,11 @@ export function ProfileModal({
                 </div>
                 <div className="bg-white/10 p-2 rounded-xl">
                   <span className="text-[10px] text-amber-200 block">NSQF Skill Alignment</span>
-                  <span className="font-extrabold text-white truncate block">{displayCourse}</span>
+                  <span className="font-extrabold text-white truncate block">{activeCourse}</span>
                 </div>
                 <div className="bg-white/10 p-2 rounded-xl col-span-2">
-                  <span className="text-[10px] text-emerald-200 block">Capital Support</span>
-                  <span className="font-extrabold text-emerald-300 truncate block">{displayGrant}</span>
+                  <span className="text-[10px] text-emerald-200 block">Capital Support / Grant</span>
+                  <span className="font-extrabold text-emerald-300 truncate block">{activeGrant}</span>
                 </div>
               </div>
             </div>
@@ -221,11 +270,12 @@ export function ProfileModal({
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <h4 className="font-extrabold text-slate-900 uppercase tracking-wider text-xs flex items-center gap-1.5">
+                  <Sparkles className="size-3.5 text-purple-600" />
                   <span>Beneficiary Profile & NSQF Settings</span>
                 </h4>
                 <button
                   onClick={() => setIsEditing(!isEditing)}
-                  className="text-xs font-bold text-purple-700 flex items-center gap-1 hover:underline cursor-pointer bg-purple-50 hover:bg-purple-100 px-2.5 py-1 rounded-lg transition-colors"
+                  className="text-xs font-bold text-purple-700 flex items-center gap-1 hover:underline cursor-pointer bg-purple-50 hover:bg-purple-100 px-2.5 py-1 rounded-lg transition-colors border border-purple-200"
                 >
                   <Edit3 className="size-3.5" />
                   <span>{isEditing ? "Cancel" : "Edit Profile"}</span>
@@ -237,7 +287,7 @@ export function ProfileModal({
                 <motion.div
                   initial={{ opacity: 0, y: 4 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="space-y-3.5 p-3.5 sm:p-4 bg-purple-50/50 rounded-2xl border border-purple-200"
+                  className="space-y-3.5 p-3.5 sm:p-4 bg-purple-50/60 rounded-2xl border border-purple-200 shadow-inner"
                 >
                   {/* 1. GENDER SELECTOR */}
                   <div className="space-y-1.5">
@@ -248,10 +298,11 @@ export function ProfileModal({
                       <button
                         type="button"
                         onClick={() => setEditGender("male")}
-                        className={`py-2 px-3 rounded-xl text-xs font-bold transition-all border flex items-center justify-center gap-1.5 cursor-pointer ${editGender === "male"
+                        className={`py-2 px-3 rounded-xl text-xs font-bold transition-all border flex items-center justify-center gap-1.5 cursor-pointer ${
+                          editGender === "male"
                             ? "bg-purple-600 text-white border-purple-600 shadow-sm"
                             : "bg-white text-slate-700 border-slate-200 hover:bg-purple-50"
-                          }`}
+                        }`}
                       >
                         <span className="text-sm">👨</span>
                         <span>Male (पुरुष)</span>
@@ -259,10 +310,11 @@ export function ProfileModal({
                       <button
                         type="button"
                         onClick={() => setEditGender("female")}
-                        className={`py-2 px-3 rounded-xl text-xs font-bold transition-all border flex items-center justify-center gap-1.5 cursor-pointer ${editGender === "female"
+                        className={`py-2 px-3 rounded-xl text-xs font-bold transition-all border flex items-center justify-center gap-1.5 cursor-pointer ${
+                          editGender === "female"
                             ? "bg-purple-600 text-white border-purple-600 shadow-sm"
                             : "bg-white text-slate-700 border-slate-200 hover:bg-purple-50"
-                          }`}
+                        }`}
                       >
                         <span className="text-sm">👩</span>
                         <span>Female (महिला)</span>
@@ -354,7 +406,44 @@ export function ProfileModal({
                     </div>
                   </div>
 
-                  {/* 5. EDUCATION LEVEL */}
+                  {/* 5. NSQF MAPPED SKILL / TRADE */}
+                  <div className="space-y-1.5">
+                    <label className="font-bold text-slate-900 text-xs flex items-center justify-between">
+                      <span className="flex items-center gap-1">
+                        <Wrench className="size-3 text-purple-600" />
+                        <span>NSQF Mapped Skill / Trade</span>
+                      </span>
+                      <span className="text-[10px] text-purple-600 font-normal">Select or type custom</span>
+                    </label>
+
+                    {/* Quick Trade Selection Chips */}
+                    <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto p-1.5 bg-white/70 rounded-xl border border-slate-200">
+                      {POPULAR_NSQF_TRADES.map((trade) => (
+                        <button
+                          key={trade.code}
+                          type="button"
+                          onClick={() => setEditNsqfCourse(trade.value)}
+                          className={`text-[10px] px-2 py-1 rounded-lg font-bold transition-colors cursor-pointer border ${
+                            editNsqfCourse.includes(trade.code) || editNsqfCourse.toLowerCase().includes(trade.label.slice(2).trim().toLowerCase())
+                              ? "bg-purple-600 text-white border-purple-600 shadow-xs"
+                              : "bg-white text-slate-700 border-slate-200 hover:bg-purple-50"
+                          }`}
+                        >
+                          {trade.label}
+                        </button>
+                      ))}
+                    </div>
+
+                    <input
+                      type="text"
+                      value={editNsqfCourse}
+                      onChange={(e) => setEditNsqfCourse(e.target.value)}
+                      placeholder="e.g. Kisan Drone Pilot & Agri-Sprayer (AGR/Q7004)"
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-purple-400 focus:outline-none"
+                    />
+                  </div>
+
+                  {/* 6. EDUCATION LEVEL */}
                   <div className="space-y-1">
                     <label className="font-bold text-slate-900 text-xs block">
                       Education / शिक्षा
@@ -364,7 +453,7 @@ export function ProfileModal({
                       onChange={(e) => setEditEducation(e.target.value)}
                       className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-purple-400 focus:outline-none"
                     >
-                      <option value="10th Pass (Matriculation)">10th Pass (Matriculation)</option>
+                      <option value="10th Standard (10वीं पास)">10th Standard (10वीं पास)</option>
                       <option value="8th Standard Completed">8th Standard Completed</option>
                       <option value="5th Pass / Practical Learner">5th Pass / Practical Learner</option>
                       <option value="12th / Intermediate">12th / Intermediate</option>
@@ -373,7 +462,22 @@ export function ProfileModal({
                     </select>
                   </div>
 
-                  {/* 6. LOOKING FOR / CAREER GOAL */}
+                  {/* 7. CAPITAL SUPPORT / GRANT */}
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-900 text-xs flex items-center gap-1">
+                      <IndianRupee className="size-3 text-emerald-600" />
+                      <span>PM-AJAY Capital Support / Goal</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={editGrantEligibility}
+                      onChange={(e) => setEditGrantEligibility(e.target.value)}
+                      placeholder="e.g. ₹35,000 Capital Subsidy + ₹3,500/mo Stipend"
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-purple-400 focus:outline-none"
+                    />
+                  </div>
+
+                  {/* 8. LOOKING FOR / CAREER GOAL */}
                   <div className="space-y-1">
                     <label className="font-bold text-slate-900 text-xs block">
                       Career Goal / स्वरोजगार या नौकरी
@@ -383,11 +487,24 @@ export function ProfileModal({
                       onChange={(e) => setEditAspiration(e.target.value)}
                       className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-purple-400 focus:outline-none"
                     >
+                      <option value="Village Agri-Pump & Solar Repair Clinic">🏪 Village Agri-Pump & Solar Repair Clinic</option>
+                      <option value="Custom Drone Hiring Center & Agri-Spraying">🚁 Custom Drone Hiring Center & Agri-Spraying</option>
                       <option value="Own Village Repair Clinic / Shop">🏪 Own Village Repair Clinic / Shop</option>
                       <option value="Assured Wage Job (Factory/Company)">💼 Assured Wage Job (Factory/Company)</option>
                       <option value="Self-Employment / Micro-Enterprise">🚀 Self-Employment / Micro-Enterprise</option>
                       <option value="Skill Certification / RPL">📜 Skill Certification / RPL</option>
                     </select>
+                  </div>
+
+                  {/* SAVE CHANGES BUTTON INSIDE FORM */}
+                  <div className="pt-2">
+                    <Button
+                      onClick={handleSave}
+                      className="w-full py-2.5 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 hover:from-purple-700 hover:to-indigo-800 text-white font-extrabold shadow-md gap-2 cursor-pointer transition-all"
+                    >
+                      <Save className="size-4" />
+                      <span>Save & Apply Changes</span>
+                    </Button>
                   </div>
                 </motion.div>
               ) : (
@@ -423,26 +540,26 @@ export function ProfileModal({
 
                   <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-1">
                     <span className="text-[10px] font-bold text-slate-400 uppercase flex items-center gap-1">
+                      <Wrench className="size-3 text-amber-600" />
+                      NSQF Trade
+                    </span>
+                    <p className="font-bold text-slate-900 truncate">{activeCourse}</p>
+                  </div>
+
+                  <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-1">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase flex items-center gap-1">
                       <GraduationCap className="size-3 text-blue-600" />
                       Education Level
                     </span>
                     <p className="font-bold text-slate-900">{activeEducation}</p>
                   </div>
 
-                  <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-1">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase flex items-center gap-1">
-                      <Briefcase className="size-3 text-amber-600" />
-                      Looking For
-                    </span>
-                    <p className="font-bold text-slate-900">{activeAspiration}</p>
-                  </div>
-
                   <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-1 sm:col-span-2">
                     <span className="text-[10px] font-bold text-slate-400 uppercase flex items-center gap-1">
-                      <Sprout className="size-3 text-emerald-600" />
-                      Family Occupation
+                      <Briefcase className="size-3 text-emerald-600" />
+                      Looking For & Goal
                     </span>
-                    <p className="font-bold text-slate-900">{beneficiary?.familyOccupation || "Smallholder Agriculture & Animal Husbandry"}</p>
+                    <p className="font-bold text-slate-900">{activeAspiration}</p>
                   </div>
                 </div>
               )}
@@ -472,7 +589,7 @@ export function ProfileModal({
             {isEditing && (
               <Button
                 onClick={handleSave}
-                className="text-xs font-bold rounded-xl bg-purple-600 hover:bg-purple-700 text-white gap-1 cursor-pointer"
+                className="text-xs font-bold rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white gap-1.5 cursor-pointer shadow-sm"
               >
                 <Save className="size-3.5" />
                 <span>Save Changes</span>
