@@ -96,7 +96,7 @@ export async function POST(req: NextRequest) {
     // Step-specific system prompts for relevance validation and data extraction
     const stepPrompts: Record<string, string> = {
       name_location: `
-You are an AI Onboarding Agent for PM-AJAY rural livelihood platform (Saksham-AI).
+You are an AI Onboarding Agent for PM-AJAY rural livelihood platform (Sakhyam-AI).
 Question asked: "What is your name, age, gender, and which village or district are you from?"
 User's spoken answer: "${userSpokenText}"
 
@@ -244,12 +244,12 @@ OUTPUT STRICT JSON FORMAT:
         requestLanguage === "hi"
           ? "जानकारी दर्ज हो गई है। आगे बढ़ते हैं।"
           : requestLanguage === "or"
-          ? "ତଥ୍ୟ ଯୋଡ଼ାଗଲା। ଆଗକୁ ବଢ଼ିବା।"
-          : requestLanguage === "sat"
-          ? "ᱠᱟᱛᱷᱟ ᱨᱮᱠᱚᱨᱰ ᱮᱱᱟ᱾ ᱞᱟᱦᱟ ᱥᱮᱫ ᱵᱚᱱ ᱪᱟᱞᱟᱜᱼᱟ᱾"
-          : requestLanguage === "bn"
-          ? "তথ্য সংরক্ষিত হয়েছে। এগিয়ে যাওয়া যাক।"
-          : "Information recorded. Moving forward.",
+            ? "ତଥ୍ୟ ଯୋଡ଼ାଗଲା। ଆଗକୁ ବଢ଼ିବା।"
+            : requestLanguage === "sat"
+              ? "ᱠᱟᱛᱷᱟ ᱨᱮᱠᱚᱨᱰ ᱮᱱᱟ᱾ ᱞᱟᱦᱟ ᱥᱮᱫ ᱵᱚᱱ ᱪᱟᱞᱟᱜᱼᱟ᱾"
+              : requestLanguage === "bn"
+                ? "তথ্য সংরক্ষিত হয়েছে। এগিয়ে যাওয়া যাক।"
+                : "Information recorded. Moving forward.",
       error: err.message
     });
   }
@@ -286,12 +286,12 @@ function fallbackHeuristicExtraction(step: string, text: string, language: strin
         cleanLang === "hi"
           ? "नमस्ते! कृपया अपना नाम और जिला बोलें, जैसे 'मेरा नाम रमेश है और मैं सुंदरगढ़ से हूँ'।"
           : cleanLang === "or"
-          ? "ନମସ୍କାର! ଦୟାକରି ଆପଣଙ୍କ ନାମ ଏବଂ ଜିଲ୍ଲା କୁହନ୍ତୁ।"
-          : cleanLang === "sat"
-          ? "ᱡᱚᱦᱟᱨ! ᱫᱟᱭᱟᱠᱟᱛᱮ ᱟᱢᱟᱜ ᱧᱩᱛᱩᱢ ᱟᱨ ᱡᱤᱞᱟ ᱞᱟᱹᱭ ᱢᱮ᱾"
-          : cleanLang === "bn"
-          ? "নমস্কার! দয়া করে আপনার নাম ও জেলার নাম বলুন।"
-          : "Namaste! Please state your full name and district, e.g. 'My name is Ramesh from Sundargarh'.";
+            ? "ନମସ୍କାର! ଦୟାକରି ଆପଣଙ୍କ ନାମ ଏବଂ ଜିଲ୍ଲା କୁହନ୍ତୁ।"
+            : cleanLang === "sat"
+              ? "ᱡᱚᱦᱟᱨ! ᱫᱟᱭᱟᱠᱟᱛᱮ ᱟᱢᱟᱜ ᱧᱩᱛᱩᱢ ᱟᱨ ᱡᱤᱞᱟ ᱞᱟᱹᱭ ᱢᱮ᱾"
+              : cleanLang === "bn"
+                ? "নমস্কার! দয়া করে আপনার নাম ও জেলার নাম বলুন।"
+                : "Namaste! Please state your full name and district, e.g. 'My name is Ramesh from Sundargarh'.";
 
       return {
         isRelevant: false,
@@ -357,12 +357,12 @@ function fallbackHeuristicExtraction(step: string, text: string, language: strin
       cleanLang === "hi"
         ? `नमस्ते ${name} जी! आपकी आयु ${parsedAge} वर्ष (श्रेणी: ${ageBracket.tag}) और गृह जिला ${district} सफलतापूर्वक दर्ज हो गई है।`
         : cleanLang === "or"
-        ? `ନମସ୍କାର ${name} ଆଜ୍ଞା! ଆପଣଙ୍କ ବୟସ ${parsedAge} ବର୍ଷ (${ageBracket.tag}) ଏବଂ ଜିଲ୍ଲା ${district} ଯୋଡ଼ାଗଲା।`
-        : cleanLang === "sat"
-        ? `ᱡᱚᱦᱟᱨ ${name}! ᱟᱢᱟᱜ ᱩᱢᱮᱨ ${parsedAge} ᱥᱮᱨᱢᱟ ᱟᱨ ᱡᱤᱞᱟ ${district} ᱨᱮᱠᱚᱨᱰ ᱮᱱᱟ᱾`
-        : cleanLang === "bn"
-        ? `নমস্কার ${name}! আপনার বয়স ${parsedAge} এবং জেলা ${district} সফলভাবে যুক্ত হয়েছে।`
-        : `Namaste ${name}! Your age ${parsedAge} (${ageBracket.tag}) and district ${district} have been recorded.`;
+          ? `ନମସ୍କାର ${name} ଆଜ୍ଞା! ଆପଣଙ୍କ ବୟସ ${parsedAge} ବର୍ଷ (${ageBracket.tag}) ଏବଂ ଜିଲ୍ଲା ${district} ଯୋଡ଼ାଗଲା।`
+          : cleanLang === "sat"
+            ? `ᱡᱚᱦᱟᱨ ${name}! ᱟᱢᱟᱜ ᱩᱢᱮᱨ ${parsedAge} ᱥᱮᱨᱢᱟ ᱟᱨ ᱡᱤᱞᱟ ${district} ᱨᱮᱠᱚᱨᱰ ᱮᱱᱟ᱾`
+            : cleanLang === "bn"
+              ? `নমস্কার ${name}! আপনার বয়স ${parsedAge} এবং জেলা ${district} সফলভাবে যুক্ত হয়েছে।`
+              : `Namaste ${name}! Your age ${parsedAge} (${ageBracket.tag}) and district ${district} have been recorded.`;
 
     return {
       isRelevant: true,
@@ -386,12 +386,12 @@ function fallbackHeuristicExtraction(step: string, text: string, language: strin
         cleanLang === "hi"
           ? "कृपया अपने काम के बारे में बताएं, जैसे 'मैं मोटर व पंप रिपेयर करता हूँ' या 'खेती और सिलाई का काम आता है'।"
           : cleanLang === "or"
-          ? "ଦୟାକରି ଆପଣଙ୍କ କାମ ବିଷୟରେ କୁହନ୍ତୁ, ଯେପରି 'ମୋଟର ମରାମତି' ବା 'ସିଲେଇ କାମ'।"
-          : cleanLang === "sat"
-          ? "ᱫᱟᱭᱟᱠᱟᱛᱮ ᱟᱢᱟᱜ ᱠᱟᱹᱢᱤ ᱵᱟᱵᱚᱛ ᱞᱟᱹᱭ ᱢᱮ, ᱡᱮᱞᱮᱠᱟ ᱢᱚᱴᱚᱨ ᱵᱮᱱᱟᱣ ᱥᱮ ᱥᱤᱞᱟᱹᱭ᱾"
-          : cleanLang === "bn"
-          ? "দয়া করে আপনার কাজের অভিজ্ঞতা বলুন, যেমন 'মোটর মেরামত' বা 'সেলাই কাজ'।"
-          : "Please describe your daily work or trade, such as 'I repair agri-pumps' or 'I do tailoring and stitching'.";
+            ? "ଦୟାକରି ଆପଣଙ୍କ କାମ ବିଷୟରେ କୁହନ୍ତୁ, ଯେପରି 'ମୋଟର ମରାମତି' ବା 'ସିଲେଇ କାମ'।"
+            : cleanLang === "sat"
+              ? "ᱫᱟᱭᱟᱠᱟᱛᱮ ᱟᱢᱟᱜ ᱠᱟᱹᱢᱤ ᱵᱟᱵᱚᱛ ᱞᱟᱹᱭ ᱢᱮ, ᱡᱮᱞᱮᱠᱟ ᱢᱚᱴᱚᱨ ᱵᱮᱱᱟᱣ ᱥᱮ ᱥᱤᱞᱟᱹᱭ᱾"
+              : cleanLang === "bn"
+                ? "দয়া করে আপনার কাজের অভিজ্ঞতা বলুন, যেমন 'মোটর মেরামত' বা 'সেলাই কাজ'।"
+                : "Please describe your daily work or trade, such as 'I repair agri-pumps' or 'I do tailoring and stitching'.";
 
       return {
         isRelevant: false,
@@ -421,12 +421,12 @@ function fallbackHeuristicExtraction(step: string, text: string, language: strin
       cleanLang === "hi"
         ? `शानदार! आपके हुनर को NSQF ट्रेड '${nsqfCourse}' (${nsqfCode}) के साथ जोड़ लिया गया है।`
         : cleanLang === "or"
-        ? `ଉତ୍ତମ! ଆପଣଙ୍କ ଦକ୍ଷତାକୁ NSQF ଟ୍ରେଡ୍ '${nsqfCourse}' (${nsqfCode}) ସହିତ ଯୋଡ଼ାଗଲା।`
-        : cleanLang === "sat"
-        ? `ᱵᱷᱟᱹᱜᱤ! ᱟᱢᱟᱜ ᱦᱩᱱᱟᱹᱨ NSQF ᱴᱨᱮᱰ '${nsqfCourse}' (${nsqfCode}) ᱥᱟᱶ ᱡᱚᱲᱟᱣ ᱮᱱᱟ᱾`
-        : cleanLang === "bn"
-        ? `চমৎকার! আপনার দক্ষতাকে NSQF ট্রেড '${nsqfCourse}' (${nsqfCode}) এর সাথে যুক্ত করা হয়েছে।`
-        : `Great! We have mapped your practical skills to NSQF Trade '${nsqfCourse}' (${nsqfCode}).`;
+          ? `ଉତ୍ତମ! ଆପଣଙ୍କ ଦକ୍ଷତାକୁ NSQF ଟ୍ରେଡ୍ '${nsqfCourse}' (${nsqfCode}) ସହିତ ଯୋଡ଼ାଗଲା।`
+          : cleanLang === "sat"
+            ? `ᱵᱷᱟᱹᱜᱤ! ᱟᱢᱟᱜ ᱦᱩᱱᱟᱹᱨ NSQF ᱴᱨᱮᱰ '${nsqfCourse}' (${nsqfCode}) ᱥᱟᱶ ᱡᱚᱲᱟᱣ ᱮᱱᱟ᱾`
+            : cleanLang === "bn"
+              ? `চমৎকার! আপনার দক্ষতাকে NSQF ট্রেড '${nsqfCourse}' (${nsqfCode}) এর সাথে যুক্ত করা হয়েছে।`
+              : `Great! We have mapped your practical skills to NSQF Trade '${nsqfCourse}' (${nsqfCode}).`;
 
     return {
       isRelevant: true,
@@ -452,12 +452,12 @@ function fallbackHeuristicExtraction(step: string, text: string, language: strin
       cleanLang === "hi"
         ? `आपकी शैक्षणिक योग्यता '${edu}' पासपोर्ट में जोड़ दी गई है।`
         : cleanLang === "or"
-        ? `ଆପଣଙ୍କ ଶିକ୍ଷାଗତ ଯୋଗ୍ୟତା '${edu}' ପାସପୋର୍ଟରେ ଯୋଡ଼ାଗଲା।`
-        : cleanLang === "sat"
-        ? `ᱟᱢᱟᱜ ᱯᱟᱲᱦᱟᱣ ᱞᱮᱵᱮᱞ '${edu}' ᱯᱟᱥᱯᱳᱨᱴ ᱨᱮ ᱡᱚᱲᱟᱣ ᱮᱱᱟ᱾`
-        : cleanLang === "bn"
-        ? `আপনার শিক্ষাগত যোগ্যতা '${edu}' পাসপোর্টে যুক্ত করা হয়েছে।`
-        : `Your education level '${edu}' has been recorded in your passport.`;
+          ? `ଆପଣଙ୍କ ଶିକ୍ଷାଗତ ଯୋଗ୍ୟତା '${edu}' ପାସପୋର୍ଟରେ ଯୋଡ଼ାଗଲା।`
+          : cleanLang === "sat"
+            ? `ᱟᱢᱟᱜ ᱯᱟᱲᱦᱟᱣ ᱞᱮᱵᱮᱞ '${edu}' ᱯᱟᱥᱯᱳᱨᱴ ᱨᱮ ᱡᱚᱲᱟᱣ ᱮᱱᱟ᱾`
+            : cleanLang === "bn"
+              ? `আপনার শিক্ষাগত যোগ্যতা '${edu}' পাসপোর্টে যুক্ত করা হয়েছে।`
+              : `Your education level '${edu}' has been recorded in your passport.`;
 
     return {
       isRelevant: true,
@@ -488,12 +488,12 @@ function fallbackHeuristicExtraction(step: string, text: string, language: strin
       cleanLang === "hi"
         ? "बधाई हो! आपका पीएम-अजय लाइवलीहुड पासपोर्ट सफलतापूर्वक पूरा हो गया है।"
         : cleanLang === "or"
-        ? "ଅଭିନନ୍ଦନ! ଆପଣଙ୍କ ପିଏମ-ଅଜୟ ଜୀବିକା ପାସପୋର୍ଟ ସଫଳତାର ସହ ସମ୍ପୂର୍ଣ୍ଣ ହୋଇଛି।"
-        : cleanLang === "sat"
-        ? "ᱥᱟᱨᱦᱟᱣ! ᱟᱢᱟᱜ ᱯᱤᱮᱢ-ᱚᱡᱚᱭ ᱡᱤᱣᱤᱠᱟ ᱯᱟᱥᱯᱳᱨᱴ ᱥᱟᱹᱛ ᱮᱱᱟ᱾"
-        : cleanLang === "bn"
-        ? "অভিনন্দন! আপনার পিএম-অজয় জীবিকা পাসপোর্ট সফলভাবে সম্পন্ন হয়েছে।"
-        : "Congratulations! Your PM-AJAY Livelihood Passport has been successfully created.";
+          ? "ଅଭିନନ୍ଦନ! ଆପଣଙ୍କ ପିଏମ-ଅଜୟ ଜୀବିକା ପାସପୋର୍ଟ ସଫଳତାର ସହ ସମ୍ପୂର୍ଣ୍ଣ ହୋଇଛି।"
+          : cleanLang === "sat"
+            ? "ᱥᱟᱨᱦᱟᱣ! ᱟᱢᱟᱜ ᱯᱤᱮᱢ-ᱚᱡᱚᱭ ᱡᱤᱣᱤᱠᱟ ᱯᱟᱥᱯᱳᱨᱴ ᱥᱟᱹᱛ ᱮᱱᱟ᱾"
+            : cleanLang === "bn"
+              ? "অভিনন্দন! আপনার পিএম-অজয় জীবিকা পাসপোর্ট সফলভাবে সম্পন্ন হয়েছে।"
+              : "Congratulations! Your PM-AJAY Livelihood Passport has been successfully created.";
 
     return {
       isRelevant: true,
@@ -514,7 +514,7 @@ function fallbackHeuristicExtraction(step: string, text: string, language: strin
       cleanLang === "hi"
         ? "जानकारी दर्ज कर ली गई है।"
         : cleanLang === "or"
-        ? "ତଥ୍ୟ ରେକର୍ଡ କରାଗଲା।"
-        : "Information recorded successfully."
+          ? "ତଥ୍ୟ ରେକର୍ଡ କରାଗଲା।"
+          : "Information recorded successfully."
   };
 }

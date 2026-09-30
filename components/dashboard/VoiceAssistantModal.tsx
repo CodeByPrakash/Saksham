@@ -216,7 +216,7 @@ export function VoiceAssistantModal({
     if (propBeneficiaryName) return propBeneficiaryName;
     if (typeof window !== "undefined") {
       try {
-        const saved = localStorage.getItem("saksham_beneficiary_profile");
+        const saved = localStorage.getItem("Sakhyam_beneficiary_profile");
         if (saved) {
           const parsed = JSON.parse(saved);
           if (parsed.fullName) return parsed.fullName;
@@ -230,7 +230,7 @@ export function VoiceAssistantModal({
     if (propDistrict) return propDistrict;
     if (typeof window !== "undefined") {
       try {
-        const saved = localStorage.getItem("saksham_beneficiary_profile");
+        const saved = localStorage.getItem("Sakhyam_beneficiary_profile");
         if (saved) {
           const parsed = JSON.parse(saved);
           if (parsed.district) return `${parsed.district}${parsed.state ? `, ${parsed.state}` : ""}`;
@@ -273,7 +273,7 @@ export function VoiceAssistantModal({
       sender: "ai",
       text: initialGreeting,
       translatedText:
-        `Namaste ${activeName} ji! I am Saksham-AI Voice AI. You can speak to explore NSQF skill courses and PM-AJAY grants in your language.`,
+        `Namaste ${activeName} ji! I am Sakhyam-AI Voice AI. You can speak to explore NSQF skill courses and PM-AJAY grants in your language.`,
       skillCards: getMatchedSkillCards("", activeDistrict, "hindi")
     }
   ]);
@@ -666,7 +666,7 @@ export function VoiceAssistantModal({
               <div>
                 <div className="flex items-center gap-2">
                   <h3 className="font-extrabold text-base sm:text-lg tracking-tight font-heading">
-                    Saksham-AI Realtime Voice AI
+                    Sakhyam-AI Realtime Voice AI
                   </h3>
                   <span className="size-2 rounded-full bg-emerald-400 animate-pulse"></span>
                 </div>
@@ -708,8 +708,8 @@ export function VoiceAssistantModal({
                 key={lang.id}
                 onClick={() => setSelectedLanguage(lang.id)}
                 className={`px-3 py-1 rounded-xl font-bold transition-all shrink-0 cursor-pointer ${selectedLanguage === lang.id
-                    ? "bg-purple-600 text-white shadow-xs"
-                    : "bg-white text-slate-700 hover:bg-purple-100/60 border border-purple-200/50"
+                  ? "bg-purple-600 text-white shadow-xs"
+                  : "bg-white text-slate-700 hover:bg-purple-100/60 border border-purple-200/50"
                   }`}
               >
                 {lang.label}
@@ -763,7 +763,7 @@ export function VoiceAssistantModal({
                 <div className="p-3 bg-white/95 backdrop-blur-md rounded-2xl border border-purple-100 shadow-xs text-xs font-medium text-slate-800 leading-relaxed text-left">
                   <div className="flex items-center gap-1.5 text-[10px] font-bold text-purple-600 uppercase tracking-wider mb-1">
                     <Bot className="size-3.5" />
-                    <span>Saksham-AI Voice Result</span>
+                    <span>Sakhyam-AI Voice Result</span>
                   </div>
                   &ldquo;{liveAiSubtitle || messages[messages.length - 1]?.text || initialGreeting}&rdquo;
                 </div>
@@ -796,15 +796,14 @@ export function VoiceAssistantModal({
                                 <h4 className="font-bold text-xs sm:text-sm text-slate-900 group-hover:text-purple-700 transition-colors">
                                   {card.title}
                                 </h4>
-                                <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-md ${
-                                  card.badgeColor === "amber"
+                                <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-md ${card.badgeColor === "amber"
                                     ? "bg-amber-100 text-amber-800 border border-amber-200"
                                     : card.badgeColor === "emerald"
-                                    ? "bg-emerald-100 text-emerald-800 border border-emerald-200"
-                                    : card.badgeColor === "blue"
-                                    ? "bg-blue-100 text-blue-800 border border-blue-200"
-                                    : "bg-purple-100 text-purple-800 border border-purple-200"
-                                }`}>
+                                      ? "bg-emerald-100 text-emerald-800 border border-emerald-200"
+                                      : card.badgeColor === "blue"
+                                        ? "bg-blue-100 text-blue-800 border border-blue-200"
+                                        : "bg-purple-100 text-purple-800 border border-purple-200"
+                                  }`}>
                                   {card.badge}
                                 </span>
                               </div>
@@ -870,8 +869,8 @@ export function VoiceAssistantModal({
 
                   <div
                     className={`max-w-[88%] p-3.5 rounded-2xl text-xs sm:text-sm leading-relaxed ${msg.sender === "user"
-                        ? "bg-purple-600 text-white rounded-br-xs shadow-md"
-                        : "bg-white text-slate-800 border border-slate-200/80 rounded-bl-xs shadow-xs"
+                      ? "bg-purple-600 text-white rounded-br-xs shadow-md"
+                      : "bg-white text-slate-800 border border-slate-200/80 rounded-bl-xs shadow-xs"
                       }`}
                   >
                     <p className="font-medium">{msg.text}</p>
@@ -983,10 +982,10 @@ export function VoiceAssistantModal({
               <button
                 onClick={handleMicToggle}
                 className={`size-14 rounded-full flex items-center justify-center text-white shadow-lg transition-all cursor-pointer ${isRecording
-                    ? "bg-red-600 scale-110 shadow-red-600/40"
-                    : isSpeaking
-                      ? "bg-emerald-600 scale-105 shadow-emerald-600/40"
-                      : "bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 hover:scale-105 shadow-purple-600/40"
+                  ? "bg-red-600 scale-110 shadow-red-600/40"
+                  : isSpeaking
+                    ? "bg-emerald-600 scale-105 shadow-emerald-600/40"
+                    : "bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 hover:scale-105 shadow-purple-600/40"
                   }`}
               >
                 {isRecording ? (

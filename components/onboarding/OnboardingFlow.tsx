@@ -355,7 +355,7 @@ export function OnboardingFlow({
                     <div className="relative w-[280px] h-[320px] animate-float">
                       <Image
                         src="/landingPage/person_1_landing.webp"
-                        alt="Young beneficiary using Saksham-AI voice app"
+                        alt="Young beneficiary using Sakhyam-AI voice app"
                         fill
                         sizes="320px"
                         quality={90}
@@ -416,7 +416,7 @@ export function OnboardingFlow({
           <section className="w-full max-w-7xl px-4 space-y-8">
             <div className="text-center space-y-2 max-w-2xl mx-auto">
               <Badge variant="purple" className="text-xs">
-                How Saksham-AI Works
+                How Sakhyam Works
               </Badge>
               <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight font-heading">
                 From Spoken Voice to Sustainable Income
@@ -516,7 +516,7 @@ export function OnboardingFlow({
                       </span>
                     </h3>
                     <p className="text-sm text-slate-600 leading-relaxed">
-                      Instead of presenting a daunting 20-page form, Saksham-AI engages the candidate in a friendly spoken dialogue. The AI detects occupation, latent experience, mobility constraints, and income urgency.
+                      Instead of presenting a daunting 20-page form, Sakhyam engages the candidate in a friendly spoken dialogue. The AI detects occupation, latent experience, mobility constraints, and income urgency.
                     </p>
 
                     <div className="space-y-2 bg-slate-50 p-4 rounded-2xl border border-slate-200 text-xs">
@@ -671,7 +671,7 @@ export function OnboardingFlow({
                       Personalized Livelihood Decision Matrix
                     </h3>
                     <p className="text-sm text-slate-600 leading-relaxed">
-                      Rather than pushing a generic course, Saksham-AI presents three viable, constraint-verified pathways side-by-side:
+                      Rather than pushing a generic course, Sakhyam presents three viable, constraint-verified pathways side-by-side:
                     </p>
 
                     <div className="space-y-2.5 text-xs">

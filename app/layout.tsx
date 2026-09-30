@@ -15,7 +15,7 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "Saksham-AI — AI Livelihood Intelligence Platform",
+  title: "Sakhyam-AI — AI Livelihood Intelligence Platform",
   description: "AI-powered livelihood decision and execution platform under PM-AJAY. From what a beneficiary can say, to what they can learn, to where they can earn.",
   icons: {
     icon: "/favicon.ico",

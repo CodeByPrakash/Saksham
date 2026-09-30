@@ -1,4 +1,4 @@
-# Saksham-AI — AI Livelihood Intelligence Platform
+# Sakhyam-AI — AI Livelihood Intelligence Platform
 
 ### Comprehensive Feature Documentation (PM-AJAY / Smart India Hackathon)
 
@@ -336,13 +336,13 @@ The defensible advantage is **not** the LLM call — anyone can call an LLM API.
 
 ## 11. Product Naming
 
-Recommended: **Saksham-AI — AI Livelihood Intelligence Platform**
+Recommended: **Sakhyam-AI — AI Livelihood Intelligence Platform**
 
-Other candidate names considered: Saksham-AI Saathi, Kaushal Saathi AI, KaushalSetu, Rozgar Saathi, Saksham-AIMitra, KaushalPath, Saksham-AI Navigator.
+Other candidate names considered: Sakhyam-AI Saathi, Kaushal Saathi AI, KaushalSetu, Rozgar Saathi, Sakhyam-AIMitra, KaushalPath, Sakhyam-AI Navigator.
 
-**Proposed product architecture under the Saksham-AI brand:**
+**Proposed product architecture under the Sakhyam-AI brand:**
 ```
-Saksham-AI
+Sakhyam-AI
 ├── 01. AI Voice Assistant (IVR / WhatsApp Voice / App / Assisted Mode)
 ├── 02. Beneficiary Intelligence (Profile, Skill Extraction, Assessment, Constraints, Twin)
 ├── 03. Skill Intelligence (Ontology, NSQF, QP/NOS, NCO, Gap Engine)

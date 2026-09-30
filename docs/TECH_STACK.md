@@ -1,4 +1,4 @@
-# Saksham-AI — Tech Stack (React Native + Expo)
+# Sakhyam-AI — Tech Stack (React Native + Expo)
 
 *This app is built fully on **React Native with Expo**, covering all three user roles — Beneficiary, Field Worker, and Government Officer — as role-gated screens/navigators inside one Expo app, with IVR/WhatsApp as lightweight backend-connected companion channels for beneficiaries without a smartphone.*
 
@@ -270,7 +270,7 @@ This lets the demo show: install one Expo/EAS build → beneficiary voice interv
 ## 18. Suggested Repo Structure
 
 ```
-Saksham-AI-app/                  # Expo project (React Native + TypeScript)
+Sakhyam-AI-app/                  # Expo project (React Native + TypeScript)
 ├── app/                          # Expo Router file-based routes
 │   ├── (auth)/                   # OTP login
 │   ├── (beneficiary)/            # Voice interview, twin, journey, pathways

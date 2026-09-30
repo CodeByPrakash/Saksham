@@ -58,7 +58,7 @@ export function MobileHeader({
           <div className="size-8.5 shrink-0 relative">
             <Image
               src="/logo.png"
-              alt="Saksham AI Logo"
+              alt="Sakhyam AI Logo"
               fill
               className="object-contain drop-shadow-xs"
               sizes="34px"
@@ -68,7 +68,7 @@ export function MobileHeader({
 
           <div className="flex flex-col">
             <span className="text-base font-extrabold tracking-tight text-slate-900 font-heading leading-tight">
-              Saksham <span className="text-purple-600">AI</span>
+              Sakhyam <span className="text-purple-600">AI</span>
             </span>
             <span className="text-[9px] font-semibold text-slate-500 tracking-tight leading-none mt-0.5">
               Skills Today · Better Tomorrow
@@ -156,11 +156,10 @@ export function MobileHeader({
                     <button
                       key={lang.code}
                       onClick={() => handleSelectLanguage(lang.code)}
-                      className={`flex items-center justify-between p-3 rounded-2xl border text-left transition-all cursor-pointer ${
-                        isSelected
+                      className={`flex items-center justify-between p-3 rounded-2xl border text-left transition-all cursor-pointer ${isSelected
                           ? "bg-purple-50/80 border-purple-400/80 text-purple-900 shadow-2xs ring-1 ring-purple-300"
                           : "bg-slate-50/70 border-slate-200/70 text-slate-700 hover:bg-purple-50/40"
-                      }`}
+                        }`}
                     >
                       <div>
                         <span className="font-bold text-sm block">{lang.label}</span>

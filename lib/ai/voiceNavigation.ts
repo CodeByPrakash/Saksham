@@ -1351,8 +1351,8 @@ export function parseVoiceNavigationIntent(
       spokenFeedback: {
         hi: "सक्षम एआई वॉयस सहायक चालू किया जा रहा है।",
         or: "ସକ୍ଷମ ଏଆଇ ଭଏସ୍ ସହାୟକ ଚାଲୁ କରାଗଲା।",
-        sat: "Saksham AI ᱵᱷᱚᱭᱮᱥ ᱜᱚᱲᱚ ᱪᱟᱹᱞᱩ ᱮᱱᱟ।",
-        en: "Opening Saksham AI Voice Copilot."
+        sat: "Sakhyam AI ᱵᱷᱚᱭᱮᱥ ᱜᱚᱲᱚ ᱪᱟᱹᱞᱩ ᱮᱱᱟ।",
+        en: "Opening Sakhyam AI Voice Copilot."
       }
     };
   }
@@ -1374,7 +1374,7 @@ export function playVoiceNavigationConfirmation(
     try {
       activeAudioElement.pause();
       activeAudioElement = null;
-    } catch {}
+    } catch { }
   }
 
   if (typeof window !== "undefined" && "speechSynthesis" in window) {

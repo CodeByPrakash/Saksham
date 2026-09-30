@@ -946,7 +946,7 @@ export const ONBOARDING_I18N: Record<string, {
     previous: "Previous",
     nextStep: "Next Step",
     viewPassport: "View Passport",
-    voiceCopilot: "Saksham-AI Voice Copilot",
+    voiceCopilot: "Sakhyam-AI Voice Copilot",
     editDetails: "Edit Details",
     replayAudio: "Replay Question",
     irrelevantTitle: "Incomplete or Unrelated Answer",
@@ -1108,7 +1108,7 @@ export const ONBOARDING_I18N: Record<string, {
     previous: "ᱢᱟᱲᱟᱝ",
     nextStep: "ᱞᱟᱦᱟ ᱛᱷᱚᱠ",
     viewPassport: "ᱯᱟᱥᱯᱳᱨᱴ ᱧᱮᱞ",
-    voiceCopilot: "Saksham-AI ᱨᱚᱲ ᱜᱚᱲᱚᱭᱤᱡ",
+    voiceCopilot: "Sakhyam-AI ᱨᱚᱲ ᱜᱚᱲᱚᱭᱤᱡ",
     editDetails: "ᱵᱚᱫᱚᱞ",
     replayAudio: "ᱠᱩᱠᱞᱤ ᱫᱚᱦᱲᱟ ᱟᱸᱡᱚᱢ",
     irrelevantTitle: "ᱵᱟᱝ ᱯᱩᱨᱟᱹᱣ ᱨᱚᱲ",
@@ -2008,7 +2008,7 @@ export function PersonalVoiceOnboarding({
     onLanguageChange?.(clean);
     if (typeof window !== "undefined") {
       try {
-        localStorage.setItem("Saksham-AI_lang", clean);
+        localStorage.setItem("Sakhyam-AI_lang", clean);
         localStorage.setItem("language", clean);
       } catch { }
     }
@@ -2866,8 +2866,8 @@ export function PersonalVoiceOnboarding({
                       type="button"
                       aria-label={t.tapMicToSpeak}
                       className={`size-16 sm:size-18 rounded-full flex items-center justify-center text-white shadow-xl transition-all cursor-pointer ring-4 ${isListening
-                          ? "bg-gradient-to-r from-red-500 to-rose-600 ring-rose-300 scale-105"
-                          : "bg-gradient-to-r from-[#6B34EB] via-[#7539F4] to-[#8042F6] hover:from-[#5E2DD8] hover:to-[#7335EC] ring-purple-200"
+                        ? "bg-gradient-to-r from-red-500 to-rose-600 ring-rose-300 scale-105"
+                        : "bg-gradient-to-r from-[#6B34EB] via-[#7539F4] to-[#8042F6] hover:from-[#5E2DD8] hover:to-[#7335EC] ring-purple-200"
                         }`}
                     >
                       {isListening ? (
@@ -2970,8 +2970,8 @@ export function PersonalVoiceOnboarding({
                           }));
                         }}
                         className={`flex items-center justify-center gap-2 py-2 px-3 rounded-xl font-bold text-xs transition-all cursor-pointer border ${(profile.gender || "male") === "male"
-                            ? "bg-purple-600 text-white border-purple-600 shadow-md ring-2 ring-purple-300"
-                            : "bg-white text-slate-700 border-slate-200 hover:bg-purple-50/60 hover:border-purple-300"
+                          ? "bg-purple-600 text-white border-purple-600 shadow-md ring-2 ring-purple-300"
+                          : "bg-white text-slate-700 border-slate-200 hover:bg-purple-50/60 hover:border-purple-300"
                           }`}
                       >
                         <span>{gI18n.male}</span>
@@ -2993,8 +2993,8 @@ export function PersonalVoiceOnboarding({
                           }));
                         }}
                         className={`flex items-center justify-center gap-2 py-2 px-3 rounded-xl font-bold text-xs transition-all cursor-pointer border ${profile.gender === "female"
-                            ? "bg-purple-600 text-white border-purple-600 shadow-md ring-2 ring-purple-300"
-                            : "bg-white text-slate-700 border-slate-200 hover:bg-purple-50/60 hover:border-purple-300"
+                          ? "bg-purple-600 text-white border-purple-600 shadow-md ring-2 ring-purple-300"
+                          : "bg-white text-slate-700 border-slate-200 hover:bg-purple-50/60 hover:border-purple-300"
                           }`}
                       >
                         <span>{gI18n.female}</span>
@@ -3083,10 +3083,10 @@ export function PersonalVoiceOnboarding({
                     <Badge
                       variant="purple"
                       className={`text-[9px] font-bold px-2 py-0.5 transition-all ${completedCount === 4
-                          ? "bg-emerald-500/20 text-emerald-300 border-emerald-400/40"
-                          : completedCount > 0
-                            ? `bg-purple-500/30 text-purple-200 border-purple-400/40`
-                            : "bg-slate-800/80 text-slate-400 border-slate-700"
+                        ? "bg-emerald-500/20 text-emerald-300 border-emerald-400/40"
+                        : completedCount > 0
+                          ? `bg-purple-500/30 text-purple-200 border-purple-400/40`
+                          : "bg-slate-800/80 text-slate-400 border-slate-700"
                         }`}
                     >
                       {completedCount === 4
@@ -3118,8 +3118,8 @@ export function PersonalVoiceOnboarding({
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       onClick={() => setCurrentStepIndex(0)}
                       className={`flex items-center justify-between p-2.5 rounded-xl border shadow-xs group cursor-pointer transition-all ${currentStepIndex === 0
-                          ? "bg-purple-950/90 border-purple-400 ring-2 ring-purple-400/40"
-                          : "bg-white/10 hover:bg-white/15 border-emerald-500/30"
+                        ? "bg-purple-950/90 border-purple-400 ring-2 ring-purple-400/40"
+                        : "bg-white/10 hover:bg-white/15 border-emerald-500/30"
                         }`}
                     >
                       <div className="flex items-center gap-2.5 min-w-0 flex-1">
@@ -3201,8 +3201,8 @@ export function PersonalVoiceOnboarding({
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       onClick={() => setCurrentStepIndex(1)}
                       className={`flex items-center justify-between p-2.5 rounded-xl border shadow-xs group cursor-pointer transition-all ${currentStepIndex === 1
-                          ? "bg-amber-950/90 border-amber-400 ring-2 ring-amber-400/40"
-                          : "bg-white/10 hover:bg-white/15 border-emerald-500/30"
+                        ? "bg-amber-950/90 border-amber-400 ring-2 ring-amber-400/40"
+                        : "bg-white/10 hover:bg-white/15 border-emerald-500/30"
                         }`}
                     >
                       <div className="flex items-center gap-2.5 min-w-0 flex-1">
@@ -3277,8 +3277,8 @@ export function PersonalVoiceOnboarding({
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       onClick={() => setCurrentStepIndex(2)}
                       className={`flex items-center justify-between p-2.5 rounded-xl border shadow-xs group cursor-pointer transition-all ${currentStepIndex === 2
-                          ? "bg-blue-950/90 border-blue-400 ring-2 ring-blue-400/40"
-                          : "bg-white/10 hover:bg-white/15 border-emerald-500/30"
+                        ? "bg-blue-950/90 border-blue-400 ring-2 ring-blue-400/40"
+                        : "bg-white/10 hover:bg-white/15 border-emerald-500/30"
                         }`}
                     >
                       <div className="flex items-center gap-2.5 min-w-0 flex-1">
@@ -3353,8 +3353,8 @@ export function PersonalVoiceOnboarding({
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       onClick={() => setCurrentStepIndex(3)}
                       className={`flex items-center justify-between p-2.5 rounded-xl border shadow-xs group cursor-pointer transition-all ${currentStepIndex === 3
-                          ? "bg-emerald-950/90 border-emerald-400 ring-2 ring-emerald-400/40"
-                          : "bg-white/10 hover:bg-white/15 border-emerald-500/30"
+                        ? "bg-emerald-950/90 border-emerald-400 ring-2 ring-emerald-400/40"
+                        : "bg-white/10 hover:bg-white/15 border-emerald-500/30"
                         }`}
                     >
                       <div className="flex items-center gap-2.5 min-w-0 flex-1">
@@ -3627,8 +3627,8 @@ export function PersonalVoiceOnboarding({
                           }));
                         }}
                         className={`py-1.5 px-2 rounded-xl font-bold text-[11px] border transition-all cursor-pointer flex items-center justify-center gap-1 ${(editableProfile.gender || "male") === "male"
-                            ? "bg-purple-600 text-white border-purple-600 shadow-xs"
-                            : "bg-white text-slate-700 border-slate-200 hover:bg-purple-100"
+                          ? "bg-purple-600 text-white border-purple-600 shadow-xs"
+                          : "bg-white text-slate-700 border-slate-200 hover:bg-purple-100"
                           }`}
                       >
                         <span>{gI18n.male}</span>
@@ -3645,8 +3645,8 @@ export function PersonalVoiceOnboarding({
                           }));
                         }}
                         className={`py-1.5 px-2 rounded-xl font-bold text-[11px] border transition-all cursor-pointer flex items-center justify-center gap-1 ${editableProfile.gender === "female"
-                            ? "bg-purple-600 text-white border-purple-600 shadow-xs"
-                            : "bg-white text-slate-700 border-slate-200 hover:bg-purple-100"
+                          ? "bg-purple-600 text-white border-purple-600 shadow-xs"
+                          : "bg-white text-slate-700 border-slate-200 hover:bg-purple-100"
                           }`}
                       >
                         <span>{gI18n.female}</span>

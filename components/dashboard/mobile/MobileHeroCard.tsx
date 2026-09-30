@@ -56,14 +56,14 @@ export function MobileHeroCard({ onStartVoice, beneficiary }: MobileHeroCardProp
           </div>
         </div>
 
-        {/* Purple Glowing CTA Button: Talk to Saksham-AI */}
+        {/* Purple Glowing CTA Button: Talk to Sakhyam-AI */}
         <motion.button
           whileTap={{ scale: 0.96 }}
           onClick={onStartVoice}
           className="w-fit flex items-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-4 py-2 rounded-2xl text-xs font-bold shadow-md shadow-purple-600/30 cursor-pointer"
         >
           <Mic className="size-3.5 animate-pulse text-white" />
-          <span>Talk to Saksham-AI</span>
+          <span>Talk to Sakhyam-AI</span>
           <ArrowRight className="size-3.5 text-white" />
         </motion.button>
       </div>

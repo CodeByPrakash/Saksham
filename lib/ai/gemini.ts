@@ -85,7 +85,7 @@ export async function generateGeminiLivelihoodAdvice({
   }
 
   const prompt = `
-You are the AI Livelihood Copilot for "Saksham-AI (Saksham-AI)", a Government of India PM-AJAY and NSQF-aligned livelihood intelligence platform.
+You are the AI Livelihood Copilot for "Sakhyam-AI (Sakhyam-AI)", a Government of India PM-AJAY and NSQF-aligned livelihood intelligence platform.
 Beneficiary Profile:
 - Name: ${beneficiaryName}
 - Location: ${district}

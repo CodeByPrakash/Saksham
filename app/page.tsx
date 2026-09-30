@@ -29,7 +29,7 @@ export default function Home() {
   // Load any previously spoken/saved profile on mount
   useEffect(() => {
     try {
-      const saved = localStorage.getItem("saksham_beneficiary_profile");
+      const saved = localStorage.getItem("Sakhyam_beneficiary_profile");
       if (saved) {
         setBeneficiaryProfile(JSON.parse(saved));
       }
@@ -48,7 +48,7 @@ export default function Home() {
     if (profileData) {
       setBeneficiaryProfile(profileData);
       try {
-        localStorage.setItem("saksham_beneficiary_profile", JSON.stringify(profileData));
+        localStorage.setItem("Sakhyam_beneficiary_profile", JSON.stringify(profileData));
       } catch { }
     }
     if (role === "beneficiary") {
@@ -61,7 +61,7 @@ export default function Home() {
   const handlePersonalOnboardingComplete = (profileData: BeneficiaryProfileData) => {
     setBeneficiaryProfile(profileData);
     try {
-      localStorage.setItem("saksham_beneficiary_profile", JSON.stringify(profileData));
+      localStorage.setItem("Sakhyam_beneficiary_profile", JSON.stringify(profileData));
     } catch { }
     setFlowStage("dashboard");
   };
@@ -76,15 +76,13 @@ export default function Home() {
 
   return (
     <div
-      className={`flex flex-col text-slate-900 selection:bg-purple-500 selection:text-white ${
-        flowStage === "onboarding" || flowStage === "login" || flowStage === "personal_onboarding"
+      className={`flex flex-col text-slate-900 selection:bg-purple-500 selection:text-white ${flowStage === "onboarding" || flowStage === "login" || flowStage === "personal_onboarding"
           ? "bg-[#FAF6EE]"
           : "bg-slate-50 min-h-screen"
-      } ${
-        flowStage === "onboarding"
+        } ${flowStage === "onboarding"
           ? "h-screen md:min-h-screen overflow-hidden md:overflow-visible"
           : "min-h-screen"
-      }`}
+        }`}
     >
       {/* ========================================================================= */}
       {/* SINGLE UNIFIED RESPONSIVE TREE (Never duplicate mounted components in React) */}
@@ -92,11 +90,10 @@ export default function Home() {
       {isMobile ? (
         /* 1. MOBILE VIEW CONTAINER */
         <div
-          className={`flex w-full flex-col ${
-            flowStage === "onboarding"
+          className={`flex w-full flex-col ${flowStage === "onboarding"
               ? "fixed inset-0 h-[100dvh] max-h-[100dvh] overflow-hidden z-50 bg-[#FAF6EE]"
               : "min-h-[100dvh]"
-          }`}
+            }`}
         >
           <AnimatePresence mode="wait" initial={false}>
             {flowStage === "onboarding" && (
@@ -193,33 +190,32 @@ export default function Home() {
             (flowStage === "dashboard" && currentMode === "beneficiary") ||
             flowStage === "personal_onboarding"
           ) && (
-            <AppHeader
-              currentMode={
-                flowStage === "login"
-                  ? "onboarding"
-                  : flowStage === "onboarding"
-                  ? "onboarding"
-                  : currentMode
-              }
-              onModeChange={(mode) => {
-                if (mode === "onboarding") {
-                  setFlowStage("onboarding");
-                } else {
-                  setCurrentMode(mode);
-                  setFlowStage("dashboard");
+              <AppHeader
+                currentMode={
+                  flowStage === "login"
+                    ? "onboarding"
+                    : flowStage === "onboarding"
+                      ? "onboarding"
+                      : currentMode
                 }
-              }}
-              language={language}
-              onLanguageChange={setLanguage}
-              onLogout={handleLogout}
-              isLoggedIn={flowStage === "dashboard"}
-            />
-          )}
+                onModeChange={(mode) => {
+                  if (mode === "onboarding") {
+                    setFlowStage("onboarding");
+                  } else {
+                    setCurrentMode(mode);
+                    setFlowStage("dashboard");
+                  }
+                }}
+                language={language}
+                onLanguageChange={setLanguage}
+                onLogout={handleLogout}
+                isLoggedIn={flowStage === "dashboard"}
+              />
+            )}
 
           <main
-            className={`flex-1 ${
-              flowStage === "dashboard" && currentMode !== "beneficiary" ? "pb-16" : ""
-            }`}
+            className={`flex-1 ${flowStage === "dashboard" && currentMode !== "beneficiary" ? "pb-16" : ""
+              }`}
           >
             <AnimatePresence mode="wait" initial={false}>
               {flowStage === "onboarding" && (
@@ -300,7 +296,7 @@ export default function Home() {
                 <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
                   <div className="flex flex-col gap-1 text-center md:text-left">
                     <div className="flex items-center justify-center md:justify-start gap-2 font-bold text-slate-800 font-heading">
-                      <span>Saksham-AI — AI Livelihood Intelligence Platform</span>
+                      <span>Sakhyam-AI — AI Livelihood Intelligence Platform</span>
                       <Badge variant="purple" className="text-[10px]">
                         PM-AJAY Standard
                       </Badge>

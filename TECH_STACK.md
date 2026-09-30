@@ -1,6 +1,6 @@
-# Saksham-AI (Saksham-AI) — Complete Tech Stack & Feature Architecture
+# Sakhyam-AI (Sakhyam-AI) — Complete Tech Stack & Feature Architecture
 
-> **Saksham-AI** is an AI-powered vernacular livelihood intelligence, NSQF skill-alignment, and PM-AJAY enterprise enablement platform designed for rural beneficiaries, grassroots field workers, and state/central government administrators.
+> **Sakhyam-AI** is an AI-powered vernacular livelihood intelligence, NSQF skill-alignment, and PM-AJAY enterprise enablement platform designed for rural beneficiaries, grassroots field workers, and state/central government administrators.
 
 ---
 
@@ -105,7 +105,7 @@
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
-│                                 SAKSHAM-AI PLATFORM                                    │
+│                                 Sakhyam-AI PLATFORM                                    │
 └────────────────────────────────────────────────────────────────────────────────────────┘
                                      │
       ┌──────────────────────────────┼──────────────────────────────┐
@@ -198,4 +198,4 @@ graph TD
 
 ---
 
-*Generated for Saksham-AI (Saksham-AI) | SIH Platform Architecture Document*
+*Generated for Sakhyam-AI (Sakhyam-AI) | SIH Platform Architecture Document*

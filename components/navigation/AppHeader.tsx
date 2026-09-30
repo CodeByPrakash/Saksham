@@ -197,7 +197,7 @@ export function AppHeader({
           <div className="size-8 sm:size-9 shrink-0 relative group-hover:scale-105 transition-transform">
             <Image
               src="/logo.png"
-              alt="Saksham AI Logo"
+              alt="Sakhyam AI Logo"
               fill
               className="object-contain"
               sizes="36px"
@@ -208,7 +208,7 @@ export function AppHeader({
           <div className="flex flex-col">
             <div className="flex items-center gap-1.5">
               <span className="text-base sm:text-lg font-extrabold tracking-tight text-slate-900 font-heading">
-                Sak<span className="text-purple-600">sham</span>
+                Sakh<span className="text-purple-600">yam</span>
               </span>
               <span className="hidden sm:inline-flex text-[10px] font-extrabold uppercase px-1.5 py-0.5 rounded-md bg-purple-100 text-purple-700">
                 PM-AJAY

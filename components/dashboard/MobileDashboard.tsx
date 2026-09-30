@@ -64,7 +64,7 @@ export function MobileDashboard({
     if (beneficiaryProfile) return beneficiaryProfile;
     if (typeof window !== "undefined") {
       try {
-        const saved = localStorage.getItem("saksham_beneficiary_profile");
+        const saved = localStorage.getItem("Sakhyam_beneficiary_profile");
         if (saved) return JSON.parse(saved);
       } catch { }
     }
@@ -135,8 +135,8 @@ export function MobileDashboard({
       };
       if (typeof window !== "undefined") {
         try {
-          localStorage.setItem("saksham_beneficiary_profile", JSON.stringify(merged));
-        } catch {}
+          localStorage.setItem("Sakhyam_beneficiary_profile", JSON.stringify(merged));
+        } catch { }
       }
       return merged;
     });
@@ -235,7 +235,7 @@ export function MobileDashboard({
 
   return (
     <div className="w-full min-h-screen bg-[#FAF6EE] text-slate-800 flex flex-col justify-between pb-24 select-none font-sans max-w-md mx-auto relative">
-      
+
       {/* 1. TOP APP BAR */}
       <MobileHeader
         beneficiary={currentBeneficiaryData}

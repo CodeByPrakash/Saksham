@@ -133,7 +133,7 @@ export function LanguageSelectScreen({
   useEffect(() => {
     if (typeof window !== "undefined") {
       try {
-        const savedMute = localStorage.getItem("Saksham-AI_voice_muted");
+        const savedMute = localStorage.getItem("Sakhyam-AI_voice_muted");
         if (savedMute === "true") {
           setIsMuted(true);
         } else {
@@ -196,7 +196,7 @@ export function LanguageSelectScreen({
       setIsMuted(true);
       if (typeof window !== "undefined") {
         try {
-          localStorage.setItem("Saksham-AI_voice_muted", "true");
+          localStorage.setItem("Sakhyam-AI_voice_muted", "true");
           stopAllVoiceAndAudio();
           isMatchingLockRef.current = false;
           setVoiceFlowState("idle");
@@ -207,7 +207,7 @@ export function LanguageSelectScreen({
       setIsMuted(false);
       if (typeof window !== "undefined") {
         try {
-          localStorage.setItem("Saksham-AI_voice_muted", "false");
+          localStorage.setItem("Sakhyam-AI_voice_muted", "false");
         } catch { }
       }
       playSpokenPrompt(
@@ -691,7 +691,7 @@ export function LanguageSelectScreen({
 
     setSelectedCode(detected);
     try {
-      localStorage.setItem("Saksham-AI_lang", detected);
+      localStorage.setItem("Sakhyam-AI_lang", detected);
       localStorage.setItem("language", detected);
     } catch { }
 
@@ -716,7 +716,7 @@ export function LanguageSelectScreen({
     isMatchingLockRef.current = false;
     setSelectedCode(langCode);
     try {
-      localStorage.setItem("Saksham-AI_lang", langCode);
+      localStorage.setItem("Sakhyam-AI_lang", langCode);
       localStorage.setItem("language", langCode);
     } catch { }
 
@@ -733,7 +733,7 @@ export function LanguageSelectScreen({
     stopAllVoiceAndAudio();
     isMatchingLockRef.current = false;
     try {
-      localStorage.setItem("Saksham-AI_lang", selectedCode);
+      localStorage.setItem("Sakhyam-AI_lang", selectedCode);
       localStorage.setItem("language", selectedCode);
     } catch { }
     onLanguageSelected(selectedCode);
@@ -808,7 +808,7 @@ export function LanguageSelectScreen({
         <div className="relative size-11">
           <Image
             src="/logo.png"
-            alt="Saksham AI Logo"
+            alt="Sakhyam AI Logo"
             fill
             className="object-contain drop-shadow-sm"
             sizes="44px"

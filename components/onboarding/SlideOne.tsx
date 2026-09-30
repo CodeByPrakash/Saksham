@@ -272,12 +272,12 @@ export function SlideOne({
 
       {/* Brand Logo & Title Area */}
       <div className="flex flex-col items-center text-center pt-1 z-10 shrink-0">
-        {/* Custom Saksham-AI Logo Emblem */}
+        {/* Custom Sakhyam-AI Logo Emblem */}
         <div className="flex flex-col items-center mb-1">
           <div className="relative size-11 sm:size-12 mb-0.5">
             <Image
               src="/logo.png"
-              alt="Saksham AI Logo"
+              alt="Sakhyam AI Logo"
               fill
               className="object-contain drop-shadow-sm"
               sizes="48px"
@@ -286,7 +286,7 @@ export function SlideOne({
           </div>
           <div className="flex items-center gap-1">
             <span className="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900 font-heading notranslate" translate="no">
-              Saksham-AI
+              Sakhyam
             </span>
           </div>
           <span className="text-[10px] font-bold text-slate-500 tracking-wider uppercase mt-0.5 notranslate" translate="no">

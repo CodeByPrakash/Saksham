@@ -94,7 +94,7 @@ export function MobileJobDetailPage({
               if (navigator.share) {
                 navigator.share({
                   title: job.title,
-                  text: `Apply for ${job.title} at ${job.company} via Saksham-AI Saksham-AI!`,
+                  text: `Apply for ${job.title} at ${job.company} via Sakhyam-AI Sakhyam-AI!`,
                   url: window.location.href
                 }).catch(() => { });
               }
@@ -285,7 +285,7 @@ export function MobileJobDetailPage({
               Direct Benefit Transfer & Post-Placement Support
             </h4>
             <p className="text-[11px] text-purple-200 leading-relaxed font-medium">
-              Beneficiaries placed through Saksham-AI receive ₹1,500/month post-placement allowance for the first 3 months directly under the PM-AJAY scheme.
+              Beneficiaries placed through Sakhyam-AI receive ₹1,500/month post-placement allowance for the first 3 months directly under the PM-AJAY scheme.
             </p>
           </div>
         </div>

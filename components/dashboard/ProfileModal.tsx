@@ -108,10 +108,10 @@ export function ProfileModal({
       onUpdateProfile(updated);
     } else if (typeof window !== "undefined") {
       try {
-        const saved = localStorage.getItem("saksham_beneficiary_profile");
+        const saved = localStorage.getItem("Sakhyam_beneficiary_profile");
         const existing = saved ? JSON.parse(saved) : {};
-        localStorage.setItem("saksham_beneficiary_profile", JSON.stringify({ ...existing, ...updated }));
-      } catch {}
+        localStorage.setItem("Sakhyam_beneficiary_profile", JSON.stringify({ ...existing, ...updated }));
+      } catch { }
     }
 
     setIsEditing(false);
@@ -248,11 +248,10 @@ export function ProfileModal({
                       <button
                         type="button"
                         onClick={() => setEditGender("male")}
-                        className={`py-2 px-3 rounded-xl text-xs font-bold transition-all border flex items-center justify-center gap-1.5 cursor-pointer ${
-                          editGender === "male"
+                        className={`py-2 px-3 rounded-xl text-xs font-bold transition-all border flex items-center justify-center gap-1.5 cursor-pointer ${editGender === "male"
                             ? "bg-purple-600 text-white border-purple-600 shadow-sm"
                             : "bg-white text-slate-700 border-slate-200 hover:bg-purple-50"
-                        }`}
+                          }`}
                       >
                         <span className="text-sm">👨</span>
                         <span>Male (पुरुष)</span>
@@ -260,11 +259,10 @@ export function ProfileModal({
                       <button
                         type="button"
                         onClick={() => setEditGender("female")}
-                        className={`py-2 px-3 rounded-xl text-xs font-bold transition-all border flex items-center justify-center gap-1.5 cursor-pointer ${
-                          editGender === "female"
+                        className={`py-2 px-3 rounded-xl text-xs font-bold transition-all border flex items-center justify-center gap-1.5 cursor-pointer ${editGender === "female"
                             ? "bg-purple-600 text-white border-purple-600 shadow-sm"
                             : "bg-white text-slate-700 border-slate-200 hover:bg-purple-50"
-                        }`}
+                          }`}
                       >
                         <span className="text-sm">👩</span>
                         <span>Female (महिला)</span>

@@ -1890,26 +1890,26 @@ export function generateCourseFromDetectedSkill(
   const category: TrainingCategory = isAgri
     ? "agriculture"
     : isHandicraft
-    ? "self_employment"
-    : isHealth
-    ? "healthcare"
-    : isDigital
-    ? "digital_construction"
-    : isTech
-    ? "technical"
-    : "service";
+      ? "self_employment"
+      : isHealth
+        ? "healthcare"
+        : isDigital
+          ? "digital_construction"
+          : isTech
+            ? "technical"
+            : "service";
 
   const sectorId = isAgri
     ? "agriculture_allied"
     : isHandicraft
-    ? "crafts_textiles"
-    : isHealth
-    ? "healthcare_services"
-    : isDigital
-    ? "digital_construction"
-    : isTech
-    ? "green_energy_tech"
-    : "micro_enterprise_grants";
+      ? "crafts_textiles"
+      : isHealth
+        ? "healthcare_services"
+        : isDigital
+          ? "digital_construction"
+          : isTech
+            ? "green_energy_tech"
+            : "micro_enterprise_grants";
 
   const sectorName = SECTOR_DEFINITIONS.find((s) => s.id === sectorId)?.name || "Technical & Vocational Trades";
 
@@ -2044,7 +2044,7 @@ export function getPersonalizedTrainingCourses(
   // Also check localStorage if available
   if (typeof window !== "undefined" && detectedSkills.length === 0) {
     try {
-      const saved = localStorage.getItem("saksham_beneficiary_profile");
+      const saved = localStorage.getItem("Sakhyam_beneficiary_profile");
       if (saved) {
         const parsed: BeneficiaryProfileData = JSON.parse(saved);
         if (parsed.nsqfCourse) detectedSkills.push(parsed.nsqfCourse);

@@ -75,7 +75,7 @@ export function LanguageSelector({
         document.cookie = `googtrans=; path=/; domain=${hostname}; expires=Thu, 01 Jan 1970 00:00:00 UTC;`;
         document.cookie = `googtrans=; path=/; domain=.${hostname}; expires=Thu, 01 Jan 1970 00:00:00 UTC;`;
 
-        const saved = localStorage.getItem("Saksham-AI_lang");
+        const saved = localStorage.getItem("Sakhyam-AI_lang");
         if (saved && !currentLanguage) {
           const found = LANGUAGES.find(
             (l) => l.code === saved || l.code.toLowerCase() === saved.toLowerCase()
@@ -118,7 +118,7 @@ export function LanguageSelector({
 
     if (typeof window !== "undefined") {
       try {
-        localStorage.setItem("Saksham-AI_lang", lang.code);
+        localStorage.setItem("Sakhyam-AI_lang", lang.code);
         // Clear googtrans to prevent browser translator from double-translating
         const hostname = window.location.hostname;
         document.cookie = "googtrans=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
@@ -248,8 +248,8 @@ export function LanguageSelector({
                       key={lang.code}
                       onClick={() => handleSelect(lang)}
                       className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer text-left ${isSelected
-                          ? "bg-purple-50/90 text-purple-700 font-extrabold"
-                          : "text-slate-700 hover:bg-slate-50 hover:text-slate-900"
+                        ? "bg-purple-50/90 text-purple-700 font-extrabold"
+                        : "text-slate-700 hover:bg-slate-50 hover:text-slate-900"
                         }`}
                     >
                       <div className="flex flex-col min-w-0 pr-2">

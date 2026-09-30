@@ -1,4 +1,4 @@
-# Saksham-AI — Google OAuth & Convex Implementation Guide
+# Sakhyam-AI — Google OAuth & Convex Implementation Guide
 
 This guide details the technical implementation of the Clerk Google OAuth and Convex backend integration.
 
@@ -8,7 +8,7 @@ This guide details the technical implementation of the Clerk Google OAuth and Co
 
 ```
                                ┌────────────────────────┐
-                               │     Saksham-AI CLIENT     │
+                               │     Sakhyam-AI CLIENT     │
                                │  (Expo / React Native) │
                                └───────────┬────────────┘
                                            │

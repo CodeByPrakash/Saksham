@@ -79,7 +79,7 @@ export function WebDashboard({ beneficiaryProfile }: WebDashboardProps = {}) {
     if (beneficiaryProfile) return beneficiaryProfile;
     if (typeof window !== "undefined") {
       try {
-        const saved = localStorage.getItem("saksham_beneficiary_profile");
+        const saved = localStorage.getItem("Sakhyam_beneficiary_profile");
         if (saved) return JSON.parse(saved);
       } catch { }
     }
@@ -248,8 +248,8 @@ export function WebDashboard({ beneficiaryProfile }: WebDashboardProps = {}) {
       };
       if (typeof window !== "undefined") {
         try {
-          localStorage.setItem("saksham_beneficiary_profile", JSON.stringify(merged));
-        } catch {}
+          localStorage.setItem("Sakhyam_beneficiary_profile", JSON.stringify(merged));
+        } catch { }
       }
       return merged;
     });
@@ -272,7 +272,7 @@ export function WebDashboard({ beneficiaryProfile }: WebDashboardProps = {}) {
         <aside className="w-60 xl:w-64 shrink-0 bg-white/95 backdrop-blur-md rounded-[32px] border border-[#EDE7D9] shadow-sm flex flex-col justify-between p-5 self-start sticky top-5 h-[calc(100vh-40px)]">
 
           <div className="space-y-6">
-            {/* Saksham-AI Logo */}
+            {/* Sakhyam-AI Logo */}
             <div
               onClick={() => setActiveMenu("dashboard")}
               className="flex flex-col items-start px-2 cursor-pointer group"
@@ -281,7 +281,7 @@ export function WebDashboard({ beneficiaryProfile }: WebDashboardProps = {}) {
                 <div className="size-9 shrink-0 relative group-hover:scale-105 transition-transform">
                   <Image
                     src="/logo.png"
-                    alt="Saksham AI Logo"
+                    alt="Sakhyam AI Logo"
                     fill
                     className="object-contain"
                     sizes="36px"
@@ -291,7 +291,7 @@ export function WebDashboard({ beneficiaryProfile }: WebDashboardProps = {}) {
 
                 <div className="flex flex-col">
                   <span className="text-xl font-extrabold tracking-tight text-slate-900 font-heading">
-                    Saksham <span className="text-purple-600">AI</span>
+                    Sakhyam <span className="text-purple-600">AI</span>
                   </span>
                 </div>
               </div>
@@ -317,8 +317,8 @@ export function WebDashboard({ beneficiaryProfile }: WebDashboardProps = {}) {
                       if (item.id === "self_employment") setIsSchemesModalOpen(true);
                     }}
                     className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-2xl text-xs xl:text-sm font-bold transition-all cursor-pointer text-left ${isActive
-                        ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md shadow-purple-600/25 font-extrabold"
-                        : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/70"
+                      ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md shadow-purple-600/25 font-extrabold"
+                      : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/70"
                       }`}
                   >
                     <Icon className={`size-4 xl:size-4.5 shrink-0 ${isActive ? "text-white" : "text-slate-500"}`} />
@@ -649,10 +649,10 @@ export function WebDashboard({ beneficiaryProfile }: WebDashboardProps = {}) {
                             <div className="absolute top-2.5 right-2.5">
                               <span
                                 className={`text-[9px] font-extrabold uppercase px-2.5 py-1 rounded-full shadow-xs ${course.badgeColor === "blue"
-                                    ? "bg-blue-600 text-white"
-                                    : course.badgeColor === "amber"
-                                      ? "bg-amber-500 text-white"
-                                      : "bg-emerald-600 text-white"
+                                  ? "bg-blue-600 text-white"
+                                  : course.badgeColor === "amber"
+                                    ? "bg-amber-500 text-white"
+                                    : "bg-emerald-600 text-white"
                                   }`}
                               >
                                 {course.badge}
@@ -831,10 +831,10 @@ export function WebDashboard({ beneficiaryProfile }: WebDashboardProps = {}) {
                             )}
                             <span
                               className={`font-semibold text-[11px] truncate ${step.status === "active"
-                                  ? "text-purple-700 font-extrabold"
-                                  : step.status === "completed"
-                                    ? "text-slate-800"
-                                    : "text-slate-400"
+                                ? "text-purple-700 font-extrabold"
+                                : step.status === "completed"
+                                  ? "text-slate-800"
+                                  : "text-slate-400"
                                 }`}
                             >
                               {step.title}
@@ -876,12 +876,12 @@ export function WebDashboard({ beneficiaryProfile }: WebDashboardProps = {}) {
                           <div className="flex items-center gap-2.5">
                             <div
                               className={`size-8 rounded-xl flex items-center justify-center shrink-0 ${step.color === "purple"
-                                  ? "bg-purple-100 text-purple-700"
-                                  : step.color === "amber"
-                                    ? "bg-amber-100 text-amber-700"
-                                    : step.color === "blue"
-                                      ? "bg-blue-100 text-blue-700"
-                                      : "bg-emerald-100 text-emerald-700"
+                                ? "bg-purple-100 text-purple-700"
+                                : step.color === "amber"
+                                  ? "bg-amber-100 text-amber-700"
+                                  : step.color === "blue"
+                                    ? "bg-blue-100 text-blue-700"
+                                    : "bg-emerald-100 text-emerald-700"
                                 }`}
                             >
                               {step.iconName === "mic" && <Mic className="size-4" />}
@@ -1155,8 +1155,8 @@ export function WebDashboard({ beneficiaryProfile }: WebDashboardProps = {}) {
                           key={sec.id}
                           onClick={() => setTrainingFilter(sec.id)}
                           className={`px-3 py-1.5 rounded-2xl text-xs font-bold shrink-0 flex items-center gap-1.5 cursor-pointer transition-all border ${isActive
-                              ? "bg-purple-600 border-purple-700 text-white shadow-xs font-extrabold"
-                              : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100"
+                            ? "bg-purple-600 border-purple-700 text-white shadow-xs font-extrabold"
+                            : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100"
                             }`}
                         >
                           <span>{sec.name}</span>
@@ -1278,8 +1278,8 @@ export function WebDashboard({ beneficiaryProfile }: WebDashboardProps = {}) {
                         key={f}
                         onClick={() => setJobFilter(f)}
                         className={`px-3 py-1.5 rounded-xl font-bold transition-all cursor-pointer ${jobFilter === f
-                            ? "bg-purple-600 text-white shadow-xs"
-                            : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                          ? "bg-purple-600 text-white shadow-xs"
+                          : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                           }`}
                       >
                         {f === "all" ? "All Jobs" : f.charAt(0).toUpperCase() + f.slice(1)}
@@ -1411,19 +1411,19 @@ export function WebDashboard({ beneficiaryProfile }: WebDashboardProps = {}) {
                       <div
                         key={idx}
                         className={`p-3.5 rounded-2xl border flex items-center justify-between ${step.status === "completed"
-                            ? "bg-emerald-50/60 border-emerald-200"
-                            : step.status === "active"
-                              ? "bg-purple-50/70 border-purple-200"
-                              : "bg-slate-50 border-slate-200"
+                          ? "bg-emerald-50/60 border-emerald-200"
+                          : step.status === "active"
+                            ? "bg-purple-50/70 border-purple-200"
+                            : "bg-slate-50 border-slate-200"
                           }`}
                       >
                         <div className="flex items-center gap-3">
                           <div
                             className={`size-6 rounded-full flex items-center justify-center font-bold text-xs ${step.status === "completed"
-                                ? "bg-emerald-600 text-white"
-                                : step.status === "active"
-                                  ? "bg-purple-600 text-white animate-pulse"
-                                  : "bg-slate-300 text-slate-600"
+                              ? "bg-emerald-600 text-white"
+                              : step.status === "active"
+                                ? "bg-purple-600 text-white animate-pulse"
+                                : "bg-slate-300 text-slate-600"
                               }`}
                           >
                             {step.status === "completed" ? "✓" : idx + 1}
@@ -1433,10 +1433,10 @@ export function WebDashboard({ beneficiaryProfile }: WebDashboardProps = {}) {
 
                         <span
                           className={`text-[11px] font-extrabold uppercase px-2.5 py-0.5 rounded-full ${step.status === "completed"
-                              ? "bg-emerald-100 text-emerald-700"
-                              : step.status === "active"
-                                ? "bg-purple-100 text-purple-700"
-                                : "bg-slate-200 text-slate-500"
+                            ? "bg-emerald-100 text-emerald-700"
+                            : step.status === "active"
+                              ? "bg-purple-100 text-purple-700"
+                              : "bg-slate-200 text-slate-500"
                             }`}
                         >
                           {step.status}

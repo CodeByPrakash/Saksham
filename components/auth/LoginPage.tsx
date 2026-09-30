@@ -113,7 +113,7 @@ const LOGIN_TRANSLATIONS: Record<
   },
   sat: {
     subLogo: "Teheñak hunar • Gapaak bhalo",
-    welcome: "Saksham-AI re Sagun Daram",
+    welcome: "Sakhyam-AI re Sagun Daram",
     subtitle: "Apanag rozgar passport lagid rod kate se mobile number te login me.",
     speakToLogin: "Rod kate Login me",
     speakSub: "100% binu ol te • Khali mic dabaw me",
@@ -136,7 +136,7 @@ const LOGIN_TRANSLATIONS: Record<
   },
   en: {
     subLogo: "Skills Today • Better Tomorrow",
-    welcome: "Welcome to Saksham-AI",
+    welcome: "Welcome to Sakhyam",
     subtitle: "Sign in with voice or mobile number to access your livelihood passport and opportunities.",
     speakToLogin: "Speak to Login",
     speakSub: "100% Voice-First • No Typing Needed",
@@ -461,7 +461,7 @@ export function LoginPage({
   const [isPlayingAudioPrompt, setIsPlayingAudioPrompt] = useState<boolean>(false);
   const [isMuted, setIsMuted] = useState<boolean>(() => {
     if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("saksham_login_audio_muted");
+      const saved = localStorage.getItem("Sakhyam_login_audio_muted");
       if (saved !== null) return saved === "true";
     }
     // Default to true so no audio automatically blasts upon login page load
@@ -537,7 +537,7 @@ export function LoginPage({
       lang: "ur-IN"
     },
     en: {
-      text: "Welcome to Saksham-AI! To log in using your voice, tap the glowing microphone button and speak your 10-digit mobile number.",
+      text: "Welcome to Sakhyam-AI! To log in using your voice, tap the glowing microphone button and speak your 10-digit mobile number.",
       lang: "en-IN"
     }
   };
@@ -683,15 +683,15 @@ export function LoginPage({
       // Currently playing -> Mute and stop audio immediately
       setIsMuted(true);
       try {
-        localStorage.setItem("saksham_login_audio_muted", "true");
-      } catch {}
+        localStorage.setItem("Sakhyam_login_audio_muted", "true");
+      } catch { }
       stopAllAudio();
     } else {
       // Currently muted or stopped -> Unmute and start voice instruction
       setIsMuted(false);
       try {
-        localStorage.setItem("saksham_login_audio_muted", "false");
-      } catch {}
+        localStorage.setItem("Sakhyam_login_audio_muted", "false");
+      } catch { }
       const promptObj = welcomePrompts[normLang] || welcomePrompts.hi;
       playGeminiTts(promptObj.text, promptObj.lang);
     }
@@ -760,7 +760,7 @@ export function LoginPage({
       };
 
       try {
-        localStorage.setItem("saksham_beneficiary_profile", JSON.stringify(profData));
+        localStorage.setItem("Sakhyam_beneficiary_profile", JSON.stringify(profData));
       } catch { }
     }
 
@@ -940,13 +940,12 @@ export function LoginPage({
             onClick={handleToggleMute}
             type="button"
             title={isMuted ? "Unmute Voice Guidance" : "Mute Voice Guidance"}
-            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold border transition-all cursor-pointer ${
-              isMuted
-                ? "bg-white/80 text-slate-500 hover:text-slate-800 border-slate-200/90 shadow-2xs hover:bg-white"
-                : isPlayingAudioPrompt
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold border transition-all cursor-pointer ${isMuted
+              ? "bg-white/80 text-slate-500 hover:text-slate-800 border-slate-200/90 shadow-2xs hover:bg-white"
+              : isPlayingAudioPrompt
                 ? "bg-purple-600 text-white border-purple-700 shadow-xs ring-2 ring-purple-300"
                 : "bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100 shadow-2xs"
-            }`}
+              }`}
           >
             {isMuted ? (
               <>
@@ -980,7 +979,7 @@ export function LoginPage({
           <div className="relative size-11 sm:size-12 mb-0.5">
             <Image
               src="/logo.png"
-              alt="Saksham AI Logo"
+              alt="Sakhyam AI Logo"
               fill
               className="object-contain drop-shadow-sm"
               sizes="48px"
@@ -989,7 +988,7 @@ export function LoginPage({
           </div>
           <div className="flex items-center gap-1">
             <span className="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900 font-heading notranslate" translate="no">
-              Saksham-AI
+              Sakhyam
             </span>
           </div>
           <span className="text-[10px] font-bold text-slate-500 tracking-wider uppercase">
@@ -1007,13 +1006,12 @@ export function LoginPage({
           <button
             onClick={handleToggleMute}
             type="button"
-            className={`inline-flex items-center gap-1.5 text-xs font-bold px-3.5 py-1.5 rounded-full border transition-all cursor-pointer mt-1 ${
-              isPlayingAudioPrompt && !isMuted
-                ? "bg-purple-600 text-white border-purple-700 shadow-md shadow-purple-600/30 ring-2 ring-purple-300"
-                : isMuted
+            className={`inline-flex items-center gap-1.5 text-xs font-bold px-3.5 py-1.5 rounded-full border transition-all cursor-pointer mt-1 ${isPlayingAudioPrompt && !isMuted
+              ? "bg-purple-600 text-white border-purple-700 shadow-md shadow-purple-600/30 ring-2 ring-purple-300"
+              : isMuted
                 ? "bg-white/90 text-slate-600 border-slate-300 hover:bg-purple-50 hover:text-purple-700 hover:border-purple-300 shadow-2xs"
                 : "bg-purple-100/80 text-purple-700 border-purple-200 hover:bg-purple-200/80"
-            }`}
+              }`}
             title={isMuted ? "Tap to unmute voice guide" : "Tap to mute voice guide"}
           >
             {isPlayingAudioPrompt && !isMuted ? (
@@ -1248,13 +1246,12 @@ export function LoginPage({
                       setLoginGender("male");
                       if (loginName === "सावित्री देवी") setLoginName("Ramesh Soren");
                     }}
-                    className={`py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer border ${
-                      loginGender === "male"
-                        ? "bg-purple-600 text-white border-purple-600 shadow-xs"
-                        : "bg-white text-slate-700 border-slate-200 hover:bg-purple-50/50"
-                    }`}
+                    className={`py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer border ${loginGender === "male"
+                      ? "bg-purple-600 text-white border-purple-600 shadow-xs"
+                      : "bg-white text-slate-700 border-slate-200 hover:bg-purple-50/50"
+                      }`}
                   >
-                    
+
                     <span>Male (पुरुष)</span>
                   </button>
                   <button
@@ -1263,13 +1260,12 @@ export function LoginPage({
                       setLoginGender("female");
                       if (loginName === "Ramesh Soren") setLoginName("सावित्री देवी");
                     }}
-                    className={`py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer border ${
-                      loginGender === "female"
-                        ? "bg-purple-600 text-white border-purple-600 shadow-xs"
-                        : "bg-white text-slate-700 border-slate-200 hover:bg-purple-50/50"
-                    }`}
+                    className={`py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer border ${loginGender === "female"
+                      ? "bg-purple-600 text-white border-purple-600 shadow-xs"
+                      : "bg-white text-slate-700 border-slate-200 hover:bg-purple-50/50"
+                      }`}
                   >
-                
+
                     <span>Female (महिला)</span>
                   </button>
                 </div>
@@ -1307,11 +1303,10 @@ export function LoginPage({
                         key={item.val}
                         type="button"
                         onClick={() => setLoginAge(item.val)}
-                        className={`px-2 py-1 rounded-lg text-[10px] font-bold transition-all cursor-pointer shrink-0 border ${
-                          loginAge === item.val
-                            ? "bg-purple-600 text-white border-purple-600"
-                            : "bg-white text-slate-600 border-slate-200 hover:bg-purple-50"
-                        }`}
+                        className={`px-2 py-1 rounded-lg text-[10px] font-bold transition-all cursor-pointer shrink-0 border ${loginAge === item.val
+                          ? "bg-purple-600 text-white border-purple-600"
+                          : "bg-white text-slate-600 border-slate-200 hover:bg-purple-50"
+                          }`}
                       >
                         {item.label}
                       </button>
