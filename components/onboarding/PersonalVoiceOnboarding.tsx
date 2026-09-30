@@ -946,9 +946,59 @@ export function formatGrantSupport(rawGrant: string, lang: string): string {
 
 export function formatNsqfCourse(rawCourse: string, lang: string): string {
   const cleanLang = (lang || "en").toLowerCase();
-  const c = rawCourse || "";
+  const c = (rawCourse || "").trim();
+  if (!c) return "NSQF Vocational Trade (PM-AJAY)";
 
-  if (/tailor|सिलाई|সিল|silai|garment/i.test(c)) {
+  // 1. Kisan Drone Pilot
+  if (/drone|ड्रोन|ଡ୍ରୋନ|ଡ୍ରୋନ୍|uav|pilot/i.test(c)) {
+    switch (cleanLang) {
+      case "hi":
+        return "किसान ड्रोन पायलट एवं एग्री-स्प्रेयर (Kisan Drone Pilot)";
+      case "or":
+        return "କିଷାନ ଡ୍ରୋନ୍ ପାଇଲଟ୍ ଓ ଏଗ୍ରି-ସ୍ପ୍ରେୟାର (Kisan Drone Pilot)";
+      case "sat":
+        return "ᱠᱤᱥᱟᱱ ᱰᱨᱳᱱ ᱯᱟᱭᱞᱚᱴ (Kisan Drone Pilot)";
+      case "bn":
+        return "কিষান ড্রোন পাইলট (Kisan Drone Pilot)";
+      case "bho":
+        return "किसान ड्रोन पायलट (Kisan Drone Pilot)";
+      case "mr":
+        return "किसान ड्रोन पायलट (Kisan Drone Pilot)";
+      case "te":
+        return "కిసాన్ డ్రోన్ పైలట్ (Kisan Drone Pilot)";
+      case "ta":
+        return "விவசாய ட்ரோன் பைலட் (Kisan Drone Pilot)";
+      default:
+        return "Kisan Drone Pilot & Agri-Sprayer (AGR/Q7004)";
+    }
+  }
+
+  // 2. Solar PV Agri-Pump
+  if (/solar|सौर|ସୌର|suryamitra|agri-pump|agri pump|pump/i.test(c)) {
+    switch (cleanLang) {
+      case "hi":
+        return "सोलर पीवी कृषि-पंप विशेषज्ञ (Solar PV Agri-Pump Specialist)";
+      case "or":
+        return "ସୌର ପିଭି କୃଷି-ପମ୍ପ ବିଶେଷଜ୍ଞ (Solar PV Agri-Pump Specialist)";
+      case "sat":
+        return "ᱥᱳᱞᱟᱨ ᱯᱤᱵᱷᱤ ᱪᱟᱥ-ᱯᱟᱢᱯ ᱦᱩᱱᱟᱹᱨ (Solar PV Specialist)";
+      case "bn":
+        return "সোলার পিভি কৃষি-পাম্প বিশেষজ্ঞ (Solar PV Specialist)";
+      case "bho":
+        return "सोलर पीवी कृषि-पंप विशेषज्ञ (Solar PV Specialist)";
+      case "mr":
+        return "सोलर पीव्ही कृषी-पंप तज्ज्ञ (Solar PV Specialist)";
+      case "te":
+        return "సోలార్ పీవీ అగ్రి-పంప్ నిపుణుడు (Solar PV Specialist)";
+      case "ta":
+        return "சூரிய ஒளி வேளாண்-பம்ப் நிபுணர் (Solar PV Specialist)";
+      default:
+        return "Solar PV Agri-Pump Specialist (SGJ/Q0102)";
+    }
+  }
+
+  // 3. Self Employed Tailor
+  if (/tailor|सिलाई|সিল|silai|garment|दर्जी|ଦରଜି|कपड़ा/i.test(c)) {
     switch (cleanLang) {
       case "hi":
         return "स्वरोजगार दर्जी (Self Employed Tailor)";
@@ -967,11 +1017,12 @@ export function formatNsqfCourse(rawCourse: string, lang: string): string {
       case "ta":
         return "சுயதொழில் தையலர் (Self Employed Tailor)";
       default:
-        return "Self Employed Tailor (NSQF Level 3)";
+        return "Self Employed Tailor (AMH/Q1947)";
     }
   }
 
-  if (/electric|बिजली|ବିଦ୍ୟୁତ|wiring|वायरिंग/i.test(c)) {
+  // 4. Electrician
+  if (/electric|बिजली|ବିଦ୍ୟୁତ|wiring|वायरिंग|इलेक्ट्रीशियन/i.test(c)) {
     switch (cleanLang) {
       case "hi":
         return "घरेलू इलेक्ट्रीशियन (Domestic Electrician)";
@@ -990,31 +1041,179 @@ export function formatNsqfCourse(rawCourse: string, lang: string): string {
       case "ta":
         return "வீட்டு எலக்ட்ரீசியன் (Domestic Electrician)";
       default:
-        return "Domestic Electrician";
+        return "Domestic Electrician (ELE/Q6001)";
     }
   }
 
-  // Solar Agri Pump default
-  switch (cleanLang) {
-    case "hi":
-      return "सोलर पीवी कृषि-पंप विशेषज्ञ (Solar PV Agri-Pump Specialist)";
-    case "or":
-      return "ସୌର ପିଭି କୃଷି-ପମ୍ପ ବିଶେଷଜ୍ଞ (Solar PV Agri-Pump Specialist)";
-    case "sat":
-      return "ᱥᱳᱞᱟᱨ ᱯᱤᱵᱷᱤ ᱪᱟᱥ-ᱯᱟᱢᱯ ᱦᱩᱱᱟᱹᱨ (Solar PV Specialist)";
-    case "bn":
-      return "সোলার পিভি কৃষি-পাম্প বিশেষজ্ঞ (Solar PV Specialist)";
-    case "bho":
-      return "सोलर पीवी कृषि-पंप विशेषज्ञ (Solar PV Specialist)";
-    case "mr":
-      return "सोलर पीव्ही कृषी-पंप तज्ज्ञ (Solar PV Specialist)";
-    case "te":
-      return "సోలార్ పీవీ అగ్రి-పంప్ నిపుణుడు (Solar PV Specialist)";
-    case "ta":
-      return "சூரிய ஒளி வேளாண்-பம்ப் நிபுணர் (Solar PV Specialist)";
-    default:
-      return "Solar PV Agri-Pump Specialist";
+  // 5. Healthcare / General Duty Assistant (GDA)
+  if (/health|hospital|gda|general duty|अस्पताल|स्वास्थ्य|ସ୍ୱାସ୍ଥ୍ୟ|ଡାକ୍ତରଖାନା|నర్సు|nurse/i.test(c)) {
+    switch (cleanLang) {
+      case "hi":
+        return "स्वास्थ्य सहायक (General Duty Assistant - GDA)";
+      case "or":
+        return "ସ୍ୱାସ୍ଥ୍ୟ ସହାୟକ (General Duty Assistant - GDA)";
+      case "sat":
+        return "ᱦᱚᱲᱢᱚ ᱥᱟᱶᱟᱨ ᱜᱚᱲᱚ (Healthcare GDA)";
+      case "bn":
+        return "স্বাস্থ্য সহায়ক (General Duty Assistant)";
+      case "bho":
+        return "स्वास्थ्य सहायक (Healthcare GDA)";
+      case "mr":
+        return "आरोग्य सहाय्यक (Healthcare GDA)";
+      case "te":
+        return "హెల్త్‌కేర్ జనరల్ డ్యూటీ అసిస్టెంట్ (GDA)";
+      case "ta":
+        return "சுகாதார பொதுப் பணி உதவியாளர் (GDA)";
+      default:
+        return "Healthcare General Duty Assistant (HSS/Q5101)";
+    }
   }
+
+  // 6. CSC Digital e-Gram Mitra
+  if (/csc|digital|computer|e-gram|कंप्यूटर|डिजिटल|ଡିଜିଟାଲ|କମ୍ପ୍ୟୁଟର|vle/i.test(c)) {
+    switch (cleanLang) {
+      case "hi":
+        return "सीएससी डिजिटल ई-ग्राम मित्र (CSC Digital Mitra)";
+      case "or":
+        return "ସିଏସସି ଡିଜିଟାଲ୍ ଇ-ଗ୍ରାମ ମିତ୍ର (CSC Digital Mitra)";
+      case "sat":
+        return "ᱥᱤ.ᱮᱥ.ᱥᱤ ᱰᱤᱡᱤᱴᱟᱞ ᱢᱤᱛᱨᱚ (CSC Digital Mitra)";
+      case "bn":
+        return "সিএসসি ডিজিটাল মিত্র (CSC Digital Mitra)";
+      case "bho":
+        return "सीएससी डिजिटल मित्र (CSC Digital Mitra)";
+      case "mr":
+        return "सीएससी डिजिटल मित्र (CSC Digital Mitra)";
+      case "te":
+        return "సీఎస్‌సీ డిజిటల్ మిత్ర (CSC Digital Mitra)";
+      case "ta":
+        return "சிஎஸ்சி டிஜிட்டல் மித்ரா (CSC Digital Mitra)";
+      default:
+        return "CSC Digital e-Gram Mitra (SSC/Q2212)";
+    }
+  }
+
+  // 7. Commercial Mushroom & Spawn
+  if (/mushroom|मशरूम|ଛତୁ|spawn|ছাতু/i.test(c)) {
+    switch (cleanLang) {
+      case "hi":
+        return "व्यावसायिक मशरूम एवं स्पॉन उत्पादक (Mushroom Cultivator)";
+      case "or":
+        return "ବାଣିଜ୍ୟିକ ଛତୁ ଓ ସ୍ପନ୍ ଉତ୍ପାଦକ (Mushroom Cultivator)";
+      case "sat":
+        return "ᱵᱮᱯᱟᱨ ᱪᱷᱟᱛᱟ ᱪᱟᱥ (Mushroom Cultivator)";
+      default:
+        return "Commercial Mushroom & Spawn Cultivator (AGR/Q7803)";
+    }
+  }
+
+  // 8. Dairy Processing & Micro-Enterprise
+  if (/dairy|दुग्ध|ଦୁଗ୍ଧ|दूध|milk|paneer|पनीर/i.test(c)) {
+    switch (cleanLang) {
+      case "hi":
+        return "दुग्ध प्रसंस्करण एवं डेयरी उद्यमी (Dairy Processing)";
+      case "or":
+        return "ଦୁଗ୍ଧ ପ୍ରକ୍ରିୟାକରଣ ଓ ଡାଏରୀ ଉଦ୍ୟୋଗୀ (Dairy Processing)";
+      case "sat":
+        return "ᱛᱳᱣᱟ ᱯᱨᱚᱥᱮᱥᱤᱝ ᱩᱫᱽᱭᱚᱜᱽ (Dairy Processing)";
+      default:
+        return "Dairy Processing & Value Added Products (FIC/Q2001)";
+    }
+  }
+
+  // 9. Biofloc Fisheries & Aquaculture
+  if (/fish|fishery|biofloc|मत्स्य|ମତ୍ସ୍ୟ|মাছ|aquaculture/i.test(c)) {
+    switch (cleanLang) {
+      case "hi":
+        return "बायोफ्लॉक मत्स्य पालन विशेषज्ञ (Biofloc Aquaculture)";
+      case "or":
+        return "ବାୟୋଫ୍ଲକ୍ ମତ୍ସ୍ୟ ଚାଷ ବିଶେଷଜ୍ଞ (Biofloc Aquaculture)";
+      case "sat":
+        return "ᱦᱟᱹᱠᱩ ᱪᱟᱥ ᱦᱩᱱᱟᱹᱨ (Biofloc Aquaculture)";
+      default:
+        return "Freshwater Biofloc Aquaculture Specialist (AGR/Q4910)";
+    }
+  }
+
+  // 10. Cold-Press Oil Mill
+  if (/oil|तेल|ତେଲ|घाणी|ghani|cold-press|mustard/i.test(c)) {
+    switch (cleanLang) {
+      case "hi":
+        return "कोल्ड-प्रेस तेल घानी प्रसंस्करण (Cold-Press Oil Mill)";
+      case "or":
+        return "କୋଲ୍ଡ-ପ୍ରେସ୍ ତେଲ ଘଣା ପ୍ରକ୍ରିୟାକରଣ (Cold-Press Oil Mill)";
+      default:
+        return "Cold-Press Edible Oil Processing Entrepreneur (FIC/Q5003)";
+    }
+  }
+
+  // 11. Carpentry / Modular Furniture
+  if (/carpenter|furniture|बढ़ई|କାଠ|ଫର୍ଣ୍ଣିଚର|wood/i.test(c)) {
+    switch (cleanLang) {
+      case "hi":
+        return "मॉड्यूलर फर्नीचर एवं काष्ठ शिल्पी (Carpentry & Woodwork)";
+      case "or":
+        return "ମଡ୍ୟୁଲାର୍ କାଠ କାରିଗର (Carpentry & Woodwork)";
+      default:
+        return "Smart Modular Furniture & Wood Craftsman (FFS/Q0103)";
+    }
+  }
+
+  // 12. Plumbing & Micro Irrigation
+  if (/plumb|नल|ପ୍ଲମ୍ବର|water|जल|ro plant/i.test(c)) {
+    switch (cleanLang) {
+      case "hi":
+        return "प्लंबिंग एवं सूक्ष्म-सिंचाई तकनीशियन (Plumbing Technician)";
+      case "or":
+        return "ପ୍ଲମ୍ବିଂ ଓ ଜଳ ନିୟନ୍ତ୍ରଣ କାରିଗର (Plumbing Technician)";
+      default:
+        return "Plumbing & Micro-Irrigation Technician (PSC/Q0104)";
+    }
+  }
+
+  // 13. EV 2W/3W Technician
+  if (/ev|electric vehicle|ईवी|ଇଭି|2 wheeler|3 wheeler|auto/i.test(c)) {
+    switch (cleanLang) {
+      case "hi":
+        return "ईवी 2W/3W असेंबली एवं सर्विस तकनीशियन (EV Technician)";
+      case "or":
+        return "ଇଭି ୨W/୩W ସର୍ଭିସିଂ କାରିଗର (EV Technician)";
+      default:
+        return "EV 2W & 3W Assembly / Service Technician (ASC/Q1402)";
+    }
+  }
+
+  // 14. Shree Anna Millet Bakery
+  if (/millet|shree anna|श्री अन्न|ମାଣ୍ଡିଆ|ragi|bakery/i.test(c)) {
+    switch (cleanLang) {
+      case "hi":
+        return "श्री अन्न मिलेट बेकरी एवं स्नैक्स उत्पादक (Millet Bakery)";
+      case "or":
+        return "ଶ୍ରୀ ଅନ୍ନ ମିଲେଟ୍ ବେକେରୀ ଉତ୍ପାଦକ (Millet Bakery)";
+      default:
+        return "Shree Anna Millet Bakery & Snacks Producer (FIC/Q5005)";
+    }
+  }
+
+  // 15. Handloom Jacquard Weaver
+  if (/handloom|weaver|बुनाई|ବୁଣାକାର|jacquard|हथकरघा/i.test(c)) {
+    switch (cleanLang) {
+      case "hi":
+        return "हैंडलूम जैकार्ड बुनकर एवं शिल्पी (Handloom Weaver)";
+      case "or":
+        return "ହ୍ୟାଣ୍ଡଲୁମ୍ ଜାକାର୍ଡ ବୁଣାକାର (Handloom Weaver)";
+      default:
+        return "Handloom Jacquard Weaver & Artisan (HCS/Q7301)";
+    }
+  }
+
+  // Dynamic Fallback: Clean up and preserve the user's authentic chosen/spoken trade without forcing a default!
+  const cleanedTitle = c
+    .replace(/^e\.g\.?\s*/i, "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  return cleanedTitle.charAt(0).toUpperCase() + cleanedTitle.slice(1);
 }
 
 export function formatEducation(rawEdu: string, lang: string): string {
@@ -2439,12 +2638,12 @@ export function PersonalVoiceOnboarding({
       fullName: profile.fullName || "रमेश सोरेन",
       district: profile.district || "Sundargarh",
       state: profile.state || "Odisha",
-      skills: profile.skills && profile.skills.length > 0 ? profile.skills : ["Submersible Diagnostics", "Agri-Pump Repair"],
-      nsqfCode: profile.nsqfCode || "ELE/Q5901",
+      skills: profile.skills && profile.skills.length > 0 ? profile.skills : [profile.nsqfCourse || "Vocational Skill Execution"],
+      nsqfCode: profile.nsqfCode || "NSQF-L4",
       nsqfLevel: profile.nsqfLevel || 4,
-      nsqfCourse: profile.nsqfCourse || "Solar PV Agri-Pump Specialist",
+      nsqfCourse: profile.nsqfCourse || (profile.skills && profile.skills[0]) || "Vocational Trade Specialist",
       education: profile.education || "10th Standard (10वीं पास)",
-      aspiration: profile.aspiration || "Village Agri-Pump & Solar Repair Clinic",
+      aspiration: profile.aspiration || (profile.nsqfCourse ? `${profile.nsqfCourse} Micro-Enterprise` : "PM-AJAY Livelihood Enterprise"),
       recommendedPathway: profile.recommendedPathway || "PM-AJAY Micro-Enterprise Hub",
       grantEligibility: profile.grantEligibility || "₹35,000 Capital Subsidy + ₹3,500/mo Stipend",
       matchScore: profile.matchScore || 94
@@ -2457,16 +2656,17 @@ export function PersonalVoiceOnboarding({
    * @param completeNow If true (default), immediately issues and completes the livelihood passport
    */
   const handleSaveManualEdit = (completeNow: boolean = true) => {
+    const rawCourse = editableProfile.nsqfCourse || profile.nsqfCourse || (editableProfile.skills && editableProfile.skills[0]) || (profile.skills && profile.skills[0]) || "Vocational Trade Specialist";
     const sanitized: BeneficiaryProfileData = {
       fullName: cleanHumanName(editableProfile.fullName) || profile.fullName || "रमेश सोरेन",
       district: editableProfile.district || profile.district || "Sundargarh",
       state: editableProfile.state || profile.state || "Odisha",
-      skills: editableProfile.skills && editableProfile.skills.length > 0 ? editableProfile.skills : (profile.skills && profile.skills.length > 0 ? profile.skills : ["Submersible Diagnostics", "Agri-Pump Repair"]),
-      nsqfCode: editableProfile.nsqfCode || profile.nsqfCode || "ELE/Q5901",
+      skills: editableProfile.skills && editableProfile.skills.length > 0 ? editableProfile.skills : (profile.skills && profile.skills.length > 0 ? profile.skills : [rawCourse]),
+      nsqfCode: editableProfile.nsqfCode || profile.nsqfCode || "NSQF-L4",
       nsqfLevel: editableProfile.nsqfLevel || profile.nsqfLevel || 4,
-      nsqfCourse: editableProfile.nsqfCourse || profile.nsqfCourse || "Solar PV Agri-Pump Specialist",
+      nsqfCourse: rawCourse,
       education: editableProfile.education || profile.education || "10th Standard (10वीं पास)",
-      aspiration: editableProfile.aspiration || profile.aspiration || "Village Agri-Pump & Solar Repair Clinic",
+      aspiration: editableProfile.aspiration || profile.aspiration || `${rawCourse} Micro-Enterprise`,
       recommendedPathway: editableProfile.recommendedPathway || profile.recommendedPathway || "PM-AJAY Micro-Enterprise Hub",
       grantEligibility: editableProfile.grantEligibility || profile.grantEligibility || "₹35,000 Capital Subsidy + ₹3,500/mo Stipend",
       matchScore: editableProfile.matchScore || profile.matchScore || 94
@@ -2774,14 +2974,14 @@ export function PersonalVoiceOnboarding({
       age: finalAge,
       ageCategory: ageInfo.category,
       avatarUrl: profToUse.avatarUrl || getAvatarForGender(finalGender),
-      skills: profToUse.skills && profToUse.skills.length > 0 ? profToUse.skills : [profToUse.nsqfCourse || "Submersible Diagnostics", "Agri-Pump Repair"],
-      nsqfCode: profToUse.nsqfCode || "ELE/Q5901",
+      skills: profToUse.skills && profToUse.skills.length > 0 ? profToUse.skills : [profToUse.nsqfCourse || "Vocational Trade Execution", "Standard Operating Safety"],
+      nsqfCode: profToUse.nsqfCode || "NSQF-L4",
       nsqfLevel: profToUse.nsqfLevel || 4,
-      nsqfCourse: profToUse.nsqfCourse || (profToUse.skills && profToUse.skills[0]) || "Solar PV Agri-Pump Specialist",
+      nsqfCourse: profToUse.nsqfCourse || (profToUse.skills && profToUse.skills[0]) || "Vocational Trade Specialist",
       matchedJobTitle: profToUse.matchedJobTitle,
       matchedJobId: profToUse.matchedJobId,
       education: profToUse.education || "10th Standard (10वीं पास)",
-      aspiration: profToUse.aspiration || "Village Agri-Pump & Solar Repair Clinic",
+      aspiration: profToUse.aspiration || (profToUse.nsqfCourse ? `${profToUse.nsqfCourse} Micro-Enterprise` : "PM-AJAY Livelihood Enterprise"),
       recommendedPathway: profToUse.recommendedPathway || "PM-AJAY Micro-Enterprise Hub",
       grantEligibility: profToUse.grantEligibility || "₹35,000 Capital Subsidy + ₹3,500/mo Stipend",
       matchScore: profToUse.matchScore || 95
