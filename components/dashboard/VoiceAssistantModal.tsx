@@ -39,15 +39,41 @@ export interface SkillCardItem {
   title: string;
   nsqfLevel: number;
   qpCode: string;
-  category: "electrician" | "tailoring" | "solar" | "carpenter" | "food" | "grant";
+  category: "electrician" | "tailoring" | "solar" | "carpenter" | "food" | "grant" | "drone" | "healthcare" | "digital" | "job";
   badge: string;
-  badgeColor: "purple" | "amber" | "blue" | "emerald";
+  badgeColor: "purple" | "amber" | "blue" | "emerald" | "rose";
   duration: string;
   stipend: string;
   centerName: string;
-  targetTab: "training" | "schemes" | "self_employment";
+  targetTab: "training" | "schemes" | "self_employment" | "jobs";
   courseId?: string;
   schemeId?: string;
+  jobId?: string;
+}
+
+export function getCardIcon(category: string) {
+  switch (category) {
+    case "electrician":
+      return <Zap className="size-4 text-blue-600" />;
+    case "tailoring":
+      return <Scissors className="size-4 text-purple-600" />;
+    case "solar":
+      return <Sun className="size-4 text-amber-600" />;
+    case "carpenter":
+      return <Hammer className="size-4 text-amber-700" />;
+    case "food":
+      return <Award className="size-4 text-emerald-600" />;
+    case "grant":
+      return <IndianRupee className="size-4 text-emerald-600" />;
+    case "drone":
+      return <Sparkles className="size-4 text-indigo-600" />;
+    case "healthcare":
+      return <ShieldCheck className="size-4 text-rose-600" />;
+    case "digital":
+      return <Award className="size-4 text-purple-600" />;
+    default:
+      return <GraduationCap className="size-4 text-purple-600" />;
+  }
 }
 
 export function getMatchedSkillCards(
@@ -59,6 +85,62 @@ export function getMatchedSkillCards(
   const distClean = district.split(",")[0].trim() || "District";
 
   const allCards: Record<string, SkillCardItem> = {
+    droneJob: {
+      id: "card-job-drone",
+      title: "Krishi Drone Pilot & Spray Operator",
+      nsqfLevel: 4,
+      qpCode: "AGR/Q7004",
+      category: "drone",
+      badge: "₹22,000/mo Salary",
+      badgeColor: "purple",
+      duration: "Full-Time Wage Job",
+      stipend: "₹18,000 - ₹24,000/mo + ₹35K Subsidy",
+      centerName: `Agri-Drone Fleet Service, ${distClean}`,
+      targetTab: "jobs",
+      jobId: "job-drone-pilot"
+    },
+    solarJob: {
+      id: "card-job-solar",
+      title: "Solar Grid & Rooftop Technician",
+      nsqfLevel: 4,
+      qpCode: "SGJ/Q0101",
+      category: "solar",
+      badge: "High Wage Opening",
+      badgeColor: "amber",
+      duration: "Full-Time Job",
+      stipend: "₹16,000 - ₹22,000/mo + PF/ESI",
+      centerName: `Green Urja DISCOM Projects, ${distClean}`,
+      targetTab: "jobs",
+      jobId: "job-solar-technician"
+    },
+    gdaJob: {
+      id: "card-job-gda",
+      title: "General Duty Hospital Assistant",
+      nsqfLevel: 4,
+      qpCode: "HSS/Q5101",
+      category: "healthcare",
+      badge: "Govt Hospital Partner",
+      badgeColor: "rose",
+      duration: "Permanent Shift Job",
+      stipend: "₹14,000 - ₹19,000/mo + Medical Cover",
+      centerName: `District Health Center & CHC, ${distClean}`,
+      targetTab: "jobs",
+      jobId: "job-hospital-gda"
+    },
+    cscJob: {
+      id: "card-job-csc",
+      title: "CSC Digital Center & VLE Operator",
+      nsqfLevel: 4,
+      qpCode: "SSC/Q2212",
+      category: "digital",
+      badge: "Direct VLE Earning",
+      badgeColor: "blue",
+      duration: "Self-Employment / VLE",
+      stipend: "₹15,000 - ₹28,000/mo + ₹35K Grant",
+      centerName: `CSC e-Governance Hub, ${distClean}`,
+      targetTab: "jobs",
+      jobId: "job-csc-vle"
+    },
     carpenter: {
       id: "card-carpenter",
       title: "Carpenter & Wooden Furniture Artisan",
@@ -68,7 +150,7 @@ export function getMatchedSkillCards(
       badge: "PM-AJAY Artisan",
       badgeColor: "amber",
       duration: "3 Months (90 Days)",
-      stipend: "₹3,500/mo Stipend + Modern Tool Kit",
+      stipend: "₹3,500/mo Stipend + Tool Kit",
       centerName: `PMKK Skill Hub, ${distClean}`,
       targetTab: "training",
       courseId: "course-carpenter"
@@ -79,7 +161,7 @@ export function getMatchedSkillCards(
       nsqfLevel: 4,
       qpCode: "ELE/Q5901",
       category: "electrician",
-      badge: "High Demand",
+      badge: "DISCOM Linked",
       badgeColor: "blue",
       duration: "3 Months",
       stipend: "₹3,500/mo (PM-AJAY Support)",
@@ -89,7 +171,7 @@ export function getMatchedSkillCards(
     },
     tailoring: {
       id: "card-tailoring",
-      title: "Self Employed Tailor & Apparel",
+      title: "Self Employed Tailor & Apparel SHG",
       nsqfLevel: 3,
       qpCode: "AMH/Q0102",
       category: "tailoring",
@@ -148,6 +230,22 @@ export function getMatchedSkillCards(
   const matched: SkillCardItem[] = [];
 
   // Match based on keywords in spoken response / query
+  if (/drone|ड्रोन|spraying|खेती|pilot|flying/i.test(lower)) {
+    matched.push(allCards.droneJob);
+  }
+  if (/hospital|gda|अस्पताल|स्वास्थ्य|मरीज|care|medical|nurse/i.test(lower)) {
+    matched.push(allCards.gdaJob);
+  }
+  if (/csc|computer|vle|डिजिटल|जन सेवा|cyber|सीएससी/i.test(lower)) {
+    matched.push(allCards.cscJob);
+  }
+  if (/job|नौकरी|रोजगार|चकरी|kam|काम|salary|vacanc|भर्ती|placement/i.test(lower)) {
+    if (/solar|सोलर/i.test(lower)) {
+      matched.push(allCards.solarJob);
+    } else {
+      matched.push(allCards.droneJob, allCards.solarJob);
+    }
+  }
   if (/carpenter|बढ़ई|कारपेंटर|wood|furniture|लकड़ी|काठ/i.test(lower)) {
     matched.push(allCards.carpenter);
   }
@@ -158,7 +256,9 @@ export function getMatchedSkillCards(
     matched.push(allCards.tailoring);
   }
   if (/solar|सोलर|pump|पंप|suryamitra|सूरज|kusum|कृषि/i.test(lower)) {
-    matched.push(allCards.solar);
+    if (!matched.some(m => m.id === allCards.solarJob.id)) {
+      matched.push(allCards.solar);
+    }
   }
   if (/food|फूड|प्रसंस्करण|processing|packaging|मशरूम|अचार/i.test(lower)) {
     matched.push(allCards.food);
@@ -169,12 +269,12 @@ export function getMatchedSkillCards(
 
   // Fallback defaults if none matched
   if (matched.length === 0) {
-    matched.push(allCards.electrician, allCards.tailoring, allCards.grant);
+    matched.push(allCards.droneJob, allCards.electrician, allCards.grant);
   } else if (matched.length === 1) {
     if (!matched.some(m => m.id === allCards.grant.id)) {
       matched.push(allCards.grant);
     } else {
-      matched.push(allCards.solar);
+      matched.push(allCards.solarJob);
     }
   }
 
@@ -281,7 +381,20 @@ export function VoiceAssistantModal({
   const handleCardAction = (card: SkillCardItem) => {
     onClose();
     if (onNavigateTarget) {
-      if (card.targetTab === "schemes") {
+      if (card.targetTab === "jobs") {
+        onNavigateTarget({
+          target: "jobs",
+          jobId: card.jobId || "job-1",
+          confidence: 1,
+          displayText: card.title,
+          spokenFeedback: {
+            hi: `${card.title} नौकरी खुल रही है`,
+            or: `${card.title} ଚାକିରି ଖୋଲୁଛି`,
+            sat: `${card.title} ᱪᱟᱹᱠᱨᱤ ᱡᱷᱤᱡᱚᱜ ᱠᱟᱱᱟ`,
+            en: `Opening ${card.title} job opening`
+          }
+        });
+      } else if (card.targetTab === "schemes") {
         onNavigateTarget({
           target: "schemes",
           schemeId: card.schemeId || "scheme-pmajay",
@@ -839,7 +952,9 @@ export function VoiceAssistantModal({
                             <span>
                               {card.targetTab === "schemes"
                                 ? "अनुदान योजना देखें (View Grant Scheme)"
-                                : "प्रशिक्षण में शामिल हों (Apply Now)"}
+                                : card.targetTab === "jobs"
+                                  ? "नौकरी में आवेदन करें (Apply For Job)"
+                                  : "प्रशिक्षण में शामिल हों (Apply Now)"}
                             </span>
                             <ArrowRight className="size-3" />
                           </button>
@@ -906,7 +1021,13 @@ export function VoiceAssistantModal({
                                   onClick={() => handleCardAction(card)}
                                   className="text-[11px] font-bold text-purple-700 hover:text-purple-900 bg-white px-2.5 py-1 rounded-lg border border-purple-200 shadow-2xs flex items-center gap-1 cursor-pointer"
                                 >
-                                  <span>{card.targetTab === "schemes" ? "योजना देखें (View Scheme)" : "आवेदन करें (Apply)"}</span>
+                                  <span>
+                                    {card.targetTab === "schemes"
+                                      ? "योजना देखें (View Scheme)"
+                                      : card.targetTab === "jobs"
+                                        ? "नौकरी देखें (View Job)"
+                                        : "आवेदन करें (Apply)"}
+                                  </span>
                                   <ArrowRight className="size-3" />
                                 </button>
                               </div>

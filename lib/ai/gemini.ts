@@ -73,6 +73,109 @@ Output ONLY the clean transcribed sentence, nothing else.`;
 /**
  * Generate personalized NSQF livelihood and training advice using Google Gemini AI REST API
  */
+export interface JobSearchLLMResponse {
+  matchingJobIds: string[];
+  recommendedSector: string;
+  summaryAdvice: string;
+  confidenceScore: number;
+}
+
+/**
+ * Fetch and rank matching jobs for any voice transcript or query using Gemini LLM reasoning
+ */
+export async function fetchMatchingJobsWithGemini(
+  userQuery: string,
+  beneficiaryContext?: { name?: string; district?: string; education?: string; skills?: string[] }
+): Promise<JobSearchLLMResponse | null> {
+  if (!apiKey || !userQuery.trim()) return null;
+
+  const prompt = `
+You are the Job & Opportunity Matching Engine for Sakhyam-AI (Government of India PM-AJAY and NSQF ecosystem).
+The user query / spoken request is: "${userQuery}"
+Beneficiary background:
+- Name: ${beneficiaryContext?.name || "Beneficiary"}
+- District: ${beneficiaryContext?.district || "Kalahandi, Odisha"}
+- Education: ${beneficiaryContext?.education || "10th Standard"}
+- Verified Skills: ${beneficiaryContext?.skills?.join(", ") || "General"}
+
+Available Verified Jobs:
+1. job-solar-field-eng (Solar PV Installation & Field Maintenance, ₹18k-28k, Green Tech)
+2. job-5 (PM Surya Ghar Rooftop Solar Technician, ₹16k-25k, Green Tech)
+3. job-ev-service-tech (E-Rickshaw & EV Service Tech, ₹18k-30k, Green Tech)
+4. job-biogas-plant-operator (Biogas & GOBAR-dhan Operator, ₹15k-24k, Green Tech)
+5. job-tractor-mechanic-lead (Farm Tractor & Diesel Mechanic, ₹18k-32k, Green Tech)
+6. job-1 (DISCOM Substation Assistant Wireman, ₹15k-22k, Green Tech)
+7. job-mobile-smd-lead (Mobile Hardware & SMD Diagnostics, ₹16k-26k, Green Tech)
+8. job-kisan-drone-pilot (Kisan Drone Spraying Pilot, ₹22k-35k, Agriculture)
+9. job-chc-drone-enterprise (Custom Hiring Center Drone Hub, ₹35k-65k, Agriculture)
+10. job-mushroom-production-sup (Commercial Mushroom & Spawn Lab, ₹14k-22k, Agriculture)
+11. job-omfed-dairy-lead (OMFED Bulk Milk Chilling Supervisor, ₹16k-26k, Agriculture)
+12. job-honey-apiary-lead (Honey Apiary & Wax Studio, ₹20k-38k, Agriculture)
+13. job-poultry-hatchery-owner (Solar Poultry Hatchery Kadaknath, ₹25k-45k, Agriculture)
+14. job-biofloc-aqua-tech (Biofloc Fish Tank Farm Operator, ₹18k-28k, Agriculture)
+15. job-vermicompost-hub-mgr (Organic Vermicompost Unit Manager, ₹14k-22k, Agriculture)
+16. job-handloom-jacquard-lead (Jacquard Handloom Master Artisan, ₹18k-30k, Crafts)
+17. job-2 (Sakhi Garments Sewing Machine Operator, ₹13k-19.5k, Crafts)
+18. job-bamboo-craft-designer (Bamboo Lifestyle Homeware Designer, ₹22k-40k, Crafts)
+19. job-terracotta-railway-kulhad (Terracotta & Railway Kulhad Supplier, ₹20k-38k, Crafts)
+20. job-beauty-wellness-salon (Beauty Salon & Bridal Wellness, ₹22k-42k, Crafts)
+21. job-csc-egram-officer (CSC e-Gram Citizen Services, ₹15k-25k, Digital)
+22. job-4 (Block Data Entry Operator, ₹12k-18k, Digital)
+23. job-jal-jeevan-plumber (Jal Jeevan Mission Har Ghar Jal Plumber, ₹16k-24k, Infrastructure)
+24. job-cctv-wifi-tech (Solar CCTV & BharatNet Wi-Fi Tech, ₹16k-25k, Digital)
+25. job-pmay-master-mason (PMAY-G Master Mason Rajmistri, ₹20k-30k, Construction)
+26. job-cold-press-oil-owner (Cold-Press Oil Expeller Mill, ₹32k-65k, Agro-Mills)
+27. job-spice-pulverizer-lead (Spice Pulverizer & Masala Mill, ₹16k-25k, Agro-Mills)
+28. job-millet-bakery-lead (Shree Anna Millet Bakery Hub, ₹24k-48k, Agro-Mills)
+29. job-3 (Food Processing Assistant, ₹14k-20k, Agro-Mills)
+30. job-hospital-gda (Hospital General Duty Assistant GDA, ₹15k-22k, Healthcare)
+31. job-telemedicine-point-operator (e-Sanjeevani Village Telemedicine, ₹16k-25k, Healthcare)
+32. job-ayush-herbal-distillation (Ayush Essential Oil Distillation, ₹28k-55k, Healthcare)
+33. job-6 (Mission Shakti SHG Community Mobilizer, ₹13k-17.5k, Healthcare)
+34. job-naps-solar-apprentice (NAPS Solar Apprentice, ₹11.5k, Apprenticeship)
+35. job-ohpc-electromechanical-apprentice (OHPC Industrial Apprentice, ₹12k, Apprenticeship)
+36. job-drone-ops-apprentice (Kisan Drone Flight Apprentice, ₹14k, Apprenticeship)
+
+TASK:
+Identify 1 to 4 best matching job IDs for the user's intent. Output STRICT JSON only.
+{
+  "matchingJobIds": ["string"],
+  "recommendedSector": "string",
+  "summaryAdvice": "string (1 simple line explaining match)",
+  "confidenceScore": 0.95
+}
+`;
+
+  for (const modelName of CANDIDATE_MODELS) {
+    try {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { responseMimeType: "application/json" }
+        })
+      });
+
+      if (!response.ok) continue;
+      const data = await response.json();
+      const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed?.matchingJobIds && Array.isArray(parsed.matchingJobIds)) {
+          return parsed;
+        }
+      }
+    } catch (e) { }
+  }
+
+  return null;
+}
+
+/**
+ * Generate personalized NSQF livelihood and training advice using Google Gemini AI REST API
+ */
 export async function generateGeminiLivelihoodAdvice({
   userQuery,
   beneficiaryName = "Savitri Devi",
@@ -94,7 +197,7 @@ Beneficiary Profile:
 
 User Question: "${userQuery}"
 
-Provide a warm, empathetic, simple, low-literacy friendly response in 2 short sentences. Mention relevant NSQF courses (Electrician, Tailoring, Food Processing, Solar), PM-AJAY ₹3,500/month stipend, and nearest training center assistance in the chosen language without markdown or asterisks.
+Provide a warm, empathetic, simple, low-literacy friendly response in 2 short sentences. Mention relevant verified jobs (with ₹15k–₹35k wage potential), NSQF courses (Electrician, Tailoring, Food Processing, Solar, Drone, Dairy), PM-AJAY ₹3,500/month stipend and ₹35,000 grants in the chosen language without markdown or asterisks.
 `;
 
   // Try candidate model names in order with automatic fallback

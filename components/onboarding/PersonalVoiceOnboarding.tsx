@@ -50,6 +50,8 @@ export interface BeneficiaryProfileData {
   recommendedPathway: string;
   grantEligibility: string;
   matchScore: number;
+  matchedJobTitle?: string;
+  matchedJobId?: string;
   gender?: "male" | "female" | "other";
   age?: number;
   ageCategory?: string;
@@ -72,6 +74,12 @@ interface StepQuestion {
   sampleChips: {
     label: Record<string, string> | string;
     spokenText: Record<string, string> | string;
+    skillCategory?: string;
+    nsqfCourse?: string;
+    nsqfCode?: string;
+    nsqfLevel?: number;
+    matchedJobTitle?: string;
+    matchedJobId?: string;
   }[];
 }
 
@@ -127,7 +135,7 @@ const ONBOARDING_QUESTIONS: StepQuestion[] = [
           en: "Savitri Devi (Kalahandi)",
           hi: "सावित्री देवी (कालाहांडी)",
           or: "ସାବିତ୍ରୀ ଦେବୀ (କଳାହାଣ୍ଡି)",
-          sat: "ᱥᱟᱵᱤତ୍ରᱤ ᱫᱮବᱤ (ᱠᱟᱞᱟᱦᱟᱱᱰᱤ)",
+          sat: "ᱥᱟᱵᱤᱛᱨᱤ ᱫᱮᱵᱤ (ᱠᱟᱞᱟᱦᱟᱱᱰᱤ)",
           bn: "সাবিত্রী देवी (कालाहांडी)",
           bho: "सावित्री देवी (कालाहांडी)",
           mr: "सावित्री देवी (कालाहांडी)",
@@ -161,15 +169,65 @@ const ONBOARDING_QUESTIONS: StepQuestion[] = [
       mr: "तुमचे कौशल्य आणि दैनंदिन काम"
     },
     aiPromptText: {
-      en: "What informal work, trade, or practical skills do you have experience in? (e.g. pump repair, farming, stitching, electrical)",
-      hi: "आप वर्तमान में क्या काम करते हैं या आपको किस काम का अनुभव है? जैसे खेती, मोटर रिपेयर, सिलाई या बिजली का काम।",
-      or: "ଆପଣ କେଉଁ କାମ କରନ୍ତି କିମ୍ବା ଆପଣଙ୍କର କେଉଁଥିରେ ଅଭିଜ୍ଞତା ଅଛି? ଯେପରି ଚାଷ, ମୋଟର ମରାମତି, ସିଲେଇ ବା ବିଦ୍ୟୁତ କାମ।",
-      sat: "ᱟᱢ ᱱᱤᱛᱚᱜ ᱪᱮᱫ ᱠᱟᱹᱢᱤᱭᱮᱫᱟᱢ ᱥᱮ ᱪᱮᱫ ᱦᱩᱱᱟᱹᱨ ᱢᱮᱱᱟᱜᱼᱟ? ᱡᱮᱞᱮᱠᱟ ᱪᱟᱥ, ᱢᱚᱴᱚᱨ ᱵᱮᱱᱟᱣ, ᱞᱩᱜᱽᱲᱤ ᱥᱤᱞᱟᱹᱭ ᱥᱮ ᱵᱤᱡᱽᱞᱤ ᱠᱟᱹᱢᱤ।",
-      bn: "আপনি বর্তমানে কি কাজ করেন বা কি কাজের অভিজ্ঞতা আছে? যেমন মোটর মেরামত, সেলাই বা বিদ্যুতের কাজ।",
-      bho: "रउरा कवन काम करीं भा कवन काम के अनुभव बा? जइसे खेती, मोटर रिपेयर, सिलाई भा बिजली के काम।",
-      mr: "तुम्ही सध्या काय काम करता किंवा तुम्हाला कोणत्या कामाचा अनुभव आहे? जसे की मोटर दुरुस्ती, टेलरिंग किंवा इलेक्ट्रिकल काम."
+      en: "What informal work, trade, or practical skills do you have experience in? (e.g. drone flying, solar pump, tailoring, hospital GDA, computer/CSC, electrical)",
+      hi: "आप वर्तमान में क्या काम करते हैं या आपको किस काम का अनुभव है? जैसे ड्रोन, सोलर, सिलाई, बिजली, बढ़ई, अस्पताल केयर या कंप्यूटर।",
+      or: "ଆପଣ କେଉଁ କାମ କରନ୍ତି କିମ୍ବା ଆପଣଙ୍କର କେଉଁଥିରେ ଅଭିଜ୍ଞତା ଅଛି? ଯେପରି ଡ୍ରୋନ୍, ସୋଲାର, ସିଲେଇ, ବିଦ୍ୟୁତ ବା କମ୍ପ୍ୟୁଟର।",
+      sat: "ᱟᱢ ᱱᱤᱛᱚᱜ ᱪᱮᱫ ᱠᱟᱹᱢᱤᱭᱮᱫᱟᱢ ᱥᱮ ᱪᱮᱫ ᱦᱩᱱᱟᱹᱨ ᱢᱮᱱᱟᱜᱼᱟ? ᱡᱮᱞᱮᱠᱟ ᱰᱨᱳᱱ, ᱥᱳᱞᱟᱨ, ᱥᱤᱞᱟᱹᱭ, ᱵᱤᱡᱽᱞᱤ ᱥᱮ ᱠᱚᱢᱯᱤᱭᱩᱴᱚᱨ।",
+      bn: "আপনি বর্তমানে কি কাজ করেন বা কি কাজের অভিজ্ঞতা আছে? যেমন ড্রোন, সোলার, সেলাই বা কম্পিউটারের কাজ।",
+      bho: "रउरा कवन काम करीं भा कवन काम के अनुभव बा? जइसे ड्रोन, सोलर, सिलाई, बिजली भा कंप्यूटर के काम।",
+      mr: "तुम्ही सध्या काय काम करता किंवा तुम्हाला कोणत्या कामाचा अनुभव आहे? जसे की ड्रोन, सोलर, टेलरिंग, इलेक्ट्रिकल किंवा संगणक."
     },
     sampleChips: [
+      {
+        label: {
+          en: "🚁 Kisan Drone Pilot & Spraying",
+          hi: "🚁 किसान ड्रोन पायलट व कृषि स्प्रे",
+          or: "🚁 କୃଷି ଡ୍ରୋନ୍ ପାଇଲଟ୍ ଓ ସ୍ପ୍ରେ",
+          sat: "🚁 ᱠᱤᱥᱟᱱ ᱰᱨᱳᱱ ᱯᱟᱭᱞᱚᱴ ᱟᱨ ᱪᱟᱥ ᱥᱯᱨᱮ",
+          bn: "🚁 কিষাণ ড্রোন পাইলট ও কৃষি স্প্রে",
+          bho: "🚁 किसान ड्रोन पायलट आ स्प्रे",
+          mr: "🚁 किसान ड्रोन पायलट आणि फवारणी"
+        },
+        spokenText: {
+          en: "I know agriculture and operate drones for field spraying and crop monitoring.",
+          hi: "मैं खेती में ड्रोन उड़ाना और खेतों में कीटनाशक स्प्रे करने का काम जानता हूँ।",
+          or: "ମୁଁ ଚାଷ ଜମିରେ ଡ୍ରୋନ୍ ଚଳାଇ ସ୍ପ୍ରେ କରିବା କାମ ଜାଣିଛି।",
+          sat: "ᱤᱧ ᱪᱟᱥ ᱨᱮ ᱰᱨᱳᱱ ᱩᱰᱟᱹᱣ ᱟᱨ ᱥᱯᱨᱮ ᱠᱟᱹᱢᱤ ᱵᱟᱰᱟᱭᱟᱹᱧ।",
+          bn: "আমি চাষের জন্য ড্রোন ওড়ানো ও স্প্রে করার কাজ জানি।",
+          bho: "हम खेती में ड्रोन उड़ावे आ स्प्रे करे के काम जानी ला।",
+          mr: "मी शेतात ड्रोन उडवणे आणि कीटकनाशक फवारणीचे काम करतो."
+        },
+        nsqfCourse: "Kisan Drone Operator & Agri-Flyer",
+        nsqfCode: "AGR/Q7004",
+        nsqfLevel: 4,
+        matchedJobTitle: "Krishi Drone Pilot & Spray Operator",
+        matchedJobId: "job-drone-pilot"
+      },
+      {
+        label: {
+          en: "☀️ Solar Rooftop & Grid Tech",
+          hi: "☀️ सोलर रूफटॉप व ग्रिड तकनीशियन",
+          or: "☀️ ସୋଲାର ରୁଫଟପ୍ ଓ ଗ୍ରୀଡ୍ ଟେକ୍ନିସିଆନ୍",
+          sat: "☀️ ᱥᱳᱞᱟᱨ ᱨᱩᱯᱷᱴᱚᱯ ᱟᱨ ᱜᱽᱨᱤᱰ ᱴᱮᱠ",
+          bn: "☀️ সোলার রুফটপ ও গ্রিড টেকনিশিয়ান",
+          bho: "☀️ सोलर रूफटॉप आ ग्रिड तकनीशियन",
+          mr: "☀️ सोलर रूफटॉप व ग्रिड तंत्रज्ञ"
+        },
+        spokenText: {
+          en: "I assemble solar panels and install rooftop solar inverters in villages.",
+          hi: "सोलर पैनल लगाने और रूफटॉप इन्वर्टर फिटिंग का काम करता हूँ।",
+          or: "ସୋଲାର ପ୍ୟାନେଲ ଓ ଇନଭର୍ଟର ଫିଟିଙ୍ଗ କାମ କରେ।",
+          sat: "ᱥᱳᱞᱟᱨ ᱯᱮᱱᱮᱞ ᱟᱨ ᱤᱱᱵᱷᱟᱨᱴᱟᱨ ᱯᱷᱤᱴᱤᱝ ᱠᱟᱹᱢᱤ ᱵᱟᱰᱟᱭᱟᱹᱧ।",
+          bn: "সোলার প্যানেল লাগানো এবং ইনভার্টার ফিটিং কাজ করি।",
+          bho: "सोलर पैनल लगावे आ इन्वर्टर फिटिंग के काम करीं ला।",
+          mr: "सोलर पॅनेल बसवणे आणि इन्व्हर्टर फिटिंगचे काम करतो."
+        },
+        nsqfCourse: "Solar PV Rooftop Grid Specialist (Suryamitra)",
+        nsqfCode: "SGJ/Q0101",
+        nsqfLevel: 4,
+        matchedJobTitle: "Solar Grid & Rooftop Technician",
+        matchedJobId: "job-solar-technician"
+      },
       {
         label: {
           en: "⚡ Motor & Agri-Pump Repair",
@@ -178,9 +236,7 @@ const ONBOARDING_QUESTIONS: StepQuestion[] = [
           sat: "⚡ ᱢᱚᱴᱚᱨ ᱟᱨ ᱪᱟᱥ ᱯᱟᱢᱯ ᱵᱮᱱᱟᱣ",
           bn: "⚡ মোটর ও কৃষি পাম্প মেরামত",
           bho: "⚡ मोटर आ कृषि पंप रिपेयर",
-          mr: "⚡ मोटर आणि कृषी पंप दुरुस्ती",
-          te: "⚡ మోటార్ మరియు అగ్రి-పంప్ మరమ్మతు",
-          ta: "⚡ மோட்டார் & வேளாண் பம்ப் பழுது"
+          mr: "⚡ मोटर आणि कृषी पंप दुरुस्ती"
         },
         spokenText: {
           en: "I do farming and also repair electric motors and water pumps in my village.",
@@ -189,10 +245,13 @@ const ONBOARDING_QUESTIONS: StepQuestion[] = [
           sat: "ᱪᱟᱥ ᱠᱟᱹᱢᱤ ᱟᱨ ᱢᱚᱴᱚᱨ ᱟᱨ ᱫᱟᱜ ᱯᱟᱢᱯ ᱦᱚᱸ ᱴᱷᱤᱠ ᱵᱟᱰᱟᱭᱟᱹᱧ।",
           bn: "চাষ করি এবং কিছুটা মোটর ও পানির পাম্প মেরামত করতে পারি।",
           bho: "खेती करीं ला आ मोटर आ पानी के पंपो ठीक क लेवेनी।",
-          mr: "शेती करतो आणि थोडीफार मोटर आणि पाण्याचा पंपही दुरुस्त करतो.",
-          te: "నేను వ్యవసాయం చేస్తాను మరియు మోటార్లు, నీటి పంపులను కూడా రిపేర్ చేస్తాను.",
-          ta: "விவசாயம் செய்கிறேன், மோட்டார் மற்றும் தண்ணீர் பம்புகளையும் சரிசெய்கிறேன்."
-        }
+          mr: "शेती करतो आणि थोडीफार मोटर आणि पाण्याचा पंपही दुरुस्त करतो."
+        },
+        nsqfCourse: "Solar PV Agri-Pump Specialist",
+        nsqfCode: "SGJ/Q0101",
+        nsqfLevel: 4,
+        matchedJobTitle: "Solar Agri-Pump & Micro-Grid Specialist",
+        matchedJobId: "job-solar-agri-pump"
       },
       {
         label: {
@@ -202,9 +261,7 @@ const ONBOARDING_QUESTIONS: StepQuestion[] = [
           sat: "✂️ ᱞᱩᱜᱽᱲᱤ ᱥᱤᱞᱟᱹᱭ ᱠᱟᱹᱢᱤ",
           bn: "✂️ সেলাই ও পোশাক তৈরি",
           bho: "✂️ सिलाई आ कपड़ा सिलाई",
-          mr: "✂️ शिलाई आणि कपडे शिवणे",
-          te: "✂️ టైలరింగ్ & దుస్తుల కుట్టు పని",
-          ta: "✂️ தையல் & ஆடை தயாரிப்பு"
+          mr: "✂️ शिलाई आणि कपडे शिवणे"
         },
         spokenText: {
           en: "I operate a sewing machine at home and stitch clothes and garments.",
@@ -213,10 +270,163 @@ const ONBOARDING_QUESTIONS: StepQuestion[] = [
           sat: "ᱚᱲᱟᱜ ᱨᱮ ᱥᱤᱞᱟᱹᱭ ᱢᱮᱥᱤᱱ ᱪᱟᱞᱟᱣ ᱟᱨ ᱞᱩᱜᱽᱲᱤ ᱥᱤᱞᱟᱹᱭᱟᱹᱧ।",
           bn: "বাড়িতে সেলাই মেশিন চালাই এবং পোশাক তৈরি করি।",
           bho: "घर पर सिलाई मशीन चलाईं ला आ कपड़ा सींवेनी।",
-          mr: "घरी शिलाई मशीन चालवते आणि कपडे शिवते.",
-          te: "ఇంట్లో కుట్టు మిషన్ నడుపుతూ బట్టలు కుడతాను.",
-          ta: "வீட்டில் தையல் இயந்திரம் இயக்கி துணிகள் தைக்கிறேன்."
-        }
+          mr: "घरी शिलाई मशीन चालवते आणि कपडे शिवते."
+        },
+        nsqfCourse: "Self Employed Tailor & Apparel SHG",
+        nsqfCode: "AMH/Q0102",
+        nsqfLevel: 3,
+        matchedJobTitle: "Self Employed Tailor & Apparel SHG",
+        matchedJobId: "job-2"
+      },
+      {
+        label: {
+          en: "🏥 Hospital General Duty Assistant (GDA)",
+          hi: "🏥 अस्पताल सहायक व मरीज देखभाल (GDA)",
+          or: "🏥 ଡାକ୍ତରଖାନା ସହାୟକ ଓ ରୋଗୀ ସେବା",
+          sat: "🏥 ᱦᱟᱥᱯᱟᱛᱟᱞ ᱜᱚᱲᱚᱭᱤᱡ ᱟᱨ ᱨᱩᱜᱤ ᱡᱚᱛᱚᱱ",
+          bn: "🏥 হাসপাতাল সহকারী ও রোগী সেবা (GDA)",
+          bho: "🏥 अस्पताल सहायक आ मरीज सेवा",
+          mr: "🏥 रुग्णालय सहाय्यक व रुग्ण सेवा"
+        },
+        spokenText: {
+          en: "I have experience in patient care, taking vital signs, and hospital assistance.",
+          hi: "अस्पताल में मरीज की देखभाल, बीपी-शुगर चेक करना और वार्ड सहायक का काम जानती हूँ।",
+          or: "ଡାକ୍ତରଖାନାରେ ରୋଗୀଙ୍କ ଯତ୍ନ ନେବା ଓ ସହାୟକ କାମ ଜାଣିଛି।",
+          sat: "ᱦᱟᱥᱯᱟᱛᱟᱞ ᱨᱮ ᱨᱩᱜᱤ ᱡᱚᱛᱚᱱ ᱟᱨ ᱜᱚᱲᱚ ᱠᱟᱹᱢᱤ ᱵᱟᱰᱟᱭᱟᱹᱧ।",
+          bn: "হাসপাতালে রোগীর যত্ন ও ওয়ার্ড সহকারীর কাজ জানি।",
+          bho: "अस्पताल में मरीज के देखरेख आ वार्ड सहायक के काम जानी ला।",
+          mr: "रुग्णालयात रुग्णांची काळजी घेणे आणि वॉर्ड सहाय्यकाचे काम करतो."
+        },
+        nsqfCourse: "General Duty Hospital Assistant (GDA)",
+        nsqfCode: "HSS/Q5101",
+        nsqfLevel: 4,
+        matchedJobTitle: "General Duty Hospital Assistant",
+        matchedJobId: "job-hospital-gda"
+      },
+      {
+        label: {
+          en: "💻 CSC Digital Seva & Computer VLE",
+          hi: "💻 सीएससी जन सेवा केंद्र व कंप्यूटर VLE",
+          or: "💻 ସିଏସସି ଜନ ସେବା କେନ୍ଦ୍ର ଓ କମ୍ପ୍ୟୁଟର",
+          sat: "💻 ᱥᱤᱮᱥᱥᱤ ᱰᱤᱡᱤᱴᱟᱞ ᱠᱮᱱᱫᱽᱨᱚ ᱟᱨ ᱠᱚᱢᱯᱤᱭᱩᱴᱚᱨ",
+          bn: "💻 সিএসসি ডিজিটাল সেবা কেন্দ্র ও কম্পিউটার",
+          bho: "💻 सीएससी जन सेवा केंद्र आ कंप्यूटर",
+          mr: "💻 सीएससी डिजिटल सेवा केंद्र व संगणक"
+        },
+        spokenText: {
+          en: "I operate computers, do online forms, aadhaar, and banking services.",
+          hi: "कंप्यूटर चलाना, ऑनलाइन सरकारी फॉर्म भरना और डिजिटल सेवाएं देना आता है।",
+          or: "କମ୍ପ୍ୟୁଟର ଚଳାଇବା ଓ ଅନଲାଇନ୍ ଫର୍ମ ଭରିବା କାମ ଜାଣିଛି।",
+          sat: "ᱠᱚᱢᱯᱤᱭᱩᱴᱚᱨ ᱪᱟᱞᱟᱣ ᱟᱨ ᱚᱱᱞᱟᱭᱤᱱ ᱯᱷᱚᱨᱢ ᱯᱮᱨᱮᱡ ᱵᱟᱰᱟᱭᱟᱹᱧ।",
+          bn: "কম্পিউটার চালানো ও অনলাইন ফর্ম পূরণের কাজ জানি।",
+          bho: "कंप्यूटर चलावे आ ऑनलाइन फॉर्म भरे के काम आवेला।",
+          mr: "संगणक चालवणे आणि ऑनलाइन फॉर्म भरण्याचे काम करतो."
+        },
+        nsqfCourse: "CSC Digital Seva Operator (VLE)",
+        nsqfCode: "SSC/Q2212",
+        nsqfLevel: 4,
+        matchedJobTitle: "CSC Digital Center & VLE Operator",
+        matchedJobId: "job-csc-vle"
+      },
+      {
+        label: {
+          en: "🪚 Carpenter & Wooden Artisan",
+          hi: "🪚 बढ़ई व लकड़ी फर्नीचर कारीगर",
+          or: "🪚 ବଢ଼େଇ ଓ କାଠ ଆସବାବପତ୍ର କାରିଗର",
+          sat: "🪚 ᱵᱟᱹᱲᱷᱟᱹᱭ ᱟᱨ ᱠᱟᱴᱷ ᱠᱟᱹᱢᱤ",
+          bn: "🪚 ছুতোর ও কাঠের কাজের কারিগর",
+          bho: "🪚 बढ़ई आ लकड़ी के काम",
+          mr: "🪚 सुतारकाम आणि लाकडी फर्निचर"
+        },
+        spokenText: {
+          en: "I make wooden furniture, doors, windows, and do carpentry work.",
+          hi: "लकड़ी के दरवाजे, खिड़कियां और फर्नीचर बनाने का काम करता हूँ।",
+          or: "କାଠ କବାଟ, ଝରକା ଓ ଆସବାବପତ୍ର ତିଆରି କାମ କରେ।",
+          sat: "ᱠᱟᱴᱷ ᱫᱩᱣᱟᱹᱨ, ଝᱟᱨᱠᱷᱟ ᱟᱨ ᱯᱷᱟᱨᱱᱤᱪᱟᱨ ᱵᱮᱱᱟᱣ ᱵᱟᱰᱟᱭᱟᱹᱧ।",
+          bn: "কাঠের দরজা, জানালা ও আসবাবপত্র তৈরি করি।",
+          bho: "लकड़ी के दरवाजा, खिड़की आ फर्नीचर बनावे के काम करीं ला।",
+          mr: "लाकडी दरवाजे, खिडक्या आणि फर्निचर बनवण्याचे काम करतो."
+        },
+        nsqfCourse: "Carpenter & Wooden Furniture Artisan",
+        nsqfCode: "CON/Q0602",
+        nsqfLevel: 4,
+        matchedJobTitle: "Carpenter & Wooden Furniture Artisan",
+        matchedJobId: "job-carpenter-furniture"
+      },
+      {
+        label: {
+          en: "🥛 Dairy & Automated Milk Chilling",
+          hi: "🥛 डेयरी फार्मिंग व दुग्ध प्रसंस्करण",
+          or: "🥛 ଡାଏରୀ ଫାର୍ମିଂ ଓ ଦୁଗ୍ଧ ପ୍ରକ୍ରିୟାକରଣ",
+          sat: "🥛 ᱰᱟᱭᱨᱤ ᱯᱷᱟᱨᱢᱤᱝ ᱟᱨ ᱛᱳᱣᱟ ᱠᱟᱹᱢᱤ",
+          bn: "🥛 ডেয়ারি ফার্মিং ও দুগ্ধ প্রক্রিয়াকরণ",
+          bho: "🥛 डेयरी फार्मिंग आ दूध के काम",
+          mr: "🥛 डेअरी फार्मिंग आणि दूध प्रक्रिया"
+        },
+        spokenText: {
+          en: "I manage cattle, milking machines, and milk collection at the village center.",
+          hi: "गाय-भैंस पालन, दूध निकालने की मशीन और डेयरी कलेक्शन का काम करता हूँ।",
+          or: "ଗାଈ-ମଇଁଷି ପାଳନ ଓ ଦୁଗ୍ଧ କେନ୍ଦ୍ର କାମ ଜାଣିଛି।",
+          sat: "ᱰᱟᱝᱜᱽᱨᱟ-ᱠᱟᱰᱟ ᱟᱹᱥᱩᱞ ᱟᱨ ᱛᱳᱣᱟ ᱥᱮᱱᱴᱟᱨ ᱠᱟᱹᱢᱤ ᱵᱟᱰᱟᱭᱟᱹᱧ।",
+          bn: "গরু-মহিষ পালন ও দুধ কালেকশন সেন্টারের কাজ জানি।",
+          bho: "गाय-भैंस पालन आ दूध सेंटर के काम करीं ला।",
+          mr: "गाई-म्हशींचे पालन आणि दूध संकलन केंद्राचे काम करतो."
+        },
+        nsqfCourse: "Dairy Farm Management & Bulk Milk Tech",
+        nsqfCode: "AGR/Q4101",
+        nsqfLevel: 4,
+        matchedJobTitle: "Automated Dairy & Milk Chilling Tech",
+        matchedJobId: "job-dairy-farm-tech"
+      },
+      {
+        label: {
+          en: "🍄 Mushroom & Organic Farming",
+          hi: "🍄 मशरूम उत्पादन व जैविक खेती",
+          or: "🍄 ଛତୁ ଚାଷ ଓ ଜୈବିକ କୃଷି",
+          sat: "🍄 ᱚᱛ ᱪᱟᱥ ᱟᱨ ᱡᱟᱹᱭᱵᱤᱠ ᱪᱟᱥ",
+          bn: "🍄 মাশরুম চাষ ও জৈব কৃষি",
+          bho: "🍄 मशरूम उत्पादन आ जैविक खेती",
+          mr: "🍄 अळंबी उत्पादन आणि सेंद्रिय शेती"
+        },
+        spokenText: {
+          en: "I cultivate oyster and button mushrooms and package them for local markets.",
+          hi: "ऑयस्टर और बटन मशरूम उगाने और लोकल बाजार में बेचने का काम करता हूँ।",
+          or: "ଛତୁ ଚାଷ ଓ ପ୍ୟାକେଜିଂ କରି ବିକ୍ରି କାମ କରେ।",
+          sat: "ᱚᱛ ᱪᱟᱥ ᱟᱨ ᱯᱮᱠᱤᱝ ᱠᱟᱛᱮ ᱦᱟᱴ ᱨᱮ ᱟᱹᱠᱷᱨᱤᱧ ᱵᱟᱰᱟᱭᱟᱹᱧ।",
+          bn: "মাশরুম চাষ ও প্যাকেট করে বাজারে বিক্রির কাজ করি।",
+          bho: "मशरूम उगावे आ बजार में बेचे के काम करीं ला।",
+          mr: "अळंबीचे उत्पादन आणि पॅकेजिंग करून बाजारात विकतो."
+        },
+        nsqfCourse: "Commercial Mushroom Cultivator",
+        nsqfCode: "AGR/Q7801",
+        nsqfLevel: 4,
+        matchedJobTitle: "Commercial Mushroom Cultivator",
+        matchedJobId: "job-mushroom-cultivator"
+      },
+      {
+        label: {
+          en: "🌾 Cold-Press Oil Mill & Food Unit",
+          hi: "🌾 कोल्ड-प्रेस तेल मिल व मसाला चक्की",
+          or: "🌾 ତେଲ ମିଲ୍ ଓ ମସଲା ପ୍ରକ୍ରିୟାକରଣ",
+          sat: "🌾 ᱥᱩᱱᱩᱢ ᱢᱤᱞ ᱟᱨ ᱢᱚᱥᱞᱟ ᱠᱟᱹᱢᱤ",
+          bn: "🌾 তেল মিল ও মশলা প্রক্রিয়াকরণ",
+          bho: "🌾 तेल मिल आ मसाला चक्की",
+          mr: "🌾 तेल गिरणी व मसाला प्रक्रिया"
+        },
+        spokenText: {
+          en: "I operate cold press oil expellers for mustard and groundnut oil processing.",
+          hi: "सरसों और मूंगफली का शुद्ध तेल निकालने की मशीन चलाता हूँ।",
+          or: "ସୋରିଷ ଓ ଚିନାବାଦାମ ତେଲ ବାହାର କରିବା ମେସିନ୍ ଚଳାଏ।",
+          sat: "ᱥᱩᱱᱩᱢ ᱵᱟᱦᱨᱮ ᱢᱮᱥᱤᱱ ᱪᱟᱞᱟᱣ ᱵᱟᱰᱟᱭᱟᱹᱧ।",
+          bn: "সরিষা ও চিনাবাদাম তেল নিষ্কাশন মেশিন চালাই।",
+          bho: "सरसों आ मूंगफली के तेल निकाले के मशीन चलाईं ला।",
+          mr: "मोहरी आणि शेंगदाणा तेल काढण्याचे काम करतो."
+        },
+        nsqfCourse: "Cold-Press Oil Mill & Agro Processing",
+        nsqfCode: "FIC/Q0103",
+        nsqfLevel: 4,
+        matchedJobTitle: "Cold-Press Oil Mill Operator",
+        matchedJobId: "job-oil-mill-operator"
       }
     ]
   },
@@ -2419,6 +2629,13 @@ export function PersonalVoiceOnboarding({
           }
           return updated;
         });
+        setEditableProfile((prev) => {
+          const updated = { ...prev, ...data.extractedData };
+          if (updated.fullName) {
+            updated.fullName = cleanHumanName(updated.fullName);
+          }
+          return updated;
+        });
 
         // Speak acknowledgment
         if (data.feedbackText) {
@@ -2515,6 +2732,28 @@ export function PersonalVoiceOnboarding({
           avatarUrl: "/landingPage/person_3_landing.webp"
         }));
       }
+    } else if (currentStepIndex === 1) {
+      const chipTyped = chip as any;
+      if (chipTyped.nsqfCourse) {
+        setProfile((prev) => ({
+          ...prev,
+          skills: [chipTyped.nsqfCourse, "Practical Job Execution", "Standard Operating Safety"],
+          nsqfCourse: chipTyped.nsqfCourse,
+          nsqfCode: chipTyped.nsqfCode || "ELE/Q5901",
+          nsqfLevel: chipTyped.nsqfLevel || 4,
+          matchedJobTitle: chipTyped.matchedJobTitle,
+          matchedJobId: chipTyped.matchedJobId
+        }));
+        setEditableProfile((prev) => ({
+          ...prev,
+          skills: [chipTyped.nsqfCourse, "Practical Job Execution", "Standard Operating Safety"],
+          nsqfCourse: chipTyped.nsqfCourse,
+          nsqfCode: chipTyped.nsqfCode || "ELE/Q5901",
+          nsqfLevel: chipTyped.nsqfLevel || 4,
+          matchedJobTitle: chipTyped.matchedJobTitle,
+          matchedJobId: chipTyped.matchedJobId
+        }));
+      }
     }
 
     evaluateSpokenAnswer(spoken);
@@ -2535,19 +2774,29 @@ export function PersonalVoiceOnboarding({
       age: finalAge,
       ageCategory: ageInfo.category,
       avatarUrl: profToUse.avatarUrl || getAvatarForGender(finalGender),
-      skills: profToUse.skills && profToUse.skills.length > 0 ? profToUse.skills : ["Submersible Diagnostics", "Agri-Pump Repair"],
+      skills: profToUse.skills && profToUse.skills.length > 0 ? profToUse.skills : [profToUse.nsqfCourse || "Submersible Diagnostics", "Agri-Pump Repair"],
       nsqfCode: profToUse.nsqfCode || "ELE/Q5901",
       nsqfLevel: profToUse.nsqfLevel || 4,
-      nsqfCourse: profToUse.nsqfCourse || "Solar PV Agri-Pump Specialist",
+      nsqfCourse: profToUse.nsqfCourse || (profToUse.skills && profToUse.skills[0]) || "Solar PV Agri-Pump Specialist",
+      matchedJobTitle: profToUse.matchedJobTitle,
+      matchedJobId: profToUse.matchedJobId,
       education: profToUse.education || "10th Standard (10वीं पास)",
       aspiration: profToUse.aspiration || "Village Agri-Pump & Solar Repair Clinic",
       recommendedPathway: profToUse.recommendedPathway || "PM-AJAY Micro-Enterprise Hub",
       grantEligibility: profToUse.grantEligibility || "₹35,000 Capital Subsidy + ₹3,500/mo Stipend",
-      matchScore: profToUse.matchScore || 94
+      matchScore: profToUse.matchScore || 95
     };
 
     setProfile(finalProfile);
     setEditableProfile(finalProfile);
+
+    // Persist to localStorage
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem("Sakhyam_beneficiary_profile", JSON.stringify(finalProfile));
+        localStorage.setItem("Sakhyam_detected_job_skill", finalProfile.nsqfCourse || (finalProfile.skills && finalProfile.skills[0]) || "");
+      } catch {}
+    }
 
     // Save transcripts for all slots so review will always show them
     setStepTranscripts({

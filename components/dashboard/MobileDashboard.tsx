@@ -351,7 +351,17 @@ export function MobileDashboard({
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
             >
-              <MobileJobsPage onOpenJob={handleOpenJob} />
+              <MobileJobsPage
+                onOpenJob={handleOpenJob}
+                onOpenTrainingCourse={(courseId) => {
+                  const found = RECOMMENDED_COURSES.find((c) => c.id === courseId || c.id.includes(courseId.replace('nsqf-course-', '')));
+                  if (found) {
+                    setSelectedCourse(found);
+                  } else {
+                    setActiveTab("training");
+                  }
+                }}
+              />
             </motion.div>
           ) : activeTab === "messages" ? (
             <motion.div

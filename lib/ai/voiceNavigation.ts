@@ -2,6 +2,7 @@
 
 import { RECOMMENDED_COURSES, RECOMMENDED_JOBS, SCHEMES_LIST, CourseItem, JobItem } from "@/components/dashboard/DashboardShared";
 import { ALL_EXPANDED_NSQF_COURSES } from "@/lib/skillTrainingGenerator";
+import { COMPREHENSIVE_JOBS_DATABASE } from "@/lib/jobOpportunityGenerator";
 
 export type VoiceNavTarget =
   | "home"
@@ -284,6 +285,23 @@ export function parseVoiceNavigationIntent(
       RECOMMENDED_COURSES.find((c) => c.id === id) ||
       (keywordFallback ? ALL_EXPANDED_NSQF_COURSES.find((c) => c.title.toLowerCase().includes(keywordFallback)) : undefined) ||
       ALL_EXPANDED_NSQF_COURSES[0]
+    );
+  };
+
+  // Helper to find job from COMPREHENSIVE_JOBS_DATABASE or RECOMMENDED_JOBS
+  const findJob = (id: string, keywordFallback?: string): JobItem => {
+    return (
+      COMPREHENSIVE_JOBS_DATABASE.find((j) => j.id === id) ||
+      RECOMMENDED_JOBS.find((j) => j.id === id) ||
+      (keywordFallback
+        ? COMPREHENSIVE_JOBS_DATABASE.find(
+            (j) =>
+              j.title.toLowerCase().includes(keywordFallback.toLowerCase()) ||
+              j.skills.some((s) => s.toLowerCase().includes(keywordFallback.toLowerCase())) ||
+              j.voiceKeywords.some((k) => k.toLowerCase().includes(keywordFallback.toLowerCase()))
+          )
+        : undefined) ||
+      COMPREHENSIVE_JOBS_DATABASE[0]
     );
   };
 
@@ -1041,7 +1059,7 @@ export function parseVoiceNavigationIntent(
     };
   }
 
-  // 4. Specific Job Requests
+  // 4. Comprehensive Specific Job & Trade Voice Intent Requests
   if (
     t.includes("job") ||
     t.includes("jobs") ||
@@ -1051,71 +1069,328 @@ export function parseVoiceNavigationIntent(
     t.includes("रोजगार") ||
     t.includes("नौकरी") ||
     t.includes("काम चाहिए") ||
+    t.includes("काम") ||
+    t.includes("चाकरी") ||
     t.includes("ଚାକିରି") ||
     t.includes("ନିଯୁକ୍ତି") ||
     t.includes("କାମ") ||
-    t.includes("kami")
+    t.includes("kami") ||
+    t.includes("rogar") ||
+    t.includes("salary") ||
+    t.includes("tankha") ||
+    t.includes("stipend") ||
+    t.includes("apprentice") ||
+    t.includes("अप्रेंटिस")
   ) {
-    // Check if user specifically mentioned a job type
-    if (t.includes("electrician") || t.includes("बिजली") || t.includes("ଇଲେକ୍ଟ୍ରିସିଆନ୍")) {
-      const job = RECOMMENDED_JOBS.find((j) => j.id === "job-1") || RECOMMENDED_JOBS[0];
+    // 1. Solar & Green Energy Jobs
+    if (t.includes("solar") || t.includes("सोलर") || t.includes("ସୋଲାର") || t.includes("kusum") || t.includes("surya ghar") || t.includes("suryamitra")) {
+      const isRooftop = t.includes("rooftop") || t.includes("surya ghar") || t.includes("रूफटॉप") || t.includes("ଛାତ");
+      const job = isRooftop ? findJob("job-5", "rooftop solar") : findJob("job-solar-field-eng", "solar");
       return {
         target: "jobs",
-        jobId: "job-1",
+        jobId: job.id,
         job: job,
         confidence: 0.98,
-        displayText: "इलेक्ट्रीशियन नौकरी (₹15,000 - ₹22,000)",
+        displayText: `${job.title} (${job.salary})`,
         spokenFeedback: {
-          hi: "इलेक्ट्रीशियन टेक्नीशियन नौकरी के अवसर खोले जा रहे हैं।",
-          or: "ଇଲେକ୍ଟ୍ରିସିଆନ୍ ଚାକିରି ସୁଯୋଗ ଦେଖାଯାଉଛି।",
-          sat: "ᱤᱞᱮᱠᱴᱨᱤᱥᱤᱭᱟᱱ ᱪᱟᱹᱠᱨᱤ ᱠᱷᱩᱞᱟᱹᱜ ᱠᱟᱱᱟ।",
-          en: "Opening Electrician Technician Job Opportunities."
-        }
-      };
-    }
-    if (t.includes("tailor") || t.includes("silai") || t.includes("सिलाई") || t.includes("ସିଲେଇ")) {
-      const job = RECOMMENDED_JOBS.find((j) => j.id === "job-2") || RECOMMENDED_JOBS[1];
-      return {
-        target: "jobs",
-        jobId: "job-2",
-        job: job,
-        confidence: 0.98,
-        displayText: "सिलाई मशीन ऑपरेटर नौकरी (₹12,000 - ₹18,000)",
-        spokenFeedback: {
-          hi: "सखी गारमेंट्स सिलाई नौकरी का विवरण खोला जा रहा है।",
-          or: "ସିଲେଇ ଚାକିରି ସୁଯୋଗ ଖୋଲାଯାଉଛି।",
-          sat: "ᱥᱤᱞᱟᱹᱭ ᱪᱟᱹᱠᱨᱤ ᱠᱷᱩᱞᱟᱹᱜ ᱠᱟᱱᱟ।",
-          en: "Opening Tailor Sewing Operator Job Details."
-        }
-      };
-    }
-    if (t.includes("data entry") || t.includes("computer") || t.includes("डेटा") || t.includes("କମ୍ପ୍ୟୁଟର")) {
-      const job = RECOMMENDED_JOBS.find((j) => j.id === "job-4") || RECOMMENDED_JOBS[3];
-      return {
-        target: "jobs",
-        jobId: "job-4",
-        job: job,
-        confidence: 0.98,
-        displayText: "डाटा एंट्री ऑपरेटर नौकरी (Block Office)",
-        spokenFeedback: {
-          hi: "ब्लॉक ऑफिस डाटा एंट्री ऑपरेटर नौकरी खोली जा रही है।",
-          or: "ବ୍ଲକ ଡାଟା ଏଣ୍ଟ୍ରି ଚାକିରି ଖୋଲାଯାଉଛି।",
-          sat: "ᱰᱟᱴᱟ ᱮᱱᱴᱨᱤ ᱪᱟᱹᱠᱨᱤ ᱠᱷᱩᱞᱟᱹᱜ ᱠᱟᱱᱟ।",
-          en: "Opening Data Entry Operator Vacancies."
+          hi: `${job.title} का अवसर खोला जा रहा है। मासिक वेतन ${job.salary} है।`,
+          or: `${job.title} ଚାକିରି ବିବରଣୀ ଖୋଲାଯାଉଛି। ଦରମା ${job.salary}।`,
+          sat: `ᱥᱳᱞᱟᱨ ᱪᱟᱹᱠᱨᱤ ᱠᱷᱩᱞᱟᱹᱜ ᱠᱟᱱᱟ। ᱠᱩᱲᱟᱹᱭ ${job.salary}।`,
+          en: `Opening ${job.title} (${job.salary}).`
         }
       };
     }
 
-    // General Job Opportunities
+    // 2. Drone Pilot & Aerial Spraying Jobs
+    if (t.includes("drone") || t.includes("ड्रोन") || t.includes("ଡ୍ରୋନ୍") || t.includes("uav") || t.includes("spraying")) {
+      const isEnterprise = t.includes("business") || t.includes("subsidy") || t.includes(" स्वरोजगार") || t.includes("chc");
+      const job = isEnterprise ? findJob("job-chc-drone-enterprise", "drone enterprise") : findJob("job-kisan-drone-pilot", "drone");
+      return {
+        target: "jobs",
+        jobId: job.id,
+        job: job,
+        confidence: 0.98,
+        displayText: `${job.title} (${job.salary})`,
+        spokenFeedback: {
+          hi: "किसान ड्रोन पायलट नौकरी खोली जा रही है। प्रति एकड़ बोनस के साथ वेतन ₹22,000 से ₹35,000 है।",
+          or: "କିଷାନ ଡ୍ରୋନ ପାଇଲଟ୍ ଚାକିରି ସୁଯୋଗ ଖୋଲାଯାଉଛି।",
+          sat: "ᱠᱤᱥᱟᱱ ᱰᱨᱳᱱ ᱯᱟᱭᱞᱚᱴ ᱪᱟᱹᱠᱨᱤ ᱠᱷᱩᱞᱟᱹᱜ ᱠᱟᱱᱟ।",
+          en: "Opening Kisan Drone Pilot Job Opportunities."
+        }
+      };
+    }
+
+    // 3. EV & E-Rickshaw Technician Jobs
+    if (t.includes("ev") || t.includes("electric vehicle") || t.includes("rickshaw") || t.includes("e-rickshaw") || t.includes("ईवी") || t.includes("ई-रिक्शा") || t.includes("ଇ-ରିକ୍ସା")) {
+      const job = findJob("job-ev-service-tech", "ev");
+      return {
+        target: "jobs",
+        jobId: job.id,
+        job: job,
+        confidence: 0.98,
+        displayText: `${job.title} (${job.salary})`,
+        spokenFeedback: {
+          hi: "इलेक्ट्रिक व्हीकल (EV) एवं ई-रिक्शा सर्विस टेक्नीशियन नौकरी खोली जा रही है।",
+          or: "ଇ-ରିକ୍ସା ଓ ଇଭି ସର୍ଭିସିଂ ଚାକିରି ସୁଯୋଗ ଖୋଲାଯାଉଛି।",
+          sat: "EV ᱟᱨ ᱤ-ᱨᱤᱠᱥᱟ ᱪᱟᱹᱠᱨᱤ ᱠᱷᱩᱞᱟᱹᱜ ᱠᱟᱱᱟ।",
+          en: "Opening Electric Vehicle (EV) & E-Rickshaw Technician Job Details."
+        }
+      };
+    }
+
+    // 4. Tractor & Automobile Mechanic Jobs
+    if (t.includes("tractor") || t.includes("mechanic") || t.includes("diesel") || t.includes("garage") || t.includes("ट्रैक्टर") || t.includes("मैकेनिक") || t.includes("ଟ୍ରାକ୍ଟର")) {
+      const job = findJob("job-tractor-mechanic-lead", "tractor");
+      return {
+        target: "jobs",
+        jobId: job.id,
+        job: job,
+        confidence: 0.98,
+        displayText: `${job.title} (${job.salary})`,
+        spokenFeedback: {
+          hi: "फार्म ट्रैक्टर एवं ऑटोमोबाइल मैकेनिक नौकरी का विवरण खोला जा रहा है।",
+          or: "ଟ୍ରାକ୍ଟର ଓ ଡିଜେଲ ମିସ୍ତ୍ରୀ ଚାକିରି ଖୋଲାଯାଉଛି।",
+          sat: "ᱴᱨᱟᱠᱴᱚᱨ ᱢᱮᱠᱟᱱᱤᱠ ᱪᱟᱹᱠᱨᱤ ᱠᱷᱩᱞᱟᱹᱜ ᱠᱟᱱᱟ।",
+          en: "Opening Farm Tractor & Auto Mechanic Lead Opportunities."
+        }
+      };
+    }
+
+    // 5. Electrician & DISCOM Jobs
+    if (t.includes("electrician") || t.includes("wiring") || t.includes("bijli") || t.includes("discom") || t.includes("इलेक्ट्रीशियन") || t.includes("बिजली") || t.includes("ଇଲେକ୍ଟ୍ରିସିଆନ୍") || t.includes("ବିଜୁଳି")) {
+      const job = findJob("job-1", "electrician");
+      return {
+        target: "jobs",
+        jobId: job.id,
+        job: job,
+        confidence: 0.98,
+        displayText: `${job.title} (${job.salary})`,
+        spokenFeedback: {
+          hi: "डिस्कॉम सबस्टेशन एवं इलेक्ट्रीशियन टेक्नीशियन नौकरी खोली जा रही है।",
+          or: "ଇଲେକ୍ଟ୍ରିସିଆନ୍ ଚାକିରି ସୁଯୋଗ ଦେଖାଯାଉଛି।",
+          sat: "ᱤᱞᱮᱠᱴᱨᱤᱥᱤᱭᱟᱱ ᱪᱟᱹᱠᱨᱤ ᱠᱷᱩᱞᱟᱹᱜ ᱠᱟᱱᱟ।",
+          en: "Opening Electrician & Substation Technician Job Opportunities."
+        }
+      };
+    }
+
+    // 6. Tailoring, Sewing & Garment Jobs
+    if (t.includes("tailor") || t.includes("silai") || t.includes("sewing") || t.includes("garment") || t.includes("apparel") || t.includes("सिलाई") || t.includes("दर्जी") || t.includes("ସିଲେଇ") || t.includes("ଲୁଗା")) {
+      const job = findJob("job-2", "tailor");
+      return {
+        target: "jobs",
+        jobId: job.id,
+        job: job,
+        confidence: 0.98,
+        displayText: `${job.title} (${job.salary})`,
+        spokenFeedback: {
+          hi: "सखी गारमेंट्स सिलाई मशीन ऑपरेटर नौकरी खोली जा रही है।",
+          or: "ସିଲେଇ ମେସିନ୍ ଚାକିରି ସୁଯୋଗ ଖୋଲାଯାଉଛି।",
+          sat: "ᱥᱤᱞᱟᱹᱭ ᱪᱟᱹᱠᱨᱤ ᱠᱷᱩᱞᱟᱹᱜ ᱠᱟᱱᱟ।",
+          en: "Opening Tailoring & Garments Operator Job Details."
+        }
+      };
+    }
+
+    // 7. Dairy & Milk Processing Jobs
+    if (t.includes("dairy") || t.includes("milk") || t.includes("omfed") || t.includes("paneer") || t.includes("डेयरी") || t.includes("दूध") || t.includes("ଡାଏରୀ") || t.includes("ଦୁଗ୍ଧ")) {
+      const job = findJob("job-omfed-dairy-lead", "dairy");
+      return {
+        target: "jobs",
+        jobId: job.id,
+        job: job,
+        confidence: 0.98,
+        displayText: `${job.title} (${job.salary})`,
+        spokenFeedback: {
+          hi: "ओम्फेड डेयरी मिल्क प्रोसेसिंग सुपरवाइजर नौकरी खोली जा रही है।",
+          or: "ଓମଫେଡ ଦୁଗ୍ଧ ଚିଲିଂ ପ୍ଲାଣ୍ଟ ଚାକିରି ଖୋଲାଯାଉଛି।",
+          sat: "ᱰᱟᱭᱨᱤ ᱟᱨ ᱛᱚᱣᱟ ᱪᱟᱹᱠᱨᱤ ᱠᱷᱩᱞᱟᱹᱜ ᱠᱟᱱᱟ।",
+          en: "Opening Dairy Processing & Milk Hub Supervisor Job."
+        }
+      };
+    }
+
+    // 8. Mushroom Farming Jobs
+    if (t.includes("mushroom") || t.includes("spawn") || t.includes("मशरूम") || t.includes("छत्तू") || t.includes("ଛତୁ")) {
+      const job = findJob("job-mushroom-production-sup", "mushroom");
+      return {
+        target: "jobs",
+        jobId: job.id,
+        job: job,
+        confidence: 0.98,
+        displayText: `${job.title} (${job.salary})`,
+        spokenFeedback: {
+          hi: "कमर्शियल मशरूम एवं स्पॉन लैब प्रोडक्शन नौकरी खोली जा रही है।",
+          or: "ମସରୁମ୍ ଓ ଛତୁ ଚାଷ ଚାକିରି ଖୋଲାଯାଉଛି।",
+          sat: "ᱢᱟᱥᱨᱩᱢ ᱪᱟᱥ ᱪᱟᱹᱠᱨᱤ ᱠᱷᱩᱞᱟᱹᱜ ᱠᱟᱱᱟ।",
+          en: "Opening Mushroom Lab Production Supervisor Job."
+        }
+      };
+    }
+
+    // 9. Poultry, Chicken & Hatchery Jobs
+    if (t.includes("poultry") || t.includes("chicken") || t.includes("murgi") || t.includes("hatchery") || t.includes("पोल्ट्री") || t.includes("मुर्गी") || t.includes("କୁକୁଡ଼ା")) {
+      const job = findJob("job-poultry-hatchery-owner", "poultry");
+      return {
+        target: "jobs",
+        jobId: job.id,
+        job: job,
+        confidence: 0.98,
+        displayText: `${job.title} (${job.salary})`,
+        spokenFeedback: {
+          hi: "कड़कनाथ एवं सोलर पोल्ट्री हैचरी स्वरोजगार अवसर खोला जा रहा है।",
+          or: "କୁକୁଡ଼ା ଫାର୍ମ ଓ ହ୍ୟାଚେରୀ ସୁଯୋଗ ଖୋଲାଯାଉଛି।",
+          sat: "ᱥᱤᱢ ᱟᱨ ᱯᱳᱞᱴᱨᱤ ᱪᱟᱹᱠᱨᱤ ᱠᱷᱩᱞᱟᱹᱜ ᱠᱟᱱᱟ।",
+          en: "Opening Poultry & Backyard Hatchery Opportunity."
+        }
+      };
+    }
+
+    // 10. Fish & Biofloc Aquaculture Jobs
+    if (t.includes("fish") || t.includes("fisheries") || t.includes("biofloc") || t.includes("matsya") || t.includes("machli") || t.includes("मछली") || t.includes("ମାଛ")) {
+      const job = findJob("job-biofloc-aqua-tech", "fish");
+      return {
+        target: "jobs",
+        jobId: job.id,
+        job: job,
+        confidence: 0.98,
+        displayText: `${job.title} (${job.salary})`,
+        spokenFeedback: {
+          hi: "बायोफ्लॉक मत्स्य पालन एवं एक्वा-टेक फार्म ऑपरेटर नौकरी खोली जा रही है।",
+          or: "ବାୟୋଫ୍ଲକ ମାଛ ଚାଷ ଚାକିରି ସୁଯୋଗ ଖୋଲାଯାଉଛି।",
+          sat: "ᱦᱟᱹᱠᱩ ᱟᱨ ᱵᱟᱭᱳᱯᱷᱞᱚᱠ ᱪᱟᱹᱠᱨᱤ ᱠᱷᱩᱞᱟᱹᱜ ᱠᱟᱱᱟ।",
+          en: "Opening Biofloc Fisheries & Aquaculture Job."
+        }
+      };
+    }
+
+    // 11. CSC & Data Entry Government Jobs
+    if (t.includes("data entry") || t.includes("computer") || t.includes("csc") || t.includes("डेटा") || t.includes("कंप्यूटर") || t.includes("କମ୍ପ୍ୟୁଟର") || t.includes("ସିଏସସି")) {
+      const isCSC = t.includes("csc") || t.includes("e-gram") || t.includes("सीएससी");
+      const job = isCSC ? findJob("job-csc-egram-officer", "csc") : findJob("job-4", "data entry");
+      return {
+        target: "jobs",
+        jobId: job.id,
+        job: job,
+        confidence: 0.98,
+        displayText: `${job.title} (${job.salary})`,
+        spokenFeedback: {
+          hi: `${job.title} का अवसर खोला जा रहा है। मासिक वेतन ${job.salary} है।`,
+          or: `${job.title} ଚାକିରି ଖୋଲାଯାଉଛି।`,
+          sat: `ᱰᱟᱴᱟ ᱮᱱᱴᱨᱤ ᱟᱨ ᱠᱚᱢᱯᱭᱩᱴᱟᱨ ᱪᱟᱹᱠᱨᱤ ᱠᱷᱩᱞᱟᱹᱜ ᱠᱟᱱᱟ।`,
+          en: `Opening ${job.title} (${job.salary}).`
+        }
+      };
+    }
+
+    // 12. Plumbing & Jal Jeevan Mission Jobs
+    if (t.includes("plumber") || t.includes("plumbing") || t.includes("pipe") || t.includes("jal jeevan") || t.includes("नल") || t.includes("प्लंबर") || t.includes("ପ୍ଲମ୍ବର") || t.includes("ପାଣି")) {
+      const job = findJob("job-jal-jeevan-plumber", "plumber");
+      return {
+        target: "jobs",
+        jobId: job.id,
+        job: job,
+        confidence: 0.98,
+        displayText: `${job.title} (${job.salary})`,
+        spokenFeedback: {
+          hi: "जल जीवन मिशन विलेज प्लंबर एवं आरओ प्लांट ऑपरेटर नौकरी खोली जा रही है।",
+          or: "ଜଳ ଜୀବନ ମିଶନ ପ୍ଲମ୍ବର ଚାକିରି ସୁଯୋଗ ଖୋଲାଯାଉଛି।",
+          sat: "ᱯᱞᱚᱢᱵᱟᱨ ᱟᱨ ᱫᱟᱜ ᱯᱟᱭᱤᱯ ᱪᱟᱹᱠᱨᱤ ᱠᱷᱩᱞᱟᱹᱜ ᱠᱟᱱᱟ।",
+          en: "Opening Jal Jeevan Mission Plumber Job."
+        }
+      };
+    }
+
+    // 13. Hospital, Healthcare & General Duty Assistant (GDA) Jobs
+    if (t.includes("hospital") || t.includes("nurse") || t.includes("gda") || t.includes("health") || t.includes("clinic") || t.includes("अस्पताल") || t.includes("नर्स") || t.includes("ହସପିଟାଲ") || t.includes("ଡାକ୍ତରଖାନା")) {
+      const isTelemed = t.includes("telemed") || t.includes("sanjeevani") || t.includes("doctor");
+      const job = isTelemed ? findJob("job-telemedicine-point-operator", "telemedicine") : findJob("job-hospital-gda", "hospital");
+      return {
+        target: "jobs",
+        jobId: job.id,
+        job: job,
+        confidence: 0.98,
+        displayText: `${job.title} (${job.salary})`,
+        spokenFeedback: {
+          hi: `${job.title} का विवरण खोला जा रहा है। मासिक वेतन ${job.salary} है।`,
+          or: `${job.title} ଚାକିରି ସୁଯୋଗ ଖୋଲାଯାଉଛି।`,
+          sat: `ᱦᱟᱥᱯᱟᱛᱟᱞ GDA ᱪᱟᱹᱠᱨᱤ ᱠᱷᱩᱞᱟᱹᱜ ᱠᱟᱱᱟ।`,
+          en: `Opening ${job.title} (${job.salary}).`
+        }
+      };
+    }
+
+    // 14. Masonry, PMAY & Construction Jobs
+    if (t.includes("mason") || t.includes("rajmistri") || t.includes("pmay") || t.includes("construction") || t.includes("brick") || t.includes("मिस्त्री") || t.includes("राजमिस्त्री") || t.includes("ମିସ୍ତ୍ରୀ")) {
+      const job = findJob("job-pmay-master-mason", "mason");
+      return {
+        target: "jobs",
+        jobId: job.id,
+        job: job,
+        confidence: 0.98,
+        displayText: `${job.title} (${job.salary})`,
+        spokenFeedback: {
+          hi: "पीएम आवास योजना (PMAY-G) मास्टर राजमिस्त्री नौकरी खोली जा रही है। दैनिक मजदूरी ₹750 से ₹900 है।",
+          or: "ପିଏମଏୱାଇ ମାଷ୍ଟର ରାଜମିସ୍ତ୍ରୀ ଚାକିରି ଖୋଲାଯାଉଛି।",
+          sat: "ᱨᱟᱡᱽᱢᱤᱥᱛᱨᱤ PMAY ᱪᱟᱹᱠᱨᱤ ᱠᱷᱩᱞᱟᱹᱜ ᱠᱟᱱᱟ।",
+          en: "Opening PMAY-G Master Mason Job Details."
+        }
+      };
+    }
+
+    // 15. Cold Press Oil Mill & Spice Agro-Mills
+    if (t.includes("oil mill") || t.includes("mustard") || t.includes("spice") || t.includes("masala") || t.includes("millet") || t.includes("ragi") || t.includes("bakery") || t.includes("मसाला") || t.includes("तेल मिल") || t.includes("ତେଲ") || t.includes("ମସଲା")) {
+      const isOil = t.includes("oil") || t.includes("mustard") || t.includes("तेल") || t.includes("ତେଲ");
+      const isMillet = t.includes("millet") || t.includes("ragi") || t.includes("mandia") || t.includes("bakery") || t.includes("ମାଣ୍ଡିଆ");
+      const job = isOil
+        ? findJob("job-cold-press-oil-owner", "oil mill")
+        : isMillet
+          ? findJob("job-millet-bakery-lead", "millet")
+          : findJob("job-spice-pulverizer-lead", "spice");
+
+      return {
+        target: "jobs",
+        jobId: job.id,
+        job: job,
+        confidence: 0.98,
+        displayText: `${job.title} (${job.salary})`,
+        spokenFeedback: {
+          hi: `${job.title} का अवसर खोला जा रहा है। अनुमानित आय ${job.salary} है।`,
+          or: `${job.title} ସୁଯୋଗ ଖୋଲାଯାଉଛି।`,
+          sat: `ᱮᱜᱽᱨᱳ ᱢᱤᱞ ᱪᱟᱹᱠᱨᱤ ᱠᱷᱩᱞᱟᱹᱜ ᱠᱟᱱᱟ।`,
+          en: `Opening ${job.title} (${job.salary}).`
+        }
+      };
+    }
+
+    // 16. Apprenticeship with Stipend
+    if (t.includes("apprentice") || t.includes("apprenticeship") || t.includes("naps") || t.includes("stipend") || t.includes("अप्रेंटिस") || t.includes("ଆପ୍ରେଣ୍ଟିସ")) {
+      const job = findJob("job-naps-solar-apprentice", "apprentice");
+      return {
+        target: "jobs",
+        jobId: job.id,
+        job: job,
+        confidence: 0.98,
+        displayText: `${job.title} (${job.salary})`,
+        spokenFeedback: {
+          hi: "राष्ट्रीय अप्रेंटिसशिप प्रमोशन स्कीम (NAPS) स्टाइपेंड अवसर खोले जा रहे हैं।",
+          or: "NAPS ଆପ୍ରେଣ୍ଟିସସିପ୍ ଷ୍ଟାଇପେଣ୍ଡ ଚାକିରି ଖୋଲାଯାଉଛି।",
+          sat: "NAPS ᱟᱯᱨᱮᱱᱴᱤᱥ ᱪᱟᱹᱠᱨᱤ ᱠᱷᱩᱞᱟᱹᱜ ᱠᱟᱱᱟ।",
+          en: "Opening Government Apprenticeship & Stipend Opportunities."
+        }
+      };
+    }
+
+    // General Job Opportunities Fallback
     return {
       target: "jobs",
       confidence: 0.95,
-      displayText: "नौकरी के अवसर (Job Opportunities)",
+      displayText: "नौकरी के अवसर (36+ Verified Jobs)",
       spokenFeedback: {
-        hi: "आपके जिले में उपलब्ध सभी नौकरियों की सूची दिखाई जा रही है।",
-        or: "ଆପଣଙ୍କ ଜିଲ୍ଲାରେ ଉପଲବ୍ଧ ଚାକିରି ତାଲିକା ଦେଖାଯାଉଛି।",
-        sat: "ᱟᱢᱟᱜ ᱡᱤᱞᱟ ᱨᱮ ᱢᱮᱱᱟᱜ ᱪᱟᱹᱠᱨᱤ ᱠᱚ ᱫᱮᱠᱷᱟᱣᱜ ᱠᱟᱱᱟ।",
-        en: "Showing verified job vacancies in your area."
+        hi: "आपके जिले में उपलब्ध 36 से अधिक सत्यापित नौकरियों और स्वरोजगार की सूची दिखाई जा रही है।",
+        or: "ଆପଣଙ୍କ ଜିଲ୍ଲାରେ ଉପଲବ୍ଧ ୩୬ରୁ ଅଧିକ ଚାକିରି ଓ ନିଯୁକ୍ତି ତାଲିକା ଦେଖାଯାଉଛି।",
+        sat: "ᱟᱢᱟᱜ ᱡᱤᱞᱟ ᱨᱮ ᱢᱮᱱᱟᱜ ᱓᱖+ ᱪᱟᱹᱠᱨᱤ ᱠᱚ ᱫᱮᱠᱷᱟᱣᱜ ᱠᱟᱱᱟ।",
+        en: "Showing 36+ verified job vacancies and self-employment opportunities in your area."
       }
     };
   }

@@ -113,20 +113,36 @@ CRITICAL RULES FOR EXTRACTION:
 4. Provide a warm 1-sentence feedback in ${language === "hi" ? "Hindi" : language === "or" ? "Odia" : "English"} acknowledging their name, age, and district.
 `,
       skills_experience: `
-You are an AI Skill Ontology Agent for PM-AJAY & National Skills Qualifications Framework (NSQF).
-Question asked: "What informal work, daily job, or skills do you have experience in? (e.g. pump repair, farming, stitching, electrical, carpentry)"
+You are an AI Skill & Job Ontology Agent for PM-AJAY & National Skills Qualifications Framework (NSQF).
+Question asked: "What informal work, daily job, trade, or practical skills do you have experience in? (e.g. drone flying, solar installation, tailoring, electrical, hospital care, computer/CSC, plumbing, carpentry, dairy, mushroom farming, food processing)"
 User's spoken answer: "${userSpokenText}"
 
-Task:
-1. Determine if the answer is RELEVANT (mentions any kind of trade, informal repair, crafts, agricultural activity, driving, electronics, shopkeeping, tailoring, construction, etc.).
+CRITICAL INSTRUCTIONS:
+1. Determine if the answer is RELEVANT (mentions ANY work, hobby, trade, chore, craft, agricultural activity, tech, caregiving, repair, shopkeeping, driving, construction, etc.).
    If the user does not mention any work or says random unrelated things, mark isRelevant: false.
-2. If relevant, extract:
-   - skills: array of strings (e.g. ["Submersible Pump Repair", "Motor Rewinding", "Hand Tool Safety"])
-   - nsqfCourse: string (e.g. "Solar PV Agri-Pump Specialist", "Assistant Electrician", "Self Employed Tailor")
-   - nsqfCode: string (e.g. "ELE/Q5901", "AMH/Q0102", "AGR/Q1101")
-   - nsqfLevel: number (3 to 5)
-   - matchScore: number (85 to 98)
-3. Provide a warm 1-sentence feedback in ${language === "hi" ? "Hindi" : language === "or" ? "Odia" : "English"} acknowledging their practical skills and how NSQF maps them.
+2. EXTRACT PRECISELY WHAT THE USER ACTUALLY SPOKE:
+   - Do NOT default everything to Pump repair or Tailoring if the user spoke about something else!
+   - If user said "drone / ड्रोन", map to Kisan Drone Pilot (AGR/Q7004, Level 4).
+   - If user said "solar / सोलर / suryamitra", map to Solar PV Rooftop Grid Specialist (SGJ/Q0101, Level 4).
+   - If user said "hospital / gda / मरीज / nurse / स्वास्थ्य", map to General Duty Hospital Assistant (HSS/Q5101, Level 4).
+   - If user said "computer / csc / digital / data entry", map to CSC Digital Seva Operator (SSC/Q2212, Level 4).
+   - If user said "carpenter / लकड़ी / बढ़ई", map to Carpenter & Furniture Artisan (CON/Q0602, Level 4).
+   - If user said "plumber / नल / पाइप", map to Rural Domestic Plumber (PSC/Q0104, Level 3).
+   - If user said "mushroom / मशरूम", map to Commercial Mushroom Cultivator (AGR/Q7801, Level 4).
+   - If user said "dairy / दूध / गाय / भैंस", map to Automated Dairy & Milk Chilling Tech (AGR/Q4101, Level 4).
+   - If user said "fish / मछली / biofloc", map to Biofloc Aquaculture Enterprise (AGR/Q4901, Level 4).
+   - If user said "tailor / सिलाई / कपड़ा", map to Self Employed Tailor & Apparel SHG (AMH/Q0102, Level 3).
+   - If user said "electrician / बिजली / वायरिंग", map to Assistant Electrician & DISCOM Wireman (ELE/Q5901, Level 4).
+   - If user speaks any other custom trade (e.g. mobile repair, cooking, driving, welding), extract that exact skill into skills!
+3. Extracted fields:
+   - skills: string[] (3 specific practical skill tags matching what they said)
+   - nsqfCourse: string (official NSQF course title)
+   - nsqfCode: string (e.g. "AGR/Q7004", "SGJ/Q0101", "HSS/Q5101", etc.)
+   - nsqfLevel: number (3, 4, or 5)
+   - matchedJobTitle: string (title of the matching job opening)
+   - matchedJobId: string (e.g. "job-drone-pilot", "job-solar-technician", etc.)
+   - matchScore: number (88 to 98)
+4. Provide a warm 1-sentence feedback in ${language === "hi" ? "Hindi" : language === "or" ? "Odia" : "English"} acknowledging their exact skills and how NSQF certifies it.
 `,
       education: `
 You are an AI Onboarding Agent for PM-AJAY livelihood qualifications.
@@ -400,33 +416,176 @@ function fallbackHeuristicExtraction(step: string, text: string, language: strin
       };
     }
 
-    let skills = ["Submersible Pump Repair", "Agri-Pump Maintenance"];
+    let skills = ["Submersible Pump Repair", "Agri-Pump Diagnostics", "Motor Wiring"];
     let nsqfCourse = "Solar PV Agri-Pump Specialist";
-    let nsqfCode = "ELE/Q5901";
+    let nsqfCode = "SGJ/Q0101";
     let nsqfLevel = 4;
+    let matchedJobTitle = "Solar Agri-Pump & Micro-Grid Specialist";
+    let matchedJobId = "job-solar-agri-pump";
 
-    if (/silai|tailor|कपड़ा|सिलाई|garment|সেলাই|ᱥᱤᱞᱟᱹᱭ/i.test(text)) {
-      skills = ["Garment Stitching", "Apparel Cutting & Pattern Design"];
-      nsqfCourse = "Self Employed Tailor";
+    if (/drone|ड्रोन|spraying|छिड़काव|flying|flight/i.test(text)) {
+      skills = ["Drone Piloting & DGCA Compliant Flying", "Agri-Chemical Spraying", "LiPo Battery Maintenance"];
+      nsqfCourse = "Kisan Drone Operator & Agri-Flyer";
+      nsqfCode = "AGR/Q7004";
+      nsqfLevel = 4;
+      matchedJobTitle = "Krishi Drone Pilot & Spray Operator";
+      matchedJobId = "job-drone-pilot";
+    } else if (/solar|सोलर|suryamitra|rooftop|सौर|सूर्यमित्र|grid/i.test(text)) {
+      skills = ["Solar Panel Assembly", "Rooftop Inverter Integration", "Grid Synchronization"];
+      nsqfCourse = "Solar PV Rooftop Grid Specialist (Suryamitra)";
+      nsqfCode = "SGJ/Q0101";
+      nsqfLevel = 4;
+      matchedJobTitle = "Solar Grid & Rooftop Technician";
+      matchedJobId = "job-solar-technician";
+    } else if (/hospital|gda|अस्पताल|स्वास्थ्य|मरीज|care|medical|nurse|রোগী|ଡାକ୍ତରଖାନା/i.test(text)) {
+      skills = ["Patient Care & Bedside Assistance", "Vital Signs Monitoring", "First Aid & Clinic Hygiene"];
+      nsqfCourse = "General Duty Hospital Assistant (GDA)";
+      nsqfCode = "HSS/Q5101";
+      nsqfLevel = 4;
+      matchedJobTitle = "General Duty Hospital Assistant";
+      matchedJobId = "job-hospital-gda";
+    } else if (/csc|computer|कंप्यूटर|कम्प्यूटर|digital|vle|data entry|it|cyber|অনলাইন|କମ୍ପ୍ୟୁଟର/i.test(text)) {
+      skills = ["Digital Certificate Services", "Online Portal Operations", "Data Entry & Office Tools"];
+      nsqfCourse = "CSC Digital Seva Operator (VLE)";
+      nsqfCode = "SSC/Q2212";
+      nsqfLevel = 4;
+      matchedJobTitle = "CSC Digital Center & VLE Operator";
+      matchedJobId = "job-csc-vle";
+    } else if (/carpenter|बढ़ई|कारपेंटर|लकड़ी|काठ|wood|furniture|কাঠ|କାଠ/i.test(text)) {
+      skills = ["Wooden Joinery & Fitting", "Furniture Fabrication", "Modern Power Tool Operation"];
+      nsqfCourse = "Carpenter & Wooden Furniture Artisan";
+      nsqfCode = "CON/Q0602";
+      nsqfLevel = 4;
+      matchedJobTitle = "Carpenter & Wooden Furniture Artisan";
+      matchedJobId = "job-carpenter-furniture";
+    } else if (/plumb|नल|पाइप|pipe|fitting|वाटर|जल जीवन|ପ୍ଲମ୍ବର/i.test(text)) {
+      skills = ["PVC Pipe Fitting & Threading", "Submersible Valve Connection", "Leakage Diagnostics"];
+      nsqfCourse = "Rural Domestic Plumber & Pipe Fitter";
+      nsqfCode = "PSC/Q0104";
+      nsqfLevel = 3;
+      matchedJobTitle = "Rural Domestic Plumber & Jal Jeevan Tech";
+      matchedJobId = "job-rural-plumber";
+    } else if (/mushroom|मशरूम|khumb|মশরুম|ଛତୁ/i.test(text)) {
+      skills = ["Mushroom Spawn Bedding", "Temperature & Humidity Control", "Organic Harvesting & Packaging"];
+      nsqfCourse = "Commercial Mushroom Cultivator";
+      nsqfCode = "AGR/Q7801";
+      nsqfLevel = 4;
+      matchedJobTitle = "Commercial Mushroom Cultivator";
+      matchedJobId = "job-mushroom-cultivator";
+    } else if (/dairy|दूध|गाय|भैंस|cattle|milk|দুধ|ଗାଈ|ଦୁଗ୍ଧ/i.test(text)) {
+      skills = ["Automated Milking Machine Operation", "Bulk Milk Chiller Maintenance", "Cattle Feed Management"];
+      nsqfCourse = "Dairy Farm Management & Bulk Milk Tech";
+      nsqfCode = "AGR/Q4101";
+      nsqfLevel = 4;
+      matchedJobTitle = "Automated Dairy & Milk Chilling Tech";
+      matchedJobId = "job-dairy-farm-tech";
+    } else if (/fish|मछली|biofloc|aquaculture|तालाब|মাছ|ମାଛ/i.test(text)) {
+      skills = ["Biofloc Water Quality & Aeration", "Fish Seed Stocking", "Feed Conversion Ratio Management"];
+      nsqfCourse = "Biofloc Aquaculture & Fish Farming Enterprise";
+      nsqfCode = "AGR/Q4901";
+      nsqfLevel = 4;
+      matchedJobTitle = "Biofloc Fish Farming Enterprise Lead";
+      matchedJobId = "job-biofloc-fish";
+    } else if (/poultry|मुर्गी|हैचरी|broiler|হাঁস-মুরগি|କୁକୁଡ଼ା/i.test(text)) {
+      skills = ["Broiler & Layer Farm Supervision", "Feed Formulation & Vaccination", "Bio-Security & Egg Incubation"];
+      nsqfCourse = "Commercial Poultry Farm Supervisor";
+      nsqfCode = "AGR/Q4301";
+      nsqfLevel = 4;
+      matchedJobTitle = "Commercial Poultry & Hatchery Supervisor";
+      matchedJobId = "job-poultry-supervisor";
+    } else if (/oil|तेल|सरसों|mustard|groundnut|oil mill|ঘানি|ତେଲ/i.test(text)) {
+      skills = ["Expeller Operation & Seed Filtration", "Cold-Press Oil Extraction", "Quality Testing & Bottling"];
+      nsqfCourse = "Cold-Press Oil Mill & Agro Processing";
+      nsqfCode = "FIC/Q0103";
+      nsqfLevel = 4;
+      matchedJobTitle = "Cold-Press Oil Mill Operator";
+      matchedJobId = "job-oil-mill-operator";
+    } else if (/spice|मसाला|flour|आटा|चक्की|mill|bakery|बिस्कुट|আটা|ମସଲା/i.test(text)) {
+      skills = ["Spice Pulverizing & Grinding", "Millet Baking & Snack Processing", "Moisture-Proof Food Packaging"];
+      nsqfCourse = "Spice Processing & Micro Flour Mill Unit";
+      nsqfCode = "FIC/Q7001";
+      nsqfLevel = 3;
+      matchedJobTitle = "Spice Grinding & Flour Mill Operator";
+      matchedJobId = "job-spice-flour-mill";
+    } else if (/mason|राजमिस्त्री|ईंट|चिनाई|plaster|मिस्त्री|রাজমিস্ত্রি|ରାଜମିସ୍ତ୍ରୀ/i.test(text)) {
+      skills = ["Brick Laying & Mortar Mixing", "Plastering & Level Alignment", "Concrete Reinforcement"];
+      nsqfCourse = "Mason & Rural Construction Supervisor";
+      nsqfCode = "CON/Q0102";
+      nsqfLevel = 4;
+      matchedJobTitle = "Mason & Rural Housing Construction Lead";
+      matchedJobId = "job-rural-mason";
+    } else if (/cctv|security|सुरक्षा|कैमरा|camera/i.test(text)) {
+      skills = ["CCTV Camera Mounting", "DVR/NVR Network Configuration", "Cable Crimping & Remote Monitoring"];
+      nsqfCourse = "CCTV Installation & Smart Security Technician";
+      nsqfCode = "ELE/Q4605";
+      nsqfLevel = 4;
+      matchedJobTitle = "CCTV & Smart Security Technician";
+      matchedJobId = "job-cctv-installer";
+    } else if (/ev|electric vehicle|ईवी|battery|चार्जिंग/i.test(text)) {
+      skills = ["EV Battery Pack Diagnostics", "BLDC Motor & Controller Troubleshooting", "Charging Socket Wiring"];
+      nsqfCourse = "EV Two-Wheeler & Charging Station Tech";
+      nsqfCode = "ASC/Q1411";
+      nsqfLevel = 4;
+      matchedJobTitle = "EV Two-Wheeler Charging Station Tech";
+      matchedJobId = "job-ev-charging-tech";
+    } else if (/weld|वेल्डिंग|लोहा|fabricat|ঝালাই/i.test(text)) {
+      skills = ["Shielded Metal Arc Welding", "Gas Cutting & Grinding", "Structural Steel Joint Assembly"];
+      nsqfCourse = "Manual Metal Arc Welder (MMAW)";
+      nsqfCode = "CSC/Q0204";
+      nsqfLevel = 3;
+      matchedJobTitle = "NAPS Industrial Welder & Fabricator";
+      matchedJobId = "job-naps-welder";
+    } else if (/silai|tailor|कपड़ा|सिलाई|garment|apparel|दर्जी|সেলাই|ᱥᱤᱞᱟᱹᱭ/i.test(text)) {
+      skills = ["Garment Stitching", "Apparel Cutting & Pattern Design", "Industrial Sewing Machine Operation"];
+      nsqfCourse = "Self Employed Tailor & Apparel SHG";
       nsqfCode = "AMH/Q0102";
       nsqfLevel = 3;
-    } else if (/bijli|electric|वायरिंग|बिजली|electrician|ବିଦ୍ୟୁତ|ᱵᱤᱡᱽᱞᱤ/i.test(text)) {
-      skills = ["Domestic House Wiring", "Circuit Fault Diagnosis"];
-      nsqfCourse = "Domestic Electrician";
+      matchedJobTitle = "Self Employed Tailor & Apparel SHG";
+      matchedJobId = "job-2";
+    } else if (/bijli|electric|वायरिंग|बिजली|electrician|विद्युत|ବିଦ୍ୟୁତ|ᱵᱤᱡᱽᱞᱤ/i.test(text)) {
+      skills = ["Domestic House Wiring", "Circuit Fault Diagnosis", "Transformer & Switchgear Safety"];
+      nsqfCourse = "Assistant Electrician & DISCOM Wireman";
       nsqfCode = "ELE/Q5901";
       nsqfLevel = 4;
+      matchedJobTitle = "Assistant Electrician & DISCOM Wireman";
+      matchedJobId = "job-1";
+    } else if (/bamboo|बांस|craft|टोकरी|বাঁশ|ବାଉଁଶ/i.test(text)) {
+      skills = ["Bamboo Splitting & Seasoning", "Eco-Packaging Weaving", "Handicraft Product Design"];
+      nsqfCourse = "Bamboo & Cane Artisan Enterprise";
+      nsqfCode = "HCS/Q8701";
+      nsqfLevel = 4;
+      matchedJobTitle = "Bamboo Cane & Eco-Packaging Artisan";
+      matchedJobId = "job-bamboo-artisan";
+    } else if (/pottery|मिट्टी|कुम्हार|मटका|माटी|ମାଟି/i.test(text)) {
+      skills = ["Clay Preparation & Potters Wheel Shaping", "Terracotta Kiln Firing", "Glazing & Traditional Pottery"];
+      nsqfCourse = "Terracotta & Pottery Micro-Enterprise";
+      nsqfCode = "HCS/Q0701";
+      nsqfLevel = 4;
+      matchedJobTitle = "Terracotta & Ceramic Pottery Lead";
+      matchedJobId = "job-terracotta-potter";
+    } else {
+      // Dynamic fallback for any spoken phrase: extract the core keywords
+      const cleanedSpoken = text.replace(/^(i do|i am|i work in|i know|mera|mujhe|hum|aami|mu|main|mein)\s+/iu, "").trim();
+      if (cleanedSpoken.length > 2) {
+        skills = [cleanedSpoken, "Practical Job Execution", "Standard Operating Safety"];
+        nsqfCourse = `${cleanedSpoken.charAt(0).toUpperCase() + cleanedSpoken.slice(1)} Specialist`;
+        nsqfCode = "SKL/Q4102";
+        nsqfLevel = 4;
+        matchedJobTitle = `${nsqfCourse} & Lead Operator`;
+        matchedJobId = `detected-job-${cleanedSpoken.toLowerCase().replace(/[^a-z0-9]/g, "-")}`;
+      }
     }
 
     const feedbackText =
       cleanLang === "hi"
-        ? `शानदार! आपके हुनर को NSQF ट्रेड '${nsqfCourse}' (${nsqfCode}) के साथ जोड़ लिया गया है।`
+        ? `शानदार! आपके हुनर को NSQF ट्रेड '${nsqfCourse}' (${nsqfCode}) और नौकरी '${matchedJobTitle}' के साथ जोड़ लिया गया है।`
         : cleanLang === "or"
-          ? `ଉତ୍ତମ! ଆପଣଙ୍କ ଦକ୍ଷତାକୁ NSQF ଟ୍ରେଡ୍ '${nsqfCourse}' (${nsqfCode}) ସହିତ ଯୋଡ଼ାଗଲା।`
+          ? `ଉତ୍ତମ! ଆପଣଙ୍କ ଦକ୍ଷତାକୁ NSQF ଟ୍ରେଡ୍ '${nsqfCourse}' (${nsqfCode}) ଓ ଚାକିରି '${matchedJobTitle}' ସହିତ ଯୋଡ଼ାଗଲା।`
           : cleanLang === "sat"
-            ? `ᱵᱷᱟᱹᱜᱤ! ᱟᱢᱟᱜ ᱦᱩᱱᱟᱹᱨ NSQF ᱴᱨᱮᱰ '${nsqfCourse}' (${nsqfCode}) ᱥᱟᱶ ᱡᱚᱲᱟᱣ ᱮᱱᱟ᱾`
+            ? `ᱵᱷᱟᱹᱜᱤ! ᱟᱢᱟᱜ ᱦᱩᱱᱟᱹᱨ NSQF ᱴᱨᱮᱰ '${nsqfCourse}' (${nsqfCode}) ᱟᱨ ᱪᱟᱹᱠᱨᱤ '${matchedJobTitle}' ᱥᱟᱶ ᱡᱚᱲᱟᱣ ᱮᱱᱟ᱾`
             : cleanLang === "bn"
-              ? `চমৎকার! আপনার দক্ষতাকে NSQF ট্রেড '${nsqfCourse}' (${nsqfCode}) এর সাথে যুক্ত করা হয়েছে।`
-              : `Great! We have mapped your practical skills to NSQF Trade '${nsqfCourse}' (${nsqfCode}).`;
+              ? `চমৎকার! আপনার দক্ষতাকে NSQF ট্রেড '${nsqfCourse}' (${nsqfCode}) এবং চাকরি '${matchedJobTitle}' এর সাথে যুক্ত করা হয়েছে।`
+              : `Great! We have mapped your practical skills to NSQF Trade '${nsqfCourse}' (${nsqfCode}) and aligned with job opening '${matchedJobTitle}'.`;
 
     return {
       isRelevant: true,
@@ -435,7 +594,9 @@ function fallbackHeuristicExtraction(step: string, text: string, language: strin
         nsqfCourse,
         nsqfCode,
         nsqfLevel,
-        matchScore: 94
+        matchedJobTitle,
+        matchedJobId,
+        matchScore: 95
       },
       feedbackText: feedbackText
     };
