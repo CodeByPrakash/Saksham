@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Globe,
@@ -31,71 +32,71 @@ const FEATURED_LANGUAGES: {
   greeting: string;
   audioVoiceText: string;
 }[] = [
-  {
-    code: "hi",
-    native: "हिन्दी",
-    label: "Hindi",
-    region: "उत्तर एवं मध्य भारत (North & Central India)",
-    greeting: "नमस्ते! आगे बढ़ने के लिए चुनें",
-    audioVoiceText: "हिन्दी भाषा चुनी गई। चलिए शुरू करते हैं।"
-  },
-  {
-    code: "or",
-    native: "ଓଡ଼ିଆ",
-    label: "Odia",
-    region: "ଓଡ଼ିଶା (Odisha)",
-    greeting: "ନମସ୍କାର! ଆରମ୍ଭ କରିବାକୁ ବାଛନ୍ତୁ",
-    audioVoiceText: "ଓଡ଼ିଆ ଭାଷା ବଛାଗଲା। ଆସନ୍ତୁ ଆରମ୍ଭ କରିବା।"
-  },
-  {
-    code: "sat",
-    native: "संताली (ᱥᱟᱱᱛᱟᱲᱤ)",
-    label: "Santhali",
-    region: "ଝାଡ଼ଖଣ୍ଡ / ମୟୂରଭଞ୍ଜ (Jharkhand / Mayurbhanj)",
-    greeting: "ᱡᱚᱦᱟᱨ! ᱮᱛᱦᱚᱵ ᱞᱟᱹᱜିᱫ ᱵᱟᱪᱷᱟᱣ ᱢᱮ",
-    audioVoiceText: "संताली बाछाव एना। चोलों सुरु लेगे।"
-  },
-  {
-    code: "en",
-    native: "English",
-    label: "English",
-    region: "National & Global",
-    greeting: "Welcome! Tap to select",
-    audioVoiceText: "English selected. Let's get started!"
-  },
-  {
-    code: "bho",
-    native: "भोजपुरी",
-    label: "Bhojpuri",
-    region: "बिहार व पूर्वी उत्तर प्रदेश (Bihar & UP)",
-    greeting: "प्रणाम! शुरू करे खातिर चुनीं",
-    audioVoiceText: "भोजपुरी भाषा चुनल गइल। चलीं शुरू कइल जाव।"
-  },
-  {
-    code: "bn",
-    native: "বাংলা",
-    label: "Bengali",
-    region: "পশ্চিমবঙ্গ ও ত্রিপুরা (West Bengal & Tripura)",
-    greeting: "স্বাগতম! शुरू করতে নির্বাচন করুন",
-    audioVoiceText: "বাংলা भाषा निर्वाचित होएछे। চলুন शुरू করা যাক।"
-  },
-  {
-    code: "te",
-    native: "తెలుగు",
-    label: "Telugu",
-    region: "ఆంధ్రప్రదేశ్ & తెలంగాణ (AP & Telangana)",
-    greeting: "స్వాగతం! ప్రారంభించడానికి ఎంచుకోండి",
-    audioVoiceText: "తెలుగు ఎంపिक చేయబడింది. ప్రారంభిద్దాం."
-  },
-  {
-    code: "mr",
-    native: "मराठी",
-    label: "Marathi",
-    region: "महाराष्ट्र (Maharashtra)",
-    greeting: "नमस्कार! सुरू करण्यासाठी निवडा",
-    audioVoiceText: "मराठी भाषा निवडली आहे. चला सुरू करूया."
-  }
-];
+    {
+      code: "hi",
+      native: "हिन्दी",
+      label: "Hindi",
+      region: "उत्तर एवं मध्य भारत (North & Central India)",
+      greeting: "नमस्ते! आगे बढ़ने के लिए चुनें",
+      audioVoiceText: "हिन्दी भाषा चुनी गई। चलिए शुरू करते हैं।"
+    },
+    {
+      code: "or",
+      native: "ଓଡ଼ିଆ",
+      label: "Odia",
+      region: "ଓଡ଼ିଶା (Odisha)",
+      greeting: "ନମସ୍କାର! ଆରମ୍ଭ କରିବାକୁ ବାଛନ୍ତୁ",
+      audioVoiceText: "ଓଡ଼ିଆ ଭାଷା ବଛାଗଲା। ଆସନ୍ତୁ ଆରମ୍ଭ କରିବା।"
+    },
+    {
+      code: "sat",
+      native: "संताली (ᱥᱟᱱᱛᱟᱲᱤ)",
+      label: "Santhali",
+      region: "ଝାଡ଼ଖଣ୍ଡ / ମୟୂରଭଞ୍ଜ (Jharkhand / Mayurbhanj)",
+      greeting: "ᱡᱚᱦᱟᱨ! ᱮᱛᱦᱚᱵ ᱞᱟᱹᱜିᱫ ᱵᱟᱪᱷᱟᱣ ᱢᱮ",
+      audioVoiceText: "संताली बाछाव एना। चोलों सुरु लेगे।"
+    },
+    {
+      code: "en",
+      native: "English",
+      label: "English",
+      region: "National & Global",
+      greeting: "Welcome! Tap to select",
+      audioVoiceText: "English selected. Let's get started!"
+    },
+    {
+      code: "bho",
+      native: "भोजपुरी",
+      label: "Bhojpuri",
+      region: "बिहार व पूर्वी उत्तर प्रदेश (Bihar & UP)",
+      greeting: "प्रणाम! शुरू करे खातिर चुनीं",
+      audioVoiceText: "भोजपुरी भाषा चुनल गइल। चलीं शुरू कइल जाव।"
+    },
+    {
+      code: "bn",
+      native: "বাংলা",
+      label: "Bengali",
+      region: "পশ্চিমবঙ্গ ও ত্রিপুরা (West Bengal & Tripura)",
+      greeting: "স্বাগতম! शुरू করতে নির্বাচন করুন",
+      audioVoiceText: "বাংলা भाषा निर्वाचित होएछे। চলুন शुरू করা যাক।"
+    },
+    {
+      code: "te",
+      native: "తెలుగు",
+      label: "Telugu",
+      region: "ఆంధ్రప్రదేశ్ & తెలంగాణ (AP & Telangana)",
+      greeting: "స్వాగతం! ప్రారంభించడానికి ఎంచుకోండి",
+      audioVoiceText: "తెలుగు ఎంపिक చేయబడింది. ప్రారంభిద్దాం."
+    },
+    {
+      code: "mr",
+      native: "मराठी",
+      label: "Marathi",
+      region: "महाराष्ट्र (Maharashtra)",
+      greeting: "नमस्कार! सुरू करण्यासाठी निवडा",
+      audioVoiceText: "मराठी भाषा निवडली आहे. चला सुरू करूया."
+    }
+  ];
 
 export function LanguageSelectScreen({
   onLanguageSelected,
@@ -137,13 +138,13 @@ export function LanguageSelectScreen({
           setIsMuted(true);
         } else {
           playSpokenPrompt(
-            "नमस्ते! कृपया अपनी पसंदीदा भाषा चुनें। ଦୟାକରି ଆପଣଙ୍କ ପସନ୍ଦର ଭାଷା ବାଛନ୍ତୁ। Please select your preferred language.",
+            "नमस्ते! कृपया अपनी पसंदीदा भाषा चुनें। Please select your preferred language.",
             "hi"
           );
         }
       } catch {
         playSpokenPrompt(
-          "नमस्ते! कृपया अपनी पसंदीदा भाषा चुनें। ଦୟାକରି ଆପଣଙ୍କ ପସନ୍ଦର ଭାଷା ବାଛନ୍ତୁ। Please select your preferred language.",
+          "नमस्ते! कृपया अपनी पसंदीदा भाषा चुनें। Please select your preferred language.",
           "hi"
         );
       }
@@ -804,19 +805,15 @@ export function LanguageSelectScreen({
 
       {/* Main Title Area */}
       <div className="flex flex-col items-center text-center space-y-1 relative z-10 pt-1.5 shrink-0">
-        <div className="relative size-11 flex items-center justify-center">
-          <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-sm">
-            <circle cx="50" cy="40" r="14" fill="#F59E0B" />
-            <path d="M50 14 L50 20" stroke="#F59E0B" strokeWidth="4" strokeLinecap="round" />
-            <path d="M28 22 L33 27" stroke="#F59E0B" strokeWidth="4" strokeLinecap="round" />
-            <path d="M72 22 L67 27" stroke="#F59E0B" strokeWidth="4" strokeLinecap="round" />
-            <circle cx="50" cy="52" r="5" fill="#3B82F6" />
-            <path d="M42 66 C42 58, 58 58, 58 66 Z" fill="#3B82F6" />
-            <circle cx="35" cy="56" r="4.5" fill="#10B981" />
-            <path d="M28 70 C28 63, 42 63, 42 70 Z" fill="#10B981" />
-            <circle cx="65" cy="56" r="4.5" fill="#F97316" />
-            <path d="M58 70 C58 63, 72 63, 72 70 Z" fill="#F97316" />
-          </svg>
+        <div className="relative size-11">
+          <Image
+            src="/logo.png"
+            alt="Saksham AI Logo"
+            fill
+            className="object-contain drop-shadow-sm"
+            sizes="44px"
+            priority
+          />
         </div>
 
         <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 font-heading tracking-tight">
@@ -836,15 +833,14 @@ export function LanguageSelectScreen({
         className="w-full mt-2.5 p-3 rounded-2xl bg-gradient-to-r from-purple-700 via-indigo-600 to-purple-800 text-white shadow-md shadow-purple-600/20 flex items-center justify-between border border-purple-400/30 cursor-pointer relative z-10 shrink-0"
       >
         <div className="flex items-center gap-3">
-          <div className={`size-9 rounded-xl flex items-center justify-center transition-all ${
-            voiceFlowState === "user_listening"
-              ? "bg-rose-500 text-white animate-pulse ring-2 ring-rose-300"
-              : voiceFlowState === "ai_speaking"
+          <div className={`size-9 rounded-xl flex items-center justify-center transition-all ${voiceFlowState === "user_listening"
+            ? "bg-rose-500 text-white animate-pulse ring-2 ring-rose-300"
+            : voiceFlowState === "ai_speaking"
               ? "bg-amber-500 text-white animate-bounce"
               : voiceFlowState === "processing"
-              ? "bg-indigo-400 text-white animate-spin"
-              : "bg-white/20 backdrop-blur-md text-white"
-          }`}>
+                ? "bg-indigo-400 text-white animate-spin"
+                : "bg-white/20 backdrop-blur-md text-white"
+            }`}>
             {voiceFlowState === "processing" ? (
               <Radio className="size-4.5 animate-pulse" />
             ) : (

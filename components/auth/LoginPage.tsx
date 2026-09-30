@@ -29,9 +29,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { LanguageSelector } from "@/components/navigation/LanguageSelector";
+import { getNSQFAgeBracket, getAvatarForGender } from "@/lib/nsqfAge";
 
 interface LoginPageProps {
-  onLoginSuccess: (role: "beneficiary" | "field_worker" | "government") => void;
+  onLoginSuccess: (role: "beneficiary" | "field_worker" | "government", profileData?: any) => void;
   onBackToOnboarding?: () => void;
   isMobile?: boolean;
   language?: string;
@@ -453,8 +454,19 @@ export function LoginPage({
   const [otpSent, setOtpSent] = useState<boolean>(false);
   const [isAutoFillingOtp, setIsAutoFillingOtp] = useState<boolean>(false);
   const [selectedRole, setSelectedRole] = useState<"beneficiary" | "field_worker" | "government">("beneficiary");
+  const [loginGender, setLoginGender] = useState<"male" | "female">("male");
+  const [loginAge, setLoginAge] = useState<number>(28);
+  const [loginName, setLoginName] = useState<string>("Ramesh Soren");
   const [isVerifying, setIsVerifying] = useState<boolean>(false);
   const [isPlayingAudioPrompt, setIsPlayingAudioPrompt] = useState<boolean>(false);
+  const [isMuted, setIsMuted] = useState<boolean>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("saksham_login_audio_muted");
+      if (saved !== null) return saved === "true";
+    }
+    // Default to true so no audio automatically blasts upon login page load
+    return true;
+  });
 
   // Normalized language code (hi, or, sat, en, bho, bn, te, mr, etc.)
   const normLang = (language || "hi").toLowerCase();
@@ -645,20 +657,44 @@ export function LoginPage({
     }
   };
 
-  // Play audio guidance automatically on load for illiterate / low-literacy users
+  // Play audio guidance only if user has explicitly unmuted
   useEffect(() => {
+    if (isMuted) {
+      stopAllAudio();
+      return;
+    }
     const timer = setTimeout(() => {
-      playSpokenHelpPrompt();
+      const promptObj = welcomePrompts[normLang] || welcomePrompts.hi;
+      playGeminiTts(promptObj.text, promptObj.lang);
     }, 600);
     return () => {
       clearTimeout(timer);
       stopAllAudio();
     };
-  }, [normLang]);
+  }, [normLang, isMuted]);
 
   const playSpokenHelpPrompt = () => {
     const promptObj = welcomePrompts[normLang] || welcomePrompts.hi;
     playGeminiTts(promptObj.text, promptObj.lang);
+  };
+
+  const handleToggleMute = () => {
+    if (isPlayingAudioPrompt && !isMuted) {
+      // Currently playing -> Mute and stop audio immediately
+      setIsMuted(true);
+      try {
+        localStorage.setItem("saksham_login_audio_muted", "true");
+      } catch {}
+      stopAllAudio();
+    } else {
+      // Currently muted or stopped -> Unmute and start voice instruction
+      setIsMuted(false);
+      try {
+        localStorage.setItem("saksham_login_audio_muted", "false");
+      } catch {}
+      const promptObj = welcomePrompts[normLang] || welcomePrompts.hi;
+      playGeminiTts(promptObj.text, promptObj.lang);
+    }
   };
 
   const handleSendOtp = () => {
@@ -688,14 +724,50 @@ export function LoginPage({
     });
   };
 
-  const handleVerifyAndLogin = (roleToLogin?: "beneficiary" | "field_worker" | "government") => {
+  const handleVerifyAndLogin = (
+    roleToLogin?: "beneficiary" | "field_worker" | "government",
+    customProfile?: any
+  ) => {
     stopAllAudio();
     setIsVerifying(true);
     const targetRole = roleToLogin || selectedRole;
+
+    let profData: any = null;
+    if (targetRole === "beneficiary") {
+      const effectiveGender = customProfile?.gender || loginGender || "male";
+      const effectiveAge = customProfile?.age || loginAge || 28;
+      const effectiveName = customProfile?.fullName || (effectiveGender === "female" ? "सावित्री देवी" : "रमेश सोरेन");
+      const bracket = getNSQFAgeBracket(effectiveAge);
+      const avatar = getAvatarForGender(effectiveGender);
+
+      profData = {
+        fullName: effectiveName,
+        gender: effectiveGender,
+        age: effectiveAge,
+        ageCategory: bracket.badgeLabel,
+        avatarUrl: avatar,
+        district: customProfile?.district || (effectiveGender === "female" ? "Kalahandi" : "Sundargarh"),
+        state: "Odisha",
+        skills: customProfile?.skills || [],
+        nsqfCode: customProfile?.nsqfCode || "",
+        nsqfLevel: customProfile?.nsqfLevel || 0,
+        nsqfCourse: customProfile?.nsqfCourse || "",
+        education: customProfile?.education || "",
+        aspiration: customProfile?.aspiration || "",
+        recommendedPathway: customProfile?.recommendedPathway || "",
+        grantEligibility: customProfile?.grantEligibility || "",
+        matchScore: customProfile?.matchScore || 0
+      };
+
+      try {
+        localStorage.setItem("saksham_beneficiary_profile", JSON.stringify(profData));
+      } catch { }
+    }
+
     setTimeout(() => {
       stopAllAudio();
       setIsVerifying(false);
-      onLoginSuccess(targetRole);
+      onLoginSuccess(targetRole, profData);
     }, 350);
   };
 
@@ -830,8 +902,8 @@ export function LoginPage({
     <div
       translate="no"
       className={`notranslate relative w-full flex flex-col items-center justify-between bg-gradient-to-b from-[#FFFDF9] via-[#FAF6EE] to-[#F5EFE1] text-slate-900 select-none ${isMobile
-          ? "min-h-[100dvh] px-4.5 pt-4 pb-8 overflow-y-auto"
-          : "min-h-screen py-10 px-4"
+        ? "min-h-[100dvh] px-4.5 pt-4 pb-8 overflow-y-auto"
+        : "min-h-screen py-10 px-4"
         }`}
     >
       {/* Background Soft Cloud Glows */}
@@ -845,7 +917,10 @@ export function LoginPage({
       <div className="w-full max-w-md flex items-center justify-between relative z-50 shrink-0 pb-1">
         {onBackToOnboarding ? (
           <button
-            onClick={onBackToOnboarding}
+            onClick={() => {
+              stopAllAudio();
+              onBackToOnboarding();
+            }}
             type="button"
             className="flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-slate-900 bg-white/80 backdrop-blur-md px-3 py-1.5 rounded-full border border-slate-200/90 shadow-2xs transition-all cursor-pointer"
           >
@@ -860,6 +935,32 @@ export function LoginPage({
         )}
 
         <div className="flex items-center gap-2 relative z-50">
+          {/* Top Bar Quick Mute / Unmute Toggle */}
+          <button
+            onClick={handleToggleMute}
+            type="button"
+            title={isMuted ? "Unmute Voice Guidance" : "Mute Voice Guidance"}
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold border transition-all cursor-pointer ${
+              isMuted
+                ? "bg-white/80 text-slate-500 hover:text-slate-800 border-slate-200/90 shadow-2xs hover:bg-white"
+                : isPlayingAudioPrompt
+                ? "bg-purple-600 text-white border-purple-700 shadow-xs ring-2 ring-purple-300"
+                : "bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100 shadow-2xs"
+            }`}
+          >
+            {isMuted ? (
+              <>
+                <VolumeX className="size-3 text-slate-400" />
+                <span>Mute</span>
+              </>
+            ) : (
+              <>
+                <Volume2 className="size-3 text-purple-600 animate-pulse" />
+                <span>{isPlayingAudioPrompt ? "Playing" : "Sound On"}</span>
+              </>
+            )}
+          </button>
+
           <LanguageSelector
             variant="icon"
             currentLanguage={normLang}
@@ -876,19 +977,15 @@ export function LoginPage({
       <div className="w-full max-w-md space-y-4 sm:space-y-5 relative z-10 pt-1">
         {/* Brand Logo Emblem & Unified Header */}
         <div className="flex flex-col items-center text-center space-y-1">
-          <div className="relative size-11 sm:size-12 mb-0.5 flex items-center justify-center">
-            <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-sm">
-              <circle cx="50" cy="40" r="14" fill="#F59E0B" />
-              <path d="M50 14 L50 20" stroke="#F59E0B" strokeWidth="4" strokeLinecap="round" />
-              <path d="M28 22 L33 27" stroke="#F59E0B" strokeWidth="4" strokeLinecap="round" />
-              <path d="M72 22 L67 27" stroke="#F59E0B" strokeWidth="4" strokeLinecap="round" />
-              <circle cx="50" cy="52" r="5" fill="#3B82F6" />
-              <path d="M42 66 C42 58, 58 58, 58 66 Z" fill="#3B82F6" />
-              <circle cx="35" cy="56" r="4.5" fill="#10B981" />
-              <path d="M28 70 C28 63, 42 63, 42 70 Z" fill="#10B981" />
-              <circle cx="65" cy="56" r="4.5" fill="#F97316" />
-              <path d="M58 70 C58 63, 72 63, 72 70 Z" fill="#F97316" />
-            </svg>
+          <div className="relative size-11 sm:size-12 mb-0.5">
+            <Image
+              src="/logo.png"
+              alt="Saksham AI Logo"
+              fill
+              className="object-contain drop-shadow-sm"
+              sizes="48px"
+              priority
+            />
           </div>
           <div className="flex items-center gap-1">
             <span className="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900 font-heading notranslate" translate="no">
@@ -906,13 +1003,39 @@ export function LoginPage({
             {t.subtitle}
           </p>
 
+          {/* Interactive Mute / Unmute System Button */}
           <button
-            onClick={playSpokenHelpPrompt}
+            onClick={handleToggleMute}
             type="button"
-            className="inline-flex items-center gap-1.5 text-[11px] font-bold text-purple-700 bg-purple-100/70 hover:bg-purple-200/70 px-3 py-1 rounded-full border border-purple-200 cursor-pointer mt-1"
+            className={`inline-flex items-center gap-1.5 text-xs font-bold px-3.5 py-1.5 rounded-full border transition-all cursor-pointer mt-1 ${
+              isPlayingAudioPrompt && !isMuted
+                ? "bg-purple-600 text-white border-purple-700 shadow-md shadow-purple-600/30 ring-2 ring-purple-300"
+                : isMuted
+                ? "bg-white/90 text-slate-600 border-slate-300 hover:bg-purple-50 hover:text-purple-700 hover:border-purple-300 shadow-2xs"
+                : "bg-purple-100/80 text-purple-700 border-purple-200 hover:bg-purple-200/80"
+            }`}
+            title={isMuted ? "Tap to unmute voice guide" : "Tap to mute voice guide"}
           >
-            <Volume2 className="size-3.5 text-purple-700 animate-pulse" />
-            <span>{t.listenGuideBtn}</span>
+            {isPlayingAudioPrompt && !isMuted ? (
+              <>
+                <Volume2 className="size-3.5 text-amber-300 animate-pulse" />
+                <span>{normLang === "en" ? "Mute Audio" : "आवाज़ म्यूट करें (Mute)"}</span>
+                <span className="flex h-2 w-2 relative ml-0.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-300"></span>
+                </span>
+              </>
+            ) : isMuted ? (
+              <>
+                <VolumeX className="size-3.5 text-slate-500" />
+                <span>{normLang === "en" ? "Voice Muted • Tap to Listen" : "आवाज़ म्यूट है • निर्देश सुनें (Unmute)"}</span>
+              </>
+            ) : (
+              <>
+                <Volume2 className="size-3.5 text-purple-700 animate-pulse" />
+                <span>{t.listenGuideBtn}</span>
+              </>
+            )}
           </button>
         </div>
 
@@ -1110,6 +1233,95 @@ export function LoginPage({
             )}
           </div>
 
+          {/* Gender & Age (NSQF Categories) for Beneficiary */}
+          {selectedRole === "beneficiary" && (
+            <div className="p-3 bg-purple-50/60 rounded-2xl border border-purple-200/80 space-y-2.5 notranslate" translate="no">
+              {/* Gender Radio */}
+              <div>
+                <span className="text-[11px] font-bold text-slate-700 block mb-1">
+                  Select Gender / लिंग चुनें:
+                </span>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setLoginGender("male");
+                      if (loginName === "सावित्री देवी") setLoginName("Ramesh Soren");
+                    }}
+                    className={`py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer border ${
+                      loginGender === "male"
+                        ? "bg-purple-600 text-white border-purple-600 shadow-xs"
+                        : "bg-white text-slate-700 border-slate-200 hover:bg-purple-50/50"
+                    }`}
+                  >
+                    
+                    <span>Male (पुरुष)</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setLoginGender("female");
+                      if (loginName === "Ramesh Soren") setLoginName("सावित्री देवी");
+                    }}
+                    className={`py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer border ${
+                      loginGender === "female"
+                        ? "bg-purple-600 text-white border-purple-600 shadow-xs"
+                        : "bg-white text-slate-700 border-slate-200 hover:bg-purple-50/50"
+                    }`}
+                  >
+                
+                    <span>Female (महिला)</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Age Input & Live NSQF Category */}
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-[11px] font-bold text-slate-700">
+                    Age & NSQF Category / उम्र:
+                  </span>
+                  <span className="text-[10px] font-extrabold text-purple-700 bg-purple-100/90 px-2 py-0.5 rounded-md">
+                    {getNSQFAgeBracket(loginAge).badgeLabel}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    min={14}
+                    max={90}
+                    value={loginAge}
+                    onChange={(e) => setLoginAge(parseInt(e.target.value, 10) || 18)}
+                    className="w-16 bg-white border border-slate-200 rounded-xl px-2 py-1.5 text-xs font-bold text-slate-900 text-center focus:ring-2 focus:ring-purple-400 focus:outline-none"
+                  />
+
+                  <div className="flex items-center gap-1 flex-1 overflow-x-auto">
+                    {[
+                      { val: 17, label: "17 (<18)" },
+                      { val: 24, label: "24 (>=18)" },
+                      { val: 28, label: "28 (>=18)" },
+                      { val: 52, label: "52 (50+)" }
+                    ].map((item) => (
+                      <button
+                        key={item.val}
+                        type="button"
+                        onClick={() => setLoginAge(item.val)}
+                        className={`px-2 py-1 rounded-lg text-[10px] font-bold transition-all cursor-pointer shrink-0 border ${
+                          loginAge === item.val
+                            ? "bg-purple-600 text-white border-purple-600"
+                            : "bg-white text-slate-600 border-slate-200 hover:bg-purple-50"
+                        }`}
+                      >
+                        {item.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Verify & Login Button with Spring Physics */}
           <motion.button
             whileHover={{ scale: 1.02 }}
@@ -1141,11 +1353,19 @@ export function LoginPage({
             </span>
 
             <div className="grid grid-cols-1 gap-2">
+              {/* Male Demo: Ramesh Soren (Age 28, >=18) */}
               <button
                 onClick={() => {
                   setPhoneNumber("9876543210");
                   setSelectedRole("beneficiary");
-                  handleVerifyAndLogin("beneficiary");
+                  setLoginGender("male");
+                  setLoginAge(28);
+                  handleVerifyAndLogin("beneficiary", {
+                    fullName: "Ramesh Soren",
+                    gender: "male",
+                    age: 28,
+                    district: "Sundargarh"
+                  });
                 }}
                 type="button"
                 className="w-full p-2.5 rounded-xl bg-purple-50/70 hover:bg-purple-100/80 border border-purple-200/80 text-left flex items-center justify-between cursor-pointer transition-colors notranslate"
@@ -1157,14 +1377,48 @@ export function LoginPage({
                   </div>
                   <div>
                     <span className="text-xs font-bold text-slate-900 block">
-                      Ramesh Soren (Rural Beneficiary • 100% Voice)
+                      👨 Ramesh Soren (Male • Age 28 • &gt;=18)
                     </span>
                     <span className="text-[10px] text-slate-500">
-                      Sundargarh, Odisha • Odia/Hindi Speaker
+                      Sundargarh, Odisha • NSQF L4 Pump Specialist
                     </span>
                   </div>
                 </div>
                 <ChevronRight className="size-4 text-purple-600" />
+              </button>
+
+              {/* Female Demo: Savitri Devi (Age 52, 50+) */}
+              <button
+                onClick={() => {
+                  setPhoneNumber("9876543211");
+                  setSelectedRole("beneficiary");
+                  setLoginGender("female");
+                  setLoginAge(52);
+                  handleVerifyAndLogin("beneficiary", {
+                    fullName: "सावित्री देवी (Savitri Devi)",
+                    gender: "female",
+                    age: 52,
+                    district: "Kalahandi"
+                  });
+                }}
+                type="button"
+                className="w-full p-2.5 rounded-xl bg-pink-50/70 hover:bg-pink-100/80 border border-pink-200/80 text-left flex items-center justify-between cursor-pointer transition-colors notranslate"
+                translate="no"
+              >
+                <div className="flex items-center gap-2.5">
+                  <div className="size-8 rounded-lg bg-pink-600 text-white flex items-center justify-center font-bold text-xs">
+                    <UserCheck className="size-4" />
+                  </div>
+                  <div>
+                    <span className="text-xs font-bold text-slate-900 block">
+                      👩 Savitri Devi (Female • Age 52 • 50+)
+                    </span>
+                    <span className="text-[10px] text-slate-500">
+                      Kalahandi, Odisha • NSQF Master Artisan RPL
+                    </span>
+                  </div>
+                </div>
+                <ChevronRight className="size-4 text-pink-600" />
               </button>
 
               <button

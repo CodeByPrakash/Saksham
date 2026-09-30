@@ -70,11 +70,11 @@ export function MobileHeroCard({ onStartVoice, beneficiary }: MobileHeroCardProp
 
       {/* Right 3D Character Artwork: Savitri Devi + Robot Assistant */}
       <div className="absolute right-0 bottom-0 w-48 h-48 flex items-end justify-center pointer-events-none z-10">
-        {/* Savitri Devi with smartphone */}
+        {/* Dynamic Beneficiary Character with smartphone */}
         <div className="relative w-32 h-full">
           <Image
-            src="/landingPage/person_1_landing.webp"
-            alt="Savitri Devi"
+            src={beneficiary?.avatarUrl || "/landingPage/person_1_landing.webp"}
+            alt={currentName}
             fill
             sizes="130px"
             className="object-contain object-bottom drop-shadow-md"

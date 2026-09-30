@@ -46,6 +46,9 @@ export interface BeneficiaryData {
   familyOccupation: string;
   lookingFor: string;
   progressPercent: number;
+  gender?: "male" | "female" | "other";
+  age?: number;
+  ageCategory?: string;
   progressSteps: {
     title: string;
     status: 'completed' | 'active' | 'pending';
@@ -61,6 +64,9 @@ export const CURRENT_BENEFICIARY: BeneficiaryData = {
   education: "10th Pass",
   familyOccupation: "Agriculture",
   lookingFor: "Both (Job & Self-Employment)",
+  gender: "female",
+  age: 52,
+  ageCategory: "50+ (Senior RPL & Master Artisan)",
   progressPercent: 60,
   progressSteps: [
     { title: "Profile Completed", status: "completed" },

@@ -24,6 +24,7 @@ import { CURRENT_BENEFICIARY, BeneficiaryData } from "./DashboardShared";
 import { BeneficiaryProfileData } from "@/components/onboarding/PersonalVoiceOnboarding";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { getNSQFAgeBracket, getAvatarForGender } from "@/lib/nsqfAge";
 
 interface ProfileModalProps {
   isOpen: boolean;
@@ -64,6 +65,12 @@ export function ProfileModal({
   const displayCode = beneficiaryProfile?.nsqfCode || "ELE/Q5901";
   const displayGrant = beneficiaryProfile?.grantEligibility || "₹35,000 Capital Subsidy + ₹3,500/mo Stipend";
 
+  const displayGender = beneficiaryProfile?.gender || profile.gender || "female";
+  const displayAge = beneficiaryProfile?.age || profile.age || (displayGender === "female" ? 52 : 28);
+  const ageBracket = getNSQFAgeBracket(displayAge);
+  const displayAgeCategory = beneficiaryProfile?.ageCategory || ageBracket.badgeLabel;
+  const avatarSrc = profile.avatarUrl || beneficiaryProfile?.avatarUrl || getAvatarForGender(displayGender);
+
   return (
     <AnimatePresence>
       <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-md">
@@ -79,7 +86,7 @@ export function ProfileModal({
             <div className="flex items-center gap-3">
               <div className="relative size-12 rounded-full overflow-hidden border-2 border-white/40 bg-purple-800">
                 <Image
-                  src={profile.avatarUrl}
+                  src={avatarSrc}
                   alt={displayName}
                   fill
                   className="object-cover object-top"
@@ -89,7 +96,13 @@ export function ProfileModal({
                 <h3 className="font-extrabold text-lg tracking-tight font-heading">
                   {displayName}
                 </h3>
-                <p className="text-xs text-purple-200/80">{profile.beneficiaryType}</p>
+                <div className="flex items-center gap-2 text-xs text-purple-200/80">
+                  <span className="capitalize">{displayGender}</span>
+                  <span>•</span>
+                  <span>Age {displayAge}</span>
+                  <span>•</span>
+                  <span className="text-amber-300 font-semibold">{displayAgeCategory}</span>
+                </div>
               </div>
             </div>
 
@@ -126,8 +139,16 @@ export function ProfileModal({
 
               <div className="grid grid-cols-2 gap-2 text-[11px]">
                 <div className="bg-white/10 p-2 rounded-xl">
-                  <span className="text-[10px] text-purple-200 block">Candidate Name</span>
-                  <span className="font-extrabold text-white truncate block">{displayName}</span>
+                  <span className="text-[10px] text-purple-200 block">Candidate & Gender</span>
+                  <span className="font-extrabold text-white truncate block capitalize">
+                    {displayName} ({displayGender})
+                  </span>
+                </div>
+                <div className="bg-white/10 p-2 rounded-xl">
+                  <span className="text-[10px] text-purple-200 block">Age & NSQF Bracket</span>
+                  <span className="font-extrabold text-amber-300 truncate block">
+                    {displayAge} yrs • {displayAgeCategory}
+                  </span>
                 </div>
                 <div className="bg-white/10 p-2 rounded-xl">
                   <span className="text-[10px] text-purple-200 block">Location</span>
@@ -137,7 +158,7 @@ export function ProfileModal({
                   <span className="text-[10px] text-amber-200 block">NSQF Skill Alignment</span>
                   <span className="font-extrabold text-white truncate block">{displayCourse}</span>
                 </div>
-                <div className="bg-white/10 p-2 rounded-xl">
+                <div className="bg-white/10 p-2 rounded-xl col-span-2">
                   <span className="text-[10px] text-emerald-200 block">Capital Support</span>
                   <span className="font-extrabold text-emerald-300 truncate block">{displayGrant}</span>
                 </div>
@@ -162,6 +183,24 @@ export function ProfileModal({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-1">
                   <span className="text-[10px] font-bold text-slate-400 uppercase flex items-center gap-1">
+                    <User className="size-3 text-indigo-600" />
+                    Gender, Age & NSQF
+                  </span>
+                  <div className="flex items-center justify-between">
+                    <p className="font-bold text-slate-900 capitalize">
+                      {displayGender} • {displayAge} yrs
+                    </p>
+                    <span className="text-[9.5px] font-extrabold bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full border border-purple-200">
+                      {displayAgeCategory}
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-slate-500 font-medium">
+                    {ageBracket.description}
+                  </p>
+                </div>
+
+                <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-1">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase flex items-center gap-1">
                     <MapPin className="size-3 text-purple-600" />
                     Location
                   </span>
@@ -180,18 +219,18 @@ export function ProfileModal({
 
                 <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-1">
                   <span className="text-[10px] font-bold text-slate-400 uppercase flex items-center gap-1">
-                    <Sprout className="size-3 text-emerald-600" />
-                    Family Occupation
-                  </span>
-                  <p className="font-bold text-slate-900">{profile.familyOccupation}</p>
-                </div>
-
-                <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-1">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase flex items-center gap-1">
                     <Briefcase className="size-3 text-amber-600" />
                     Looking For
                   </span>
                   <p className="font-bold text-slate-900">{beneficiaryProfile?.aspiration || profile.lookingFor}</p>
+                </div>
+
+                <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-1 sm:col-span-2">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase flex items-center gap-1">
+                    <Sprout className="size-3 text-emerald-600" />
+                    Family Occupation
+                  </span>
+                  <p className="font-bold text-slate-900">{profile.familyOccupation}</p>
                 </div>
               </div>
             </div>

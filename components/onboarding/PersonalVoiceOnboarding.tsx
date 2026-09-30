@@ -49,6 +49,10 @@ export interface BeneficiaryProfileData {
   recommendedPathway: string;
   grantEligibility: string;
   matchScore: number;
+  gender?: "male" | "female" | "other";
+  age?: number;
+  ageCategory?: string;
+  avatarUrl?: string;
 }
 
 interface PersonalVoiceOnboardingProps {
@@ -140,30 +144,6 @@ const ONBOARDING_QUESTIONS: StepQuestion[] = [
           te: "నా పేరు సావిత్రి దేవి, కలహండి ఒడిశా నుండి.",
           ta: "என் பெயர் சாவித்ரி தேவி, காலாஹண்டி ஒடிசா."
         }
-      },
-      {
-        label: {
-          en: "👤 Amit Kumar (Varanasi)",
-          hi: "👤 अमित कुमार (वाराणसी)",
-          or: "👤 ଅମିତ କୁମାର (ବାରାଣାସୀ)",
-          sat: "👤 ᱚᱢᱤᱛ ᱠᱩᱢᱟᱨ (ᱵᱟᱨᱟᱬᱟᱥᱤ)",
-          bn: "👤 অমিত কুমার (বারাণসী)",
-          bho: "👤 अमित कुमार (वाराणसी)",
-          mr: "👤 अमित कुमार (वाराणसी)",
-          te: "👤 అమిత్ కుమార్ (వారణాసి)",
-          ta: "👤 அமித் குமார் (வாரணாசி)"
-        },
-        spokenText: {
-          en: "My name is Amit Kumar, Varanasi Uttar Pradesh.",
-          hi: "मेरा नाम अमित कुमार है, वाराणसी उत्तर प्रदेश।",
-          or: "ମୋର ନାମ ଅମିତ କୁମାର, ବାରାଣାସୀ ଉତ୍ତର ପ୍ରଦେଶ।",
-          sat: "ᱤᱧᱟᱜ ᱧᱩᱛᱩᱢ ᱚᱢᱤᱛ ᱠᱩᱢᱟᱨ ᱠᱟᱱᱟ, ᱵᱟᱨᱟᱬᱟᱥᱤ ᱩᱛᱛᱚᱨ ᱯᱨᱚᱫᱮᱥ ᱠᱷᱚᱱ।",
-          bn: "আমার নাম অমিত কুমার, বারাণসী উত্তর প্রদেশ।",
-          bho: "हमार नाम अमित कुमार ह, वाराणसी उत्तर प्रदेश से।",
-          mr: "माझे नाव अमित कुमार आहे, वाराणसी उत्तर प्रदेश.",
-          te: "నా పేరు అమిత్ కుమార్, వారణాసి ఉత్తర ప్రదేశ్.",
-          ta: "என் பெயர் அமித் குமார், வாரணாசி உத்தரப் பிரதேசம்."
-        }
       }
     ]
   },
@@ -236,30 +216,6 @@ const ONBOARDING_QUESTIONS: StepQuestion[] = [
           te: "ఇంట్లో కుట్టు మిషన్ నడుపుతూ బట్టలు కుడతాను.",
           ta: "வீட்டில் தையல் இயந்திரம் இயக்கி துணிகள் தைக்கிறேன்."
         }
-      },
-      {
-        label: {
-          en: "🔌 Domestic Electrician",
-          hi: "🔌 घरेलू इलेक्ट्रीशियन व वायरिंग",
-          or: "🔌 ଘରୋଇ ଇଲେକ୍ଟ୍ରିସିଆନ୍ ଓ ୱାୟରିଂ",
-          sat: "🔌 ᱚᱲᱟᱜ ᱵᱤᱡᱽᱞᱤ ᱟᱨ ᱣᱟᱭᱨᱤᱝ",
-          bn: "🔌 গৃহস্থালি ইলেকট্রিশিয়ান",
-          bho: "🔌 घरेलू इलेक्ट्रीशियन आ वायरिंग",
-          mr: "🔌 घरगुती इलेक्ट्रिशियन आणि वायरिंग",
-          te: "🔌 గృహ ఎలక్ట్రీషియన్ & వైరింగ్",
-          ta: "🔌 வீட்டு எலக்ட்ரீசியன் & வயரிங்"
-        },
-        spokenText: {
-          en: "I do house wiring, fan and motor electrical repair work in my locality.",
-          hi: "गांव में घरों की वायरिंग और पंखा-मोटर रिपेयर करता हूँ।",
-          or: "ଗାଁରେ ଘରର ୱାୟରିଂ ଏବଂ ପଙ୍ଖା-ମୋଟର ମରାମତି କରେ।",
-          sat: "ᱟᱹᱛᱩ ᱨᱮ ᱚᱲᱟᱜ ᱨᱮᱱᱟᱜ ᱵᱤᱡᱽᱞᱤ ᱣᱟᱭᱨᱤᱝ ᱟᱨ ᱯᱷᱮᱱ-ᱢᱚᱴᱚᱨ ᱴᱷᱤᱠᱟᱹᱧ।",
-          bn: "গ্রামে বাড়ির ওয়্যারিং এবং ফ্যান-মোটর মেরামত করি।",
-          bho: "गांव में घर के वायरिंग आ पंखा-मोटर ठीक करीं ला।",
-          mr: "गावात घरांची वायरिंग आणि पंखा-मोटर दुरुस्त करतो.",
-          te: "గ్రామంలో ఇళ్ల వైరింగ్ మరియు ఫ్యాన్లు, మోటార్లు రిపేర్ చేస్తాను.",
-          ta: "கிராமத்தில் வீட்டு வயரிங் மற்றும் மின் விசிறி, மோட்டார் பழுதுபார்க்கிறேன்."
-        }
       }
     ]
   },
@@ -331,30 +287,6 @@ const ONBOARDING_QUESTIONS: StepQuestion[] = [
           mr: "मी आठवीपर्यंत शाळेत शिकलो आहे.",
           te: "నేను 8వ తరగతి వరకు చదువుకున్నాను.",
           ta: "நான் எட்டாம் வகுப்பு வரை பள்ளியில் படித்துள்ளேன்."
-        }
-      },
-      {
-        label: {
-          en: "🛠️ Practical Learner (5th / Non-formal)",
-          hi: "🛠️ व्यावहारिक हुनर (5वीं / गैर-औपचारिक)",
-          or: "🛠️ ବ୍ୟବହାରିକ ଜ୍ଞାନ (୫ମ / ଅଣ-ଆନୁଷ୍ଠାନିକ)",
-          sat: "🛠️ ᱵᱮᱵᱷᱟᱨᱤᱠ ᱦᱩᱱᱟᱹᱨ (᱕ ᱯᱟᱥ / ᱵᱤᱱᱟᱹ ᱤᱥᱠᱩᱞ)",
-          bn: "🛠️ ব্যবহারিক জ্ঞান (৫ম শ্রেণী / নন-ফর্মাল)",
-          bho: "🛠️ व्यावहारिक हुनर (5वीं / गैर-औपचारिक)",
-          mr: "🛠️ प्रत्यक्ष कामाचा अनुभव (५ वी / अनौपचारिक)",
-          te: "🛠️ ప్రాక్టికల్ అనుభవం (5వ తరగతి)",
-          ta: "🛠️ நேரடி வேலை அனுபவம் (5ஆம் வகுப்பு)"
-        },
-        spokenText: {
-          en: "I studied up to 5th standard, but I have full practical skills and hands-on experience.",
-          hi: "पाँचवीं तक पढ़ा हूँ, लेकिन काम का पूरा हुनर और अनुभव है।",
-          or: "ପଞ୍ଚମ ଯାଏଁ ପଢ଼ିଛି, କିନ୍ତୁ କାମର ପୂରା ଅନୁଭବ ଓ କୌଶଳ ଅଛି।",
-          sat: "᱕ ᱪᱟᱱᱟᱪ ᱦᱟᱹᱵᱤᱡ ᱯᱟᱲᱦᱟᱣ ᱢᱮᱱᱟᱜᱼᱟ, ᱢᱮᱱᱠᱷᱟᱱ ᱠᱟᱹᱢᱤ ᱨᱮᱱᱟᱜ ᱯᱩᱨᱟᱹ ᱦᱩᱱᱟᱹᱨ ᱢᱮᱱᱟᱜᱼᱟ।",
-          bn: "পঞ্চম পর্যন্ত পড়েছি, তবে কাজের পুরো অভিজ্ঞতা ও দক্ষতা রয়েছে।",
-          bho: "पाँचवीं ले पढ़ले बानी, बाकिर काम के पूरा हुनर आ तजुर्बा बा।",
-          mr: "पाचवीपर्यंत शिकलो आहे, पण कामाचा पूर्ण अनुभव आणि कौशल्य आहे.",
-          te: "5వ తరగతి వరకే చదివాను, కానీ పనిలో పూర్తి ప్రాక్టికల్ అనుభవం ఉంది.",
-          ta: "ஐந்தாம் வகுப்பு வரை படித்துள்ளேன், ஆனால் முழுமையான செய்முறை அனுபவம் உள்ளது."
         }
       }
     ]
@@ -2732,13 +2664,13 @@ export function PersonalVoiceOnboarding({
               </AnimatePresence>
             </div>
 
-            {/* Middle Section: Spoken Transcript & Live Passport Preview */}
+            {/* Middle Section: Spoken Action / Transcript & Live Passport Preview */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 items-start">
               {/* Spoken Live Transcript Box & Manual Typing Option */}
-              <div className="bg-white/80 backdrop-blur-md rounded-3xl p-4 border border-slate-200/90 shadow-sm space-y-2.5">
+              <div className="bg-white/90 backdrop-blur-md rounded-3xl p-4 border border-purple-100 shadow-md space-y-3">
                 <div className="flex items-center justify-between text-xs">
                   <span className="font-bold text-slate-700 flex items-center gap-1.5">
-                    <Radio className={`size-3.5 ${isListening ? "text-red-500 animate-pulse" : "text-slate-400"}`} />
+                    <Radio className={`size-3.5 ${isListening ? "text-red-500 animate-pulse" : "text-purple-600"}`} />
                     <span>{isListening ? t.listening : t.yourResponse}</span>
                   </span>
                   
@@ -2758,6 +2690,37 @@ export function PersonalVoiceOnboarding({
                   </button>
                 </div>
 
+                {/* Primary Eye-Catching Giant Speak Button (Immediately Visible Without Scrolling) */}
+                <div className="w-full flex flex-col items-center justify-center py-2.5 bg-gradient-to-b from-purple-50/70 to-indigo-50/50 rounded-2xl border border-purple-200/70 shadow-inner space-y-1.5">
+                  <div className="relative">
+                    {isListening && (
+                      <div className="absolute -inset-3.5 rounded-full bg-red-500/30 animate-ping" />
+                    )}
+                    <motion.button
+                      whileHover={{ scale: 1.08 }}
+                      whileTap={{ scale: 0.94 }}
+                      onClick={toggleListening}
+                      type="button"
+                      aria-label={t.tapMicToSpeak}
+                      className={`size-16 sm:size-18 rounded-full flex items-center justify-center text-white shadow-xl transition-all cursor-pointer ring-4 ${
+                        isListening
+                          ? "bg-gradient-to-r from-red-500 to-rose-600 ring-rose-300 scale-105"
+                          : "bg-gradient-to-r from-[#6B34EB] via-[#7539F4] to-[#8042F6] hover:from-[#5E2DD8] hover:to-[#7335EC] ring-purple-200"
+                      }`}
+                    >
+                      {isListening ? (
+                        <MicOff className="size-8 animate-pulse" />
+                      ) : (
+                        <Mic className="size-8" />
+                      )}
+                    </motion.button>
+                  </div>
+
+                  <span className={`text-xs font-extrabold tracking-wide ${isListening ? "text-rose-600 animate-pulse" : "text-purple-900"}`}>
+                    {isListening ? t.listeningSpeakNow : t.tapMicToSpeak}
+                  </span>
+                </div>
+
                 {/* Inline Manual Typing Editor Box */}
                 {isInlineTyping ? (
                   <div className="space-y-2 p-2.5 rounded-2xl bg-purple-50/50 border border-purple-200">
@@ -2772,7 +2735,7 @@ export function PersonalVoiceOnboarding({
                       <button
                         onClick={() => setIsInlineTyping(false)}
                         type="button"
-                        className="px-2.5 py-1 text-xs font-bold text-slate-500 hover:text-slate-800"
+                        className="px-2.5 py-1 text-xs font-bold text-slate-500 hover:text-slate-800 cursor-pointer"
                       >
                         {t.cancel}
                       </button>
@@ -2787,7 +2750,7 @@ export function PersonalVoiceOnboarding({
                     </div>
                   </div>
                 ) : (
-                  <div className="min-h-[64px] p-3 rounded-2xl bg-slate-50 border border-slate-200/80 text-xs font-medium text-slate-800 flex items-center justify-between group">
+                  <div className="min-h-[52px] p-2.5 rounded-2xl bg-slate-50 border border-slate-200/80 text-xs font-medium text-slate-800 flex items-center justify-between group">
                     {spokenTranscript || getStepExistingResponse(currentStepIndex) ? (
                       <div className="flex-1">
                         <p className="italic font-semibold text-slate-900">"{spokenTranscript || getStepExistingResponse(currentStepIndex)}"</p>
@@ -3225,48 +3188,6 @@ export function PersonalVoiceOnboarding({
                     <span>{t.editAllFields}</span>
                   </button>
                 )}
-              </div>
-            </div>
-
-            {/* Bottom Giant Microphone Action Center */}
-            <div className="w-full flex flex-col items-center justify-center pt-2 pb-1 space-y-2">
-              <div className="relative">
-                {isListening && (
-                  <div className="absolute -inset-4 rounded-full bg-purple-600/30 animate-ping" />
-                )}
-                <motion.button
-                  whileHover={{ scale: 1.06 }}
-                  whileTap={{ scale: 0.94 }}
-                  onClick={toggleListening}
-                  type="button"
-                  aria-label={t.tapMicToSpeak}
-                  className={`size-16 sm:size-18 rounded-full flex items-center justify-center text-white shadow-xl transition-all cursor-pointer ${
-                    isListening
-                      ? "bg-gradient-to-r from-red-500 to-rose-600 scale-105"
-                      : "bg-gradient-to-r from-[#6B34EB] via-[#7539F4] to-[#8042F6] hover:from-[#5E2DD8] hover:to-[#7335EC]"
-                  }`}
-                >
-                  {isListening ? (
-                    <MicOff className="size-8 animate-pulse" />
-                  ) : (
-                    <Mic className="size-8" />
-                  )}
-                </motion.button>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <span className="text-xs font-extrabold text-slate-800">
-                  {isListening ? t.listeningSpeakNow : t.tapMicToSpeak}
-                </span>
-                <span className="text-slate-300">|</span>
-                <button
-                  onClick={() => setIsInlineTyping(true)}
-                  type="button"
-                  className="text-xs font-bold text-purple-700 hover:underline cursor-pointer flex items-center gap-1"
-                >
-                  <Pencil className="size-3" />
-                  <span>{t.typeManually}</span>
-                </button>
               </div>
             </div>
           </div>

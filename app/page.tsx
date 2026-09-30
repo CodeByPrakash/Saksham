@@ -40,8 +40,17 @@ export default function Home() {
     setFlowStage("login");
   };
 
-  const handleLoginSuccess = (role: "beneficiary" | "field_worker" | "government") => {
+  const handleLoginSuccess = (
+    role: "beneficiary" | "field_worker" | "government",
+    profileData?: BeneficiaryProfileData
+  ) => {
     setCurrentMode(role);
+    if (profileData) {
+      setBeneficiaryProfile(profileData);
+      try {
+        localStorage.setItem("saksham_beneficiary_profile", JSON.stringify(profileData));
+      } catch { }
+    }
     if (role === "beneficiary") {
       setFlowStage("personal_onboarding");
     } else {

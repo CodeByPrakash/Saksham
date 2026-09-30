@@ -54,6 +54,7 @@ import { CourseDetailModal } from "./CourseDetailModal";
 import { JobDetailModal } from "./JobDetailModal";
 import { SchemesModal } from "./SchemesModal";
 import { ProfileModal } from "./ProfileModal";
+import { NotificationPopover } from "./NotificationPopover";
 import { GlobalVoiceNavigator } from "@/components/navigation/GlobalVoiceNavigator";
 import { VoiceNavIntent } from "@/lib/ai/voiceNavigation";
 import { BeneficiaryProfileData } from "@/components/onboarding/PersonalVoiceOnboarding";
@@ -67,6 +68,7 @@ import {
 } from "@/lib/skillTrainingGenerator";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { getNSQFAgeBracket, getAvatarForGender } from "@/lib/nsqfAge";
 
 interface WebDashboardProps {
   beneficiaryProfile?: BeneficiaryProfileData | null;
@@ -95,7 +97,11 @@ export function WebDashboard({ beneficiaryProfile }: WebDashboardProps = {}) {
     district: beneficiaryDistrict,
     state: beneficiaryState,
     education: activeProfile?.education || CURRENT_BENEFICIARY.education,
-    lookingFor: activeProfile?.aspiration || CURRENT_BENEFICIARY.lookingFor
+    lookingFor: activeProfile?.aspiration || CURRENT_BENEFICIARY.lookingFor,
+    gender: activeProfile?.gender || CURRENT_BENEFICIARY.gender || "female",
+    age: activeProfile?.age || CURRENT_BENEFICIARY.age || 28,
+    ageCategory: activeProfile?.ageCategory || getNSQFAgeBracket(activeProfile?.age || CURRENT_BENEFICIARY.age || 28).badgeLabel,
+    avatarUrl: activeProfile?.avatarUrl || getAvatarForGender(activeProfile?.gender) || CURRENT_BENEFICIARY.avatarUrl
   };
 
   const [activeMenu, setActiveMenu] = useState<string>("dashboard");
@@ -107,6 +113,7 @@ export function WebDashboard({ beneficiaryProfile }: WebDashboardProps = {}) {
   const [isJobModalOpen, setIsJobModalOpen] = useState<boolean>(false);
   const [isSchemesModalOpen, setIsSchemesModalOpen] = useState<boolean>(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState<boolean>(false);
+  const [isNotificationOpen, setIsNotificationOpen] = useState<boolean>(false);
   const [selectedLang, setSelectedLang] = useState<string>("English");
   const [isLangOpen, setIsLangOpen] = useState<boolean>(false);
 
@@ -242,19 +249,15 @@ export function WebDashboard({ beneficiaryProfile }: WebDashboardProps = {}) {
               className="flex flex-col items-start px-2 cursor-pointer group"
             >
               <div className="flex items-center gap-2.5">
-                <div className="size-9 flex items-center justify-center shrink-0">
-                  <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-xs group-hover:scale-105 transition-transform">
-                    <circle cx="50" cy="40" r="14" fill="#F59E0B" />
-                    <path d="M50 14 L50 20" stroke="#F59E0B" strokeWidth="4" strokeLinecap="round" />
-                    <path d="M28 22 L33 27" stroke="#F59E0B" strokeWidth="4" strokeLinecap="round" />
-                    <path d="M72 22 L67 27" stroke="#F59E0B" strokeWidth="4" strokeLinecap="round" />
-                    <circle cx="50" cy="52" r="5" fill="#3B82F6" />
-                    <path d="M42 66 C42 58, 58 58, 58 66 Z" fill="#3B82F6" />
-                    <circle cx="35" cy="56" r="4.5" fill="#10B981" />
-                    <path d="M28 70 C28 63, 42 63, 42 70 Z" fill="#10B981" />
-                    <circle cx="65" cy="56" r="4.5" fill="#F97316" />
-                    <path d="M58 70 C58 63, 72 63, 72 70 Z" fill="#F97316" />
-                  </svg>
+                <div className="size-9 shrink-0 relative group-hover:scale-105 transition-transform">
+                  <Image
+                    src="/logo.png"
+                    alt="Saksham AI Logo"
+                    fill
+                    className="object-contain"
+                    sizes="36px"
+                    priority
+                  />
                 </div>
 
                 <div className="flex flex-col">
@@ -284,11 +287,10 @@ export function WebDashboard({ beneficiaryProfile }: WebDashboardProps = {}) {
                       if (item.id === "messages") setIsVoiceModalOpen(true);
                       if (item.id === "self_employment") setIsSchemesModalOpen(true);
                     }}
-                    className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-2xl text-xs xl:text-sm font-bold transition-all cursor-pointer text-left ${
-                      isActive
+                    className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-2xl text-xs xl:text-sm font-bold transition-all cursor-pointer text-left ${isActive
                         ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md shadow-purple-600/25 font-extrabold"
                         : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/70"
-                    }`}
+                      }`}
                   >
                     <Icon className={`size-4 xl:size-4.5 shrink-0 ${isActive ? "text-white" : "text-slate-500"}`} />
                     <span>{item.label}</span>
@@ -397,9 +399,9 @@ export function WebDashboard({ beneficiaryProfile }: WebDashboardProps = {}) {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => setIsVoiceModalOpen(true)}
+                onClick={() => setIsNotificationOpen(true)}
                 className="relative size-10 rounded-2xl bg-white hover:bg-slate-50 border border-slate-200/90 flex items-center justify-center text-slate-700 shadow-2xs cursor-pointer"
-                title="Notifications & Alerts"
+                title="Notifications & Alerts (सूचनाएं)"
               >
                 <Bell className="size-4.5" />
                 <span className="absolute top-2 right-2 size-2 rounded-full bg-red-500 ring-2 ring-white"></span>
@@ -507,18 +509,18 @@ export function WebDashboard({ beneficiaryProfile }: WebDashboardProps = {}) {
                       </div>
                     </div>
 
-                    <div className="relative z-10 hidden sm:flex items-end justify-center w-64 xl:w-72 h-44 xl:h-48 shrink-0">
-                      <div className="relative w-36 xl:w-40 h-full">
+                    <div className="relative z-10 hidden sm:flex items-end justify-center w-72 xl:w-80 h-[210px] xl:h-[235px] -mb-6 xl:-mb-8 shrink-0 pointer-events-none select-none">
+                      <div className="relative w-40 xl:w-48 h-full">
                         <Image
-                          src="/landingPage/person_2_landing.webp"
+                          src={currentBeneficiaryData.avatarUrl}
                           alt={beneficiaryName}
                           fill
-                          className="object-contain object-bottom drop-shadow-md"
+                          className="object-contain object-bottom drop-shadow-xl"
                           priority
                         />
                       </div>
 
-                      <div className="relative w-24 xl:w-28 h-32 mb-2 animate-float">
+                      <div className="relative w-24 xl:w-28 h-32 mb-6 xl:mb-8 -ml-3 animate-float pointer-events-auto">
                         <Image
                           src="/landingPage/ai_2_landing.webp"
                           alt="AI Assistant Bot"
@@ -617,13 +619,12 @@ export function WebDashboard({ beneficiaryProfile }: WebDashboardProps = {}) {
                             />
                             <div className="absolute top-2.5 right-2.5">
                               <span
-                                className={`text-[9px] font-extrabold uppercase px-2.5 py-1 rounded-full shadow-xs ${
-                                  course.badgeColor === "blue"
+                                className={`text-[9px] font-extrabold uppercase px-2.5 py-1 rounded-full shadow-xs ${course.badgeColor === "blue"
                                     ? "bg-blue-600 text-white"
                                     : course.badgeColor === "amber"
-                                    ? "bg-amber-500 text-white"
-                                    : "bg-emerald-600 text-white"
-                                }`}
+                                      ? "bg-amber-500 text-white"
+                                      : "bg-emerald-600 text-white"
+                                  }`}
                               >
                                 {course.badge}
                               </span>
@@ -673,7 +674,7 @@ export function WebDashboard({ beneficiaryProfile }: WebDashboardProps = {}) {
                       <div className="flex items-center gap-3">
                         <div className="relative size-12 rounded-2xl overflow-hidden border border-purple-200">
                           <Image
-                            src={CURRENT_BENEFICIARY.avatarUrl}
+                            src={currentBeneficiaryData.avatarUrl}
                             alt={beneficiaryName}
                             fill
                             className="object-cover object-top"
@@ -683,9 +684,14 @@ export function WebDashboard({ beneficiaryProfile }: WebDashboardProps = {}) {
                           <h4 className="font-extrabold text-slate-900 text-sm xl:text-base font-heading">
                             {beneficiaryName}
                           </h4>
-                          <p className="text-[10px] font-bold text-purple-700">
-                            {CURRENT_BENEFICIARY.beneficiaryType}
-                          </p>
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="text-[10px] font-bold text-purple-700">
+                              {CURRENT_BENEFICIARY.beneficiaryType}
+                            </span>
+                            <span className="text-[9.5px] font-extrabold bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full border border-purple-200">
+                              {currentBeneficiaryData.ageCategory}
+                            </span>
+                          </div>
                         </div>
                       </div>
 
@@ -699,6 +705,14 @@ export function WebDashboard({ beneficiaryProfile }: WebDashboardProps = {}) {
                     </div>
 
                     <div className="space-y-2 text-xs text-slate-600 font-medium pt-1">
+                      <div className="flex items-center gap-2">
+                        <User className="size-3.5 text-indigo-600 shrink-0" />
+                        <span className="capitalize font-semibold text-slate-800">{currentBeneficiaryData.gender}</span>
+                        <span className="text-slate-300">•</span>
+                        <span>Age <strong className="text-slate-800 font-bold">{currentBeneficiaryData.age}</strong></span>
+                        <span className="text-slate-300">•</span>
+                        <span className="text-purple-700 font-semibold">{currentBeneficiaryData.ageCategory}</span>
+                      </div>
                       <div className="flex items-center gap-2">
                         <MapPin className="size-3.5 text-purple-600 shrink-0" />
                         <span>{beneficiaryDistrict}, {beneficiaryState}</span>
@@ -787,13 +801,12 @@ export function WebDashboard({ beneficiaryProfile }: WebDashboardProps = {}) {
                               <div className="size-4 rounded-full border border-slate-300 shrink-0"></div>
                             )}
                             <span
-                              className={`font-semibold text-[11px] truncate ${
-                                step.status === "active"
+                              className={`font-semibold text-[11px] truncate ${step.status === "active"
                                   ? "text-purple-700 font-extrabold"
                                   : step.status === "completed"
-                                  ? "text-slate-800"
-                                  : "text-slate-400"
-                              }`}
+                                    ? "text-slate-800"
+                                    : "text-slate-400"
+                                }`}
                             >
                               {step.title}
                             </span>
@@ -833,15 +846,14 @@ export function WebDashboard({ beneficiaryProfile }: WebDashboardProps = {}) {
                         >
                           <div className="flex items-center gap-2.5">
                             <div
-                              className={`size-8 rounded-xl flex items-center justify-center shrink-0 ${
-                                step.color === "purple"
+                              className={`size-8 rounded-xl flex items-center justify-center shrink-0 ${step.color === "purple"
                                   ? "bg-purple-100 text-purple-700"
                                   : step.color === "amber"
-                                  ? "bg-amber-100 text-amber-700"
-                                  : step.color === "blue"
-                                  ? "bg-blue-100 text-blue-700"
-                                  : "bg-emerald-100 text-emerald-700"
-                              }`}
+                                    ? "bg-amber-100 text-amber-700"
+                                    : step.color === "blue"
+                                      ? "bg-blue-100 text-blue-700"
+                                      : "bg-emerald-100 text-emerald-700"
+                                }`}
                             >
                               {step.iconName === "mic" && <Mic className="size-4" />}
                               {step.iconName === "book" && <GraduationCap className="size-4" />}
@@ -1113,17 +1125,15 @@ export function WebDashboard({ beneficiaryProfile }: WebDashboardProps = {}) {
                         <button
                           key={sec.id}
                           onClick={() => setTrainingFilter(sec.id)}
-                          className={`px-3 py-1.5 rounded-2xl text-xs font-bold shrink-0 flex items-center gap-1.5 cursor-pointer transition-all border ${
-                            isActive
+                          className={`px-3 py-1.5 rounded-2xl text-xs font-bold shrink-0 flex items-center gap-1.5 cursor-pointer transition-all border ${isActive
                               ? "bg-purple-600 border-purple-700 text-white shadow-xs font-extrabold"
                               : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100"
-                          }`}
+                            }`}
                         >
                           <span>{sec.name}</span>
                           <span
-                            className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
-                              isActive ? "bg-white/25 text-white" : "bg-slate-200 text-slate-600"
-                            }`}
+                            className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${isActive ? "bg-white/25 text-white" : "bg-slate-200 text-slate-600"
+                              }`}
                           >
                             {count}
                           </span>
@@ -1238,11 +1248,10 @@ export function WebDashboard({ beneficiaryProfile }: WebDashboardProps = {}) {
                       <button
                         key={f}
                         onClick={() => setJobFilter(f)}
-                        className={`px-3 py-1.5 rounded-xl font-bold transition-all cursor-pointer ${
-                          jobFilter === f
+                        className={`px-3 py-1.5 rounded-xl font-bold transition-all cursor-pointer ${jobFilter === f
                             ? "bg-purple-600 text-white shadow-xs"
                             : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                        }`}
+                          }`}
                       >
                         {f === "all" ? "All Jobs" : f.charAt(0).toUpperCase() + f.slice(1)}
                       </button>
@@ -1372,23 +1381,21 @@ export function WebDashboard({ beneficiaryProfile }: WebDashboardProps = {}) {
                     {CURRENT_BENEFICIARY.progressSteps.map((step, idx) => (
                       <div
                         key={idx}
-                        className={`p-3.5 rounded-2xl border flex items-center justify-between ${
-                          step.status === "completed"
+                        className={`p-3.5 rounded-2xl border flex items-center justify-between ${step.status === "completed"
                             ? "bg-emerald-50/60 border-emerald-200"
                             : step.status === "active"
-                            ? "bg-purple-50/70 border-purple-200"
-                            : "bg-slate-50 border-slate-200"
-                        }`}
+                              ? "bg-purple-50/70 border-purple-200"
+                              : "bg-slate-50 border-slate-200"
+                          }`}
                       >
                         <div className="flex items-center gap-3">
                           <div
-                            className={`size-6 rounded-full flex items-center justify-center font-bold text-xs ${
-                              step.status === "completed"
+                            className={`size-6 rounded-full flex items-center justify-center font-bold text-xs ${step.status === "completed"
                                 ? "bg-emerald-600 text-white"
                                 : step.status === "active"
-                                ? "bg-purple-600 text-white animate-pulse"
-                                : "bg-slate-300 text-slate-600"
-                            }`}
+                                  ? "bg-purple-600 text-white animate-pulse"
+                                  : "bg-slate-300 text-slate-600"
+                              }`}
                           >
                             {step.status === "completed" ? "✓" : idx + 1}
                           </div>
@@ -1396,13 +1403,12 @@ export function WebDashboard({ beneficiaryProfile }: WebDashboardProps = {}) {
                         </div>
 
                         <span
-                          className={`text-[11px] font-extrabold uppercase px-2.5 py-0.5 rounded-full ${
-                            step.status === "completed"
+                          className={`text-[11px] font-extrabold uppercase px-2.5 py-0.5 rounded-full ${step.status === "completed"
                               ? "bg-emerald-100 text-emerald-700"
                               : step.status === "active"
-                              ? "bg-purple-100 text-purple-700"
-                              : "bg-slate-200 text-slate-500"
-                          }`}
+                                ? "bg-purple-100 text-purple-700"
+                                : "bg-slate-200 text-slate-500"
+                            }`}
                         >
                           {step.status}
                         </span>
@@ -1489,6 +1495,11 @@ export function WebDashboard({ beneficiaryProfile }: WebDashboardProps = {}) {
         onClose={() => setIsProfileModalOpen(false)}
         beneficiary={currentBeneficiaryData}
         beneficiaryProfile={activeProfile}
+      />
+
+      <NotificationPopover
+        isOpen={isNotificationOpen}
+        onClose={() => setIsNotificationOpen(false)}
       />
     </div>
   );

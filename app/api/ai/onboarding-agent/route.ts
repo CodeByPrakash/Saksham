@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateGoogleSpeechBase64 } from "@/lib/ai/gemini";
+import { getNSQFAgeBracket, getAvatarForGender } from "@/lib/nsqfAge";
 
 export const maxDuration = 30;
 
@@ -96,19 +97,20 @@ export async function POST(req: NextRequest) {
     const stepPrompts: Record<string, string> = {
       name_location: `
 You are an AI Onboarding Agent for PM-AJAY rural livelihood platform (Saksham-AI).
-Question asked: "What is your name and which village or district are you from?"
+Question asked: "What is your name, age, gender, and which village or district are you from?"
 User's spoken answer: "${userSpokenText}"
 
-CRITICAL RULES FOR FULL NAME EXTRACTION:
+CRITICAL RULES FOR EXTRACTION:
 1. Extract STRICTLY the human person's name (e.g. "Omprakash", "Ramesh Soren", "Amit Kumar", "Savitri Devi").
 2. NEVER include prepositions, location connectors, or filler words like "from", "form", "se", "is", "am", "i am", "of", "and", "hail from", "rehta hu", "district", "village", "city" in fullName!
-   - BAD: "Omprakash from", "Ramesh from Sundargarh", "Amit Kumar Varanasi se"
-   - GOOD: "Omprakash", "Ramesh Soren", "Amit Kumar"
 3. Extract:
    - fullName: string (only the clean first and last name, capitalized)
+   - gender: "male" | "female" | "other" (determine from words like male/female/purush/mahila/devi/kumar/etc.)
+   - age: number (e.g. 28, 52, 19, etc. If not explicitly spoken, infer from standard context or default to 28)
+   - ageCategory: string ("<18 (Pre-Vocational / Foundation)" if age < 18, "50+ (Senior RPL & Master Artisan)" if age >= 50, otherwise ">=18 (NSQF L3–5 Core & RPL)")
    - district: string (e.g. "Sundargarh", "Kalahandi", "Mayurbhanj", "Varanasi", etc.)
    - state: string (e.g. "Odisha", "Jharkhand", "Uttar Pradesh", "Bihar", etc.)
-4. Provide a warm 1-sentence feedback in ${language === "hi" ? "Hindi" : language === "or" ? "Odia" : "English"} acknowledging their name and district.
+4. Provide a warm 1-sentence feedback in ${language === "hi" ? "Hindi" : language === "or" ? "Odia" : "English"} acknowledging their name, age, and district.
 `,
       skills_experience: `
 You are an AI Skill Ontology Agent for PM-AJAY & National Skills Qualifications Framework (NSQF).
@@ -331,20 +333,48 @@ function fallbackHeuristicExtraction(step: string, text: string, language: strin
       name = "Ramesh Soren";
     }
 
+    // Detect gender
+    const isFemale = /महिला|mahila|aurat|devi|kumari|sharma|didi|girl|woman|female|सावित्री|savitri/i.test(text);
+    const gender: "male" | "female" = isFemale ? "female" : "male";
+
+    // Detect age if mentioned (e.g., "28 साल", "52 years", "19 वर्ष", "35")
+    const ageMatch = text.match(/\b(\d{1,2})\s*(?:साल|saal|sal|वर्ष|varsh|years?|yr|barsa|bochhor)?\b/);
+    let parsedAge = 28;
+    if (ageMatch && ageMatch[1]) {
+      const num = parseInt(ageMatch[1], 10);
+      if (num >= 14 && num <= 90) {
+        parsedAge = num;
+      }
+    }
+    if (isFemale && /savitri|सावित्री/i.test(text)) {
+      parsedAge = 52;
+    }
+
+    const ageBracket = getNSQFAgeBracket(parsedAge);
+    const avatar = getAvatarForGender(gender);
+
     const greeting =
       cleanLang === "hi"
-        ? `नमस्ते ${name} जी! हमने आपका गृह जिला ${district} सफलतापूर्वक जोड़ लिया है।`
+        ? `नमस्ते ${name} जी! आपकी आयु ${parsedAge} वर्ष (श्रेणी: ${ageBracket.tag}) और गृह जिला ${district} सफलतापूर्वक दर्ज हो गई है।`
         : cleanLang === "or"
-        ? `ନମସ୍କାର ${name} ଆଜ୍ଞା! ଆପଣଙ୍କ ଜିଲ୍ଲା ${district} ଯୋଡ଼ାଗଲା।`
+        ? `ନମସ୍କାର ${name} ଆଜ୍ଞା! ଆପଣଙ୍କ ବୟସ ${parsedAge} ବର୍ଷ (${ageBracket.tag}) ଏବଂ ଜିଲ୍ଲା ${district} ଯୋଡ଼ାଗଲା।`
         : cleanLang === "sat"
-        ? `ᱡᱚᱦᱟᱨ ${name}! ᱟᱢᱟᱜ ᱡᱤᱞᱟ ${district} ᱨᱮᱠᱚᱨᱰ ᱮᱱᱟ᱾`
+        ? `ᱡᱚᱦᱟᱨ ${name}! ᱟᱢᱟᱜ ᱩᱢᱮᱨ ${parsedAge} ᱥᱮᱨᱢᱟ ᱟᱨ ᱡᱤᱞᱟ ${district} ᱨᱮᱠᱚᱨᱰ ᱮᱱᱟ᱾`
         : cleanLang === "bn"
-        ? `নমস্কার ${name}! আপনার জেলা ${district} সফলভাবে যুক্ত হয়েছে।`
-        : `Namaste ${name}! We have recorded your district as ${district}.`;
+        ? `নমস্কার ${name}! আপনার বয়স ${parsedAge} এবং জেলা ${district} সফলভাবে যুক্ত হয়েছে।`
+        : `Namaste ${name}! Your age ${parsedAge} (${ageBracket.tag}) and district ${district} have been recorded.`;
 
     return {
       isRelevant: true,
-      extractedData: { fullName: name, district: district, state: state },
+      extractedData: {
+        fullName: name,
+        gender: gender,
+        age: parsedAge,
+        ageCategory: ageBracket.badgeLabel,
+        avatarUrl: avatar,
+        district: district,
+        state: state
+      },
       feedbackText: greeting
     };
   }

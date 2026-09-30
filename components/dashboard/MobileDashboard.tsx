@@ -40,9 +40,11 @@ import {
 import { VoiceAssistantModal } from "./VoiceAssistantModal";
 import { SchemesModal } from "./SchemesModal";
 import { ProfileModal } from "./ProfileModal";
+import { NotificationPopover } from "./NotificationPopover";
 import { GlobalVoiceNavigator } from "@/components/navigation/GlobalVoiceNavigator";
 import { VoiceNavIntent } from "@/lib/ai/voiceNavigation";
 import { BeneficiaryProfileData } from "@/components/onboarding/PersonalVoiceOnboarding";
+import { getNSQFAgeBracket, getAvatarForGender } from "@/lib/nsqfAge";
 
 interface MobileDashboardProps {
   initialTab?: MobileTab;
@@ -76,7 +78,11 @@ export function MobileDashboard({
     district: activeProfile?.district || CURRENT_BENEFICIARY.district,
     state: activeProfile?.state || CURRENT_BENEFICIARY.state,
     education: activeProfile?.education || CURRENT_BENEFICIARY.education,
-    lookingFor: activeProfile?.aspiration || CURRENT_BENEFICIARY.lookingFor
+    lookingFor: activeProfile?.aspiration || CURRENT_BENEFICIARY.lookingFor,
+    gender: activeProfile?.gender || CURRENT_BENEFICIARY.gender || "female",
+    age: activeProfile?.age || CURRENT_BENEFICIARY.age || 28,
+    ageCategory: activeProfile?.ageCategory || getNSQFAgeBracket(activeProfile?.age || CURRENT_BENEFICIARY.age || 28).badgeLabel,
+    avatarUrl: activeProfile?.avatarUrl || getAvatarForGender(activeProfile?.gender) || CURRENT_BENEFICIARY.avatarUrl
   };
 
   const [selectedCourse, setSelectedCourse] = useState<CourseItem | null>(() => {
@@ -95,6 +101,7 @@ export function MobileDashboard({
   const [voiceAssistantInitialPrompt, setVoiceAssistantInitialPrompt] = useState<string>("");
   const [isSchemesModalOpen, setIsSchemesModalOpen] = useState<boolean>(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState<boolean>(false);
+  const [isNotificationOpen, setIsNotificationOpen] = useState<boolean>(false);
 
   const handleOpenCourse = (course: CourseItem) => {
     setSelectedJob(null);
@@ -205,6 +212,7 @@ export function MobileDashboard({
         beneficiary={currentBeneficiaryData}
         onOpenVoice={() => setIsVoiceModalOpen(true)}
         onOpenProfile={() => setIsProfileModalOpen(true)}
+        onOpenNotifications={() => setIsNotificationOpen(true)}
         onLogoClick={() => {
           setSelectedCourse(null);
           setSelectedJob(null);
@@ -422,6 +430,11 @@ export function MobileDashboard({
         onClose={() => setIsProfileModalOpen(false)}
         beneficiary={currentBeneficiaryData}
         beneficiaryProfile={activeProfile}
+      />
+
+      <NotificationPopover
+        isOpen={isNotificationOpen}
+        onClose={() => setIsNotificationOpen(false)}
       />
     </div>
   );
