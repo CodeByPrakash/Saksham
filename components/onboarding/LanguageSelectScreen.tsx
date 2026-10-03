@@ -14,12 +14,14 @@ import {
   Sparkles,
   Sparkle,
   Radio,
-  X
+  X,
+  Home
 } from "lucide-react";
 import { LANGUAGES, LanguageOption } from "@/components/navigation/LanguageSelector";
 
 interface LanguageSelectScreenProps {
   onLanguageSelected: (langCode: string) => void;
+  onBackToLanding?: () => void;
   initialLanguage?: string;
   isMobile?: boolean;
 }
@@ -100,6 +102,7 @@ const FEATURED_LANGUAGES: {
 
 export function LanguageSelectScreen({
   onLanguageSelected,
+  onBackToLanding,
   initialLanguage = "hi",
   isMobile = false
 }: LanguageSelectScreenProps) {
@@ -129,7 +132,7 @@ export function LanguageSelectScreen({
     };
   }, []);
 
-  // Sync mute state and play initial audio prompt on mount if not muted
+  // Sync mute state and play initial audio prompt on mount ONLY on mobile (never play automatically on desktop initially)
   useEffect(() => {
     if (typeof window !== "undefined") {
       try {
@@ -137,19 +140,27 @@ export function LanguageSelectScreen({
         if (savedMute === "true") {
           setIsMuted(true);
         } else {
+          // Do NOT play starting audio on desktop initially
+          const isDesktop = !isMobile || (typeof window !== "undefined" && window.innerWidth >= 768);
+          if (isDesktop) {
+            return;
+          }
           playSpokenPrompt(
             "नमस्ते! कृपया अपनी पसंदीदा भाषा चुनें। Please select your preferred language.",
             "hi"
           );
         }
       } catch {
-        playSpokenPrompt(
-          "नमस्ते! कृपया अपनी पसंदीदा भाषा चुनें। Please select your preferred language.",
-          "hi"
-        );
+        const isDesktop = !isMobile || (typeof window !== "undefined" && window.innerWidth >= 768);
+        if (!isDesktop) {
+          playSpokenPrompt(
+            "नमस्ते! कृपया अपनी पसंदीदा भाषा चुनें। Please select your preferred language.",
+            "hi"
+          );
+        }
       }
     }
-  }, []);
+  }, [isMobile]);
 
   const stopAllVoiceAndAudio = () => {
     audioRequestIdRef.current++;
@@ -764,10 +775,32 @@ export function LanguageSelectScreen({
       </div>
 
       {/* Top Header */}
-      <div className="w-full flex items-center justify-between relative z-10 shrink-0 pb-1">
-        <div className="flex items-center gap-1.5 bg-white/85 backdrop-blur-md px-2.5 py-1 rounded-full text-[11px] font-bold text-purple-800 border border-amber-100/80 shadow-2xs">
-          <Globe className="size-3.5 text-purple-600 animate-spin-slow" />
-          <span>Language Setup • भाषा चयन</span>
+      <div className="w-full flex items-center justify-between relative z-10 shrink-0 pb-1 gap-2">
+        <div className="flex items-center gap-1.5">
+          {/* Landing Page Button */}
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => {
+              stopAllVoiceAndAudio();
+              if (onBackToLanding) {
+                onBackToLanding();
+              } else if (typeof window !== "undefined") {
+                window.location.href = "/";
+              }
+            }}
+            type="button"
+            className="flex items-center gap-1.5 bg-white/95 hover:bg-white text-slate-800 hover:text-purple-700 px-3 py-1 rounded-full text-[11px] font-bold border border-slate-200/90 shadow-2xs transition-all cursor-pointer select-none active:scale-95"
+            title="Go to Landing Page (मुख्य पृष्ठ पर जाएँ)"
+          >
+            <Home className="size-3.5 text-purple-600" />
+            <span>Landing Page</span>
+          </motion.button>
+
+          <div className="hidden sm:flex items-center gap-1.5 bg-white/85 backdrop-blur-md px-2.5 py-1 rounded-full text-[11px] font-bold text-purple-800 border border-amber-100/80 shadow-2xs">
+            <Globe className="size-3.5 text-purple-600 animate-spin-slow" />
+            <span>Language Setup</span>
+          </div>
         </div>
 
         {/* Voice Toggle Button: Mute / Voice ON */}

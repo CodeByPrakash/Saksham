@@ -16,13 +16,18 @@ import {
   GraduationCap,
   Briefcase,
   MapPin,
-  Heart
+  Heart,
+  PlayCircle,
+  Smartphone,
+  Film
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { MobilePhoneMockup } from "@/components/demo/MobilePhoneMockup";
 
 interface OnboardingFlowProps {
   onFinish: (targetMode?: "beneficiary" | "field_worker" | "government") => void;
+  onBackToLanding?: () => void;
   isMobile?: boolean;
   initialLanguage?: string;
   onLanguageChange?: (langCode: string) => void;
@@ -45,6 +50,7 @@ const slideVariants = {
 
 export function OnboardingFlow({
   onFinish,
+  onBackToLanding,
   isMobile = false,
   initialLanguage = "hi",
   onLanguageChange
@@ -73,6 +79,19 @@ export function OnboardingFlow({
     setDirection(nextSlide > mobileSlide ? 1 : -1);
     setMobileSlide(nextSlide);
   };
+
+  const handleBackToLanding = () => {
+    if (onBackToLanding) {
+      onBackToLanding();
+    } else {
+      setMobileSlide(-1);
+      if (typeof window !== "undefined") {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    }
+  };
+
+  const [heroViewMode, setHeroViewMode] = useState<"demo" | "voice">("demo");
 
   const [activeVoicePhrase, setActiveVoicePhrase] = useState<string>(
     "खेती करता हूं और थोड़ा बहुत मोटर और पंप का काम भी कर लेता हूं।"
@@ -133,6 +152,7 @@ export function OnboardingFlow({
                 handleLanguageUpdate(code);
                 goToSlide(0);
               }}
+              onBackToLanding={handleBackToLanding}
               initialLanguage={currentLanguage}
               isMobile={isNative}
             />
@@ -242,7 +262,7 @@ export function OnboardingFlow({
       {!isMobile && (
         <div className="hidden md:flex w-full flex-col items-center space-y-12">
           {/* Hero Section with bg_component.png as Scenic Canvas */}
-          <section className="relative w-full min-h-[640px] lg:min-h-[720px] flex items-center justify-center overflow-hidden border-b border-slate-200">
+          <section className="relative w-full min-h-[680px] lg:min-h-[760px] flex items-center justify-center overflow-hidden border-b border-slate-200">
             {/* Background Widescreen Village Illustration */}
             <div className="absolute inset-0 z-0">
               <Image
@@ -252,12 +272,13 @@ export function OnboardingFlow({
                 className="object-cover object-bottom"
                 priority
               />
-              <div className="absolute inset-0 bg-gradient-to-r from-slate-950/85 via-slate-950/60 to-transparent lg:w-3/5" />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/40 via-transparent to-white/10" />
+              {/* Fully blended continuous gradient across the entire width (no hard vertical cut-off) */}
+              <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-950/65 to-slate-950/30" />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-black/20" />
             </div>
 
             {/* Hero Foreground Content */}
-            <div className="relative z-10 w-full max-w-7xl mx-auto px-4 py-12 flex flex-col lg:flex-row items-center justify-between gap-8">
+            <div className="relative z-10 w-full max-w-7xl mx-auto px-4 py-10 flex flex-col lg:flex-row items-center justify-between gap-8">
               {/* Left Column */}
               <div className="w-full lg:max-w-xl space-y-6 text-white text-center lg:text-left">
                 <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20 text-xs font-semibold">
@@ -332,79 +353,13 @@ export function OnboardingFlow({
                 </div>
               </div>
 
-              {/* Right Column: Hero Spotlight Graphic (Desktop Showcase) */}
+              {/* Right Column: Mobile Phone SVG with YouTube Video Demo */}
               <div className="relative w-full max-w-md lg:max-w-lg flex items-center justify-center">
-                <div className="relative w-[360px] sm:w-[420px] h-[520px] rounded-3xl bg-white/20 backdrop-blur-md border border-white/30 shadow-2xl p-6 flex flex-col justify-between overflow-hidden">
-                  <div className="absolute top-0 right-0 size-56 bg-amber-400/25 rounded-full blur-3xl pointer-events-none" />
-                  <div className="absolute bottom-0 left-0 size-56 bg-purple-600/30 rounded-full blur-3xl pointer-events-none" />
-
-                  {/* Top Bar on Hero Card */}
-                  <div className="flex items-center justify-between z-10">
-                    <div className="flex items-center gap-2 bg-white/90 px-3.5 py-1.5 rounded-full text-slate-900 shadow-xs border border-white/50">
-                      <span className="size-2 rounded-full bg-emerald-500 animate-ping" />
-                      <span className="text-xs font-bold text-slate-800">AI Voice Assistant Ready</span>
-                    </div>
-
-                    <Badge variant="purple" className="text-xs shadow-xs">
-                      Odia • हिन्दी • English
-                    </Badge>
-                  </div>
-
-                  {/* Center Character (person_1_landing.webp) */}
-                  <div className="relative flex-1 w-full flex items-center justify-center my-2">
-                    <div className="relative w-[280px] h-[320px] animate-float">
-                      <Image
-                        src="/landingPage/person_1_landing.webp"
-                        alt="Young beneficiary using Sakhyam-AI voice app"
-                        fill
-                        sizes="320px"
-                        quality={90}
-                        className="object-contain drop-shadow-2xl"
-                        priority
-                      />
-
-                      {/* Floating Voice Waves */}
-                      <div className="absolute left-6 top-10 flex items-center gap-1.5 bg-purple-600 text-white px-2.5 py-1.5 rounded-2xl shadow-lg border border-purple-400">
-                        <Mic className="size-4 animate-pulse" />
-                        <span className="w-1 h-3 bg-white rounded-full animate-bounce"></span>
-                        <span className="w-1 h-5 bg-white rounded-full animate-bounce" style={{ animationDelay: "100ms" }}></span>
-                        <span className="w-1 h-4 bg-white rounded-full animate-bounce" style={{ animationDelay: "200ms" }}></span>
-                      </div>
-
-                      {/* Floating Badge */}
-                      <div className="absolute -left-3 bottom-6 z-20 flex items-center gap-2 bg-white/95 text-slate-900 px-3.5 py-2 rounded-2xl shadow-xl border border-purple-100">
-                        <div className="size-6 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center font-bold text-xs">
-                          🗣️
-                        </div>
-                        <span className="text-xs font-extrabold whitespace-nowrap">
-                          Speak in your language
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Bottom Interactive Quick Audio Trigger */}
-                  <div className="z-10 bg-white/90 backdrop-blur-md p-3.5 rounded-2xl border border-white/60 shadow-md space-y-2">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="font-bold text-slate-800">Sample Conversational Profiling:</span>
-                      <span className="text-[10px] font-bold text-purple-600">Simulated Vernacular</span>
-                    </div>
-                    <p className="text-[11.5px] text-slate-600 italic font-medium">
-                      "खेती करता हूँ और मोटर पंप भी ठीक कर लेता हूँ।"
-                    </p>
-                    <div className="flex items-center justify-between pt-1">
-                      <span className="text-[10.5px] font-extrabold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200/60">
-                        → Solar Agri-Pump (94% Fit)
-                      </span>
-                      <button
-                        onClick={() => onFinish("beneficiary")}
-                        className="text-xs font-bold text-purple-700 hover:text-purple-900 flex items-center gap-1 cursor-pointer"
-                      >
-                        <span>Start Profiler</span>
-                        <ChevronRight className="size-3.5" />
-                      </button>
-                    </div>
-                  </div>
+                <div className="scale-95 sm:scale-100 origin-center transition-all">
+                  <MobilePhoneMockup
+                    videoId="xRLAAr7CCCY"
+                    videoTitle="Sakhyam AI - PM-AJAY Live Voice Intelligence Demo"
+                  />
                 </div>
               </div>
             </div>

@@ -792,10 +792,14 @@ export function LoginPage({
     }
   };
 
-  // Play audio guidance only if user has explicitly unmuted
+  // Play audio guidance only on mobile or if explicitly initiated (do not play on desktop initially)
   useEffect(() => {
     if (isMuted) {
       stopAllAudio();
+      return;
+    }
+    // Do not play starting audio on desktop initially
+    if (!isMobile || (typeof window !== "undefined" && window.innerWidth >= 768)) {
       return;
     }
     const timer = setTimeout(() => {
@@ -806,7 +810,7 @@ export function LoginPage({
       clearTimeout(timer);
       stopAllAudio();
     };
-  }, [normLang, isMuted]);
+  }, [normLang, isMuted, isMobile]);
 
   const playSpokenHelpPrompt = () => {
     const promptObj = welcomePrompts[normLang] || welcomePrompts.hi;

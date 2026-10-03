@@ -15,7 +15,8 @@ import {
   X,
   LogOut,
   Sparkles,
-  Search
+  Search,
+  PlayCircle
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
@@ -236,6 +237,14 @@ export function AppHeader({
               </button>
             );
           })}
+
+          <a
+            href="/demo"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-slate-600 hover:text-purple-700 hover:bg-white transition-all whitespace-nowrap"
+          >
+            <PlayCircle className="size-3.5 text-purple-600" />
+            <span>Demo</span>
+          </a>
         </nav>
 
         {/* Right Actions: Language Dropdown & Logout / Mobile Toggle */}
@@ -403,6 +412,15 @@ export function AppHeader({
                 </button>
               );
             })}
+
+            <a
+              href="/demo"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="flex items-center gap-2 p-2.5 rounded-xl text-xs font-bold transition-all text-left bg-purple-50 text-purple-800 hover:bg-purple-100 border border-purple-200 cursor-pointer"
+            >
+              <PlayCircle className="size-4 shrink-0 text-purple-600" />
+              <span>Video Demo</span>
+            </a>
           </div>
         </div>
       )}
